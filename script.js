@@ -49,8 +49,8 @@ async function cargarTablaGeneral(){
       });
     }
 
-    equipos.sort((a,b)=>a.ranking-b.ranking);
-    equipos = equipos.slice(0, 3);
+  equipos.sort((a,b)=>a.ranking-b.ranking);
+const top3equipos = equipos.slice(0, 3);
     
     let html = `
       <table class="tabla">
@@ -65,7 +65,7 @@ async function cargarTablaGeneral(){
       <tbody>
     `;
 
-   equipos.forEach((e,index)=>{
+  equipos.slice(0,3).forEach((e,index)=>{
 
   let posicion =
     e.ranking == 1 ? "🥇" :

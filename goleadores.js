@@ -222,15 +222,36 @@ function siluetaSVG(tipo) {
     .silver-label{ color: #c0c0c0; text-shadow: 0 0 8px #c0c0c0; }
     .blue-label  { color: #29b6f6; text-shadow: 0 0 8px #29b6f6; }
 
-    /* Responsive */
+    /* Responsive móvil */
     @media(max-width: 600px) {
-      .goleadores-wrap { gap: 12px; }
-      .fifa-carta { width: 110px; height: 180px; }
+      .goleadores-wrap {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+      .gol-card-wrap {
+        flex-direction: row;
+        align-items: center;
+        gap: 14px;
+        width: 100%;
+        max-width: 340px;
+      }
+      .gol-rank-label {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        font-size: 11px;
+        min-width: 20px;
+      }
+      .fifa-carta { width: 280px; height: 100px; flex-direction: row; border-radius: 12px; }
+      .fifa-top { width: auto; flex-direction: column; padding: 8px 8px 0 8px; gap: 2px; }
       .fifa-num { font-size: 18px; }
-      .fifa-escudo { width: 26px; height: 26px; }
-      .fifa-silueta { width: 74px; height: 82px; }
-      .fifa-nombre { font-size: 8px; }
+      .fifa-escudo { width: 28px; height: 28px; }
+      .fifa-silueta { width: 70px; height: 90px; margin-top: 0; flex-shrink: 0; }
+      .fifa-nombre { font-size: 9px; padding: 2px 4px; }
+      .fifa-sep { width: 1px; height: 70%; margin: 0 4px; }
+      .fifa-stats { flex-direction: column; gap: 4px; margin-bottom: 0; margin-right: 8px; }
       .fifa-stat-val { font-size: 14px; }
+      .fifa-stat-lbl { font-size: 7px; }
     }
   `;
   document.head.appendChild(style);

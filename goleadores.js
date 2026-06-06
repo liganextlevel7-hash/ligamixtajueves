@@ -33,123 +33,112 @@ function parseCSV(texto) {
 }
 
 function abreviarPosicion(pos) {
-  const mapa = {
-    "Portero": "POR",
-    "Defensa": "DEF",
-    "Medio": "MED",
-    "Delantero": "DEL",
-    "": "JUG"
-  };
-  return mapa[pos] || pos.substring(0, 3).toUpperCase();
+  const mapa = { "Portero":"POR","Defensa":"DEF","Medio":"MED","Delantero":"DEL","":"JUG" };
+  return mapa[pos] || pos.substring(0,3).toUpperCase();
 }
 
-function siluetaSVG(colorKey) {
-  const fills = {
-    gold: "rgba(120,70,0,0.55)",
-    silver: "rgba(80,80,80,0.55)",
-    blue: "rgba(255,255,255,0.35)",
-    dark: "rgba(255,255,255,0.25)"
+function siluetaSVG(tipo) {
+  // Colores de silueta según tipo de carta
+  const colores = {
+    gold:   { body: "rgba(120,70,0,0.6)",   glow: "#ffd700" },
+    silver: { body: "rgba(80,80,80,0.6)",    glow: "#c0c0c0" },
+    blue:   { body: "rgba(255,255,255,0.35)", glow: "#29b6f6" }
   };
-  const fill = fills[colorKey] || fills.dark;
+  const c = colores[tipo] || colores.gold;
   return `
-    <svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
-      <!-- Cabeza -->
-      <ellipse cx="50" cy="28" rx="16" ry="18" fill="${fill}"/>
-      <!-- Cuello -->
-      <rect x="44" y="44" width="12" height="10" fill="${fill}"/>
-      <!-- Cuerpo -->
-      <path d="M20 120 Q25 75 50 70 Q75 75 80 120Z" fill="${fill}"/>
-      <!-- Brazo izquierdo cruzado -->
-      <path d="M20 75 Q30 68 45 72 Q50 74 50 78 Q35 80 25 85Z" fill="${fill}"/>
-      <!-- Brazo derecho cruzado -->
-      <path d="M80 75 Q70 68 55 72 Q50 74 50 78 Q65 80 75 85Z" fill="${fill}"/>
-      <!-- Antebrazos cruzados -->
-      <path d="M28 82 Q50 76 72 82 Q70 88 50 84 Q30 88 28 82Z" fill="${fill}"/>
-    </svg>
-  `;
+    <svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;filter:drop-shadow(0 0 6px ${c.glow});">
+      <ellipse cx="50" cy="26" rx="15" ry="17" fill="${c.body}"/>
+      <rect x="43" y="41" width="14" height="9" fill="${c.body}"/>
+      <path d="M18 130 Q24 78 50 72 Q76 78 82 130Z" fill="${c.body}"/>
+      <path d="M18 80 Q28 65 44 72 Q50 75 50 80 Q34 83 22 90Z" fill="${c.body}"/>
+      <path d="M82 80 Q72 65 56 72 Q50 75 50 80 Q66 83 78 90Z" fill="${c.body}"/>
+      <path d="M25 87 Q50 80 75 87 Q73 94 50 90 Q27 94 25 87Z" fill="${c.body}"/>
+    </svg>`;
 }
 
-function estilosCarta(rank) {
-  if (rank === 1) return {
-    bg: "linear-gradient(160deg, #ffe066 0%, #f5a500 35%, #b8720a 65%, #f5d020 100%)",
-    border: "2px solid #ffd700",
-    shadow: "0 0 30px #ffd700, 0 0 60px rgba(255,215,0,0.5)",
-    textColor: "#3d2200",
-    silhouetteColor: "gold",
-    shimmer: "rgba(255,255,255,0.18)",
-    label: "ORO",
-    rankBg: "rgba(61,34,0,0.25)"
-  };
-  if (rank === 2) return {
-    bg: "linear-gradient(160deg, #f0f0f0 0%, #c0c0c0 35%, #808080 65%, #d8d8d8 100%)",
-    border: "2px solid #c0c0c0",
-    shadow: "0 0 25px #bbb, 0 0 50px rgba(192,192,192,0.4)",
-    textColor: "#1a1a1a",
-    silhouetteColor: "silver",
-    shimmer: "rgba(255,255,255,0.22)",
-    label: "PLATA",
-    rankBg: "rgba(0,0,0,0.12)"
-  };
-  if (rank === 3) return {
-    bg: "linear-gradient(160deg, #64d0ff 0%, #0288d1 35%, #01579b 65%, #29b6f6 100%)",
-    border: "2px solid #29b6f6",
-    shadow: "0 0 25px #29b6f6, 0 0 50px rgba(41,182,246,0.4)",
-    textColor: "#fff",
-    silhouetteColor: "blue",
-    shimmer: "rgba(255,255,255,0.15)",
-    label: "BRONCE",
-    rankBg: "rgba(255,255,255,0.15)"
-  };
-  return {
-    bg: "linear-gradient(160deg, #2a2a2a 0%, #181818 50%, #0d0d0d 100%)",
-    border: "1px solid #39ff14",
-    shadow: "0 0 12px rgba(57,255,20,0.35)",
-    textColor: "#fff",
-    silhouetteColor: "dark",
-    shimmer: "rgba(57,255,20,0.06)",
-    label: "",
-    rankBg: "rgba(57,255,20,0.15)"
-  };
-}
-
-// Inyectar estilos responsive una sola vez
-(function inyectarEstilos() {
+// Inyectar estilos una sola vez
+(function() {
   if (document.getElementById("goleadores-style")) return;
   const style = document.createElement("style");
   style.id = "goleadores-style";
   style.textContent = `
-    #top-goleadores {
-      width: 100%;
-    }
-    .goleadores-grid {
+    .goleadores-wrap {
       display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
       justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
       padding: 10px 0;
     }
-    .fifa-card {
+
+    /* Contenedor de cada carta con brillo exterior igual que la página */
+    .gol-card-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .gol-rank-label {
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* La carta FIFA dentro del contenedor estilo página */
+    .gol-outer {
+      background: rgba(0,0,0,0.75);
+      border-radius: 20px;
+      padding: 14px;
+      box-shadow: 0 0 10px #39ff14, 0 0 20px rgba(57,255,20,0.4);
+      border: 1px solid #39ff14;
+      transition: 0.3s;
+    }
+
+    .gol-outer:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 18px #39ff14, 0 0 35px rgba(57,255,20,0.6);
+    }
+
+    /* La carta FIFA interior */
+    .fifa-carta {
       width: 150px;
-      min-height: 230px;
-      border-radius: 18px 18px 10px 10px;
+      height: 230px;
+      border-radius: 16px 16px 10px 10px;
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       overflow: hidden;
-      transition: transform 0.3s, box-shadow 0.3s;
-      flex-shrink: 0;
     }
-    .fifa-card:hover {
-      transform: translateY(-8px) scale(1.05);
+
+    .fifa-carta.gold {
+      background: linear-gradient(160deg, #ffe566 0%, #f5a500 35%, #b8720a 65%, #f5d020 100%);
+      border: 2px solid #ffd700;
+      box-shadow: 0 0 20px #ffd700, inset 0 1px 0 rgba(255,255,255,0.4);
     }
-    .fifa-card .shimmer {
+
+    .fifa-carta.silver {
+      background: linear-gradient(160deg, #f0f0f0 0%, #c0c0c0 35%, #808080 65%, #d8d8d8 100%);
+      border: 2px solid #c0c0c0;
+      box-shadow: 0 0 18px #bbb, inset 0 1px 0 rgba(255,255,255,0.5);
+    }
+
+    .fifa-carta.blue {
+      background: linear-gradient(160deg, #64d0ff 0%, #0288d1 35%, #01579b 65%, #29b6f6 100%);
+      border: 2px solid #29b6f6;
+      box-shadow: 0 0 18px #29b6f6, inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+
+    .fifa-shimmer {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top:0;left:0;right:0;bottom:0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);
       pointer-events: none;
       border-radius: inherit;
     }
-    .fifa-card .card-top {
+
+    .fifa-top {
       width: 100%;
       display: flex;
       justify-content: space-between;
@@ -159,151 +148,135 @@ function estilosCarta(rank) {
       position: relative;
       z-index: 1;
     }
-    .fifa-card .card-pos {
-      font-size: 10px;
-      font-weight: 900;
-      letter-spacing: 1px;
-      opacity: 0.9;
-    }
-    .fifa-card .card-num {
-      font-size: 20px;
-      font-weight: 900;
-      line-height: 1;
-    }
-    .fifa-card .card-escudo {
-      width: 30px;
-      height: 30px;
-      object-fit: contain;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
-    }
-    .fifa-card .card-silueta {
-      width: 90px;
-      height: 100px;
+
+    .fifa-pos { font-size: 10px; font-weight: 900; letter-spacing: 1px; opacity: 0.85; }
+    .fifa-num { font-size: 22px; font-weight: 900; line-height: 1; }
+    .fifa-escudo { width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+
+    .fifa-silueta {
+      width: 95px;
+      height: 105px;
       position: relative;
       z-index: 1;
       margin-top: -4px;
     }
-    .fifa-card .card-nombre {
+
+    .fifa-nombre {
       font-size: 10px;
       font-weight: 900;
       text-align: center;
-      padding: 4px 8px 0;
+      padding: 3px 8px 0;
       line-height: 1.2;
       position: relative;
       z-index: 1;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      max-width: 140px;
+      max-width: 144px;
       word-break: break-word;
     }
-    .fifa-card .card-sep {
-      width: 80%;
+
+    .fifa-sep {
+      width: 78%;
       height: 1px;
       opacity: 0.3;
       margin: 5px 0;
     }
-    .fifa-card .card-stats {
+
+    .fifa-stats {
       display: flex;
-      gap: 14px;
+      gap: 18px;
       position: relative;
       z-index: 1;
-      margin-bottom: 10px;
-    }
-    .fifa-card .stat-item {
-      text-align: center;
-    }
-    .fifa-card .stat-val {
-      font-size: 17px;
-      font-weight: 900;
-      line-height: 1;
-    }
-    .fifa-card .stat-lbl {
-      font-size: 8px;
-      opacity: 0.8;
-      letter-spacing: 0.5px;
-    }
-    .fifa-card .card-badge {
-      position: absolute;
-      bottom: 7px;
-      right: 8px;
-      font-size: 7px;
-      font-weight: 900;
-      opacity: 0.6;
-      letter-spacing: 1px;
+      margin-bottom: 8px;
     }
 
-    /* === RESPONSIVE === */
-    @media (max-width: 480px) {
-      .goleadores-grid {
-        gap: 10px;
-      }
-      .fifa-card {
-        width: 120px;
-        min-height: 190px;
-      }
-      .fifa-card .card-num { font-size: 16px; }
-      .fifa-card .card-pos { font-size: 9px; }
-      .fifa-card .card-escudo { width: 24px; height: 24px; }
-      .fifa-card .card-silueta { width: 72px; height: 82px; }
-      .fifa-card .card-nombre { font-size: 8px; }
-      .fifa-card .stat-val { font-size: 14px; }
-      .fifa-card .stat-lbl { font-size: 7px; }
-    }
+    .fifa-stat { text-align: center; }
+    .fifa-stat-val { font-size: 18px; font-weight: 900; line-height: 1; }
+    .fifa-stat-lbl { font-size: 8px; opacity: 0.8; letter-spacing: 0.5px; }
 
-    @media (min-width: 481px) and (max-width: 768px) {
-      .fifa-card {
-        width: 135px;
-        min-height: 210px;
-      }
+    /* Colores de texto por tipo */
+    .fifa-carta.gold .fifa-pos,
+    .fifa-carta.gold .fifa-num,
+    .fifa-carta.gold .fifa-nombre,
+    .fifa-carta.gold .fifa-sep,
+    .fifa-carta.gold .fifa-stat-val,
+    .fifa-carta.gold .fifa-stat-lbl { color: #3d2200; }
+    .fifa-carta.gold .fifa-sep { background: #3d2200; }
+
+    .fifa-carta.silver .fifa-pos,
+    .fifa-carta.silver .fifa-num,
+    .fifa-carta.silver .fifa-nombre,
+    .fifa-carta.silver .fifa-stat-val,
+    .fifa-carta.silver .fifa-stat-lbl { color: #1a1a1a; }
+    .fifa-carta.silver .fifa-sep { background: #1a1a1a; }
+
+    .fifa-carta.blue .fifa-pos,
+    .fifa-carta.blue .fifa-num,
+    .fifa-carta.blue .fifa-nombre,
+    .fifa-carta.blue .fifa-stat-val,
+    .fifa-carta.blue .fifa-stat-lbl { color: #fff; }
+    .fifa-carta.blue .fifa-sep { background: #fff; }
+
+    /* Labels ranking */
+    .gold-label  { color: #ffd700; text-shadow: 0 0 8px #ffd700; }
+    .silver-label{ color: #c0c0c0; text-shadow: 0 0 8px #c0c0c0; }
+    .blue-label  { color: #29b6f6; text-shadow: 0 0 8px #29b6f6; }
+
+    /* Responsive */
+    @media(max-width: 600px) {
+      .goleadores-wrap { gap: 12px; }
+      .fifa-carta { width: 110px; height: 180px; }
+      .fifa-num { font-size: 18px; }
+      .fifa-escudo { width: 26px; height: 26px; }
+      .fifa-silueta { width: 74px; height: 82px; }
+      .fifa-nombre { font-size: 8px; }
+      .fifa-stat-val { font-size: 14px; }
     }
   `;
   document.head.appendChild(style);
 })();
 
-function crearCartaGoleador(jugador, rank) {
-  const s = estilosCarta(rank);
-  const logoEquipo = logosEquipos[jugador.equipoID] || "";
+function crearCarta(jugador, tipo) {
+  const tipos = { gold: "gold", silver: "silver", blue: "blue" };
+  const labels = { gold: "🥇 1er Lugar", silver: "🥈 2do Lugar", blue: "🥉 3er Lugar" };
+  const labelClass = { gold: "gold-label", silver: "silver-label", blue: "blue-label" };
+
   const pos = abreviarPosicion(jugador.posicion);
-  const pct = jugador.partidos > 0
-    ? Math.round((jugador.asistencias / jugador.partidos) * 100)
-    : 0;
+  const logo = logosEquipos[jugador.equipoID] || "";
+  const pct = jugador.partidos > 0 ? Math.round((jugador.asistencias / jugador.partidos) * 100) : 0;
 
-  const div = document.createElement("div");
-  div.className = "fifa-card";
-  div.style.cssText = `background:${s.bg};border:${s.border};box-shadow:${s.shadow};`;
+  const wrap = document.createElement("div");
+  wrap.className = "gol-card-wrap";
 
-  div.innerHTML = `
-    <div class="shimmer" style="background:linear-gradient(135deg,${s.shimmer} 0%,transparent 50%,${s.shimmer} 100%);"></div>
-
-    <div class="card-top">
-      <div>
-        <div class="card-pos" style="color:${s.textColor};">${pos}</div>
-        <div class="card-num" style="color:${s.textColor};">${jugador.numero || "—"}</div>
-      </div>
-      <img class="card-escudo" src="${logoEquipo}" alt="">
-    </div>
-
-    <div class="card-silueta">${siluetaSVG(s.silhouetteColor)}</div>
-
-    <div class="card-nombre" style="color:${s.textColor};">${jugador.nombre}</div>
-
-    <div class="card-sep" style="background:${s.textColor};"></div>
-
-    <div class="card-stats">
-      <div class="stat-item">
-        <div class="stat-val" style="color:${s.textColor};">${jugador.goles}</div>
-        <div class="stat-lbl" style="color:${s.textColor};">GOLES</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-val" style="color:${s.textColor};">${pct}%</div>
-        <div class="stat-lbl" style="color:${s.textColor};">ASIST</div>
+  wrap.innerHTML = `
+    <div class="gol-rank-label ${labelClass[tipo]}">${labels[tipo]}</div>
+    <div class="gol-outer">
+      <div class="fifa-carta ${tipo}">
+        <div class="fifa-shimmer"></div>
+        <div class="fifa-top">
+          <div>
+            <div class="fifa-pos">${pos}</div>
+            <div class="fifa-num">${jugador.numero || "—"}</div>
+          </div>
+          <img class="fifa-escudo" src="${logo}" alt="">
+        </div>
+        <div class="fifa-silueta">${siluetaSVG(tipo)}</div>
+        <div class="fifa-nombre">${jugador.nombre}</div>
+        <div class="fifa-sep"></div>
+        <div class="fifa-stats">
+          <div class="fifa-stat">
+            <div class="fifa-stat-val">${jugador.goles}</div>
+            <div class="fifa-stat-lbl">GOLES</div>
+          </div>
+          <div class="fifa-stat">
+            <div class="fifa-stat-val">${pct}%</div>
+            <div class="fifa-stat-lbl">ASIST</div>
+          </div>
+        </div>
       </div>
     </div>
-
-    ${rank <= 3 ? `<div class="card-badge" style="color:${s.textColor};">${s.label}</div>` : ""}
   `;
-
-  return div;
+  return wrap;
 }
 
 async function cargarTopGoleadores() {
@@ -312,63 +285,53 @@ async function cargarTopGoleadores() {
   contenedor.innerHTML = `<div style="text-align:center;color:#39ff14;padding:20px;">Cargando goleadores...</div>`;
 
   try {
-    const [resJugadores, resEventos, resParticipaciones] = await Promise.all([
+    const [resJ, resE, resP] = await Promise.all([
       fetch(URL_JUGADORES),
       fetch(URL_EVENTOS),
       fetch(URL_PARTICIPACIONES)
     ]);
+    const [txtJ, txtE, txtP] = await Promise.all([resJ.text(), resE.text(), resP.text()]);
 
-    const [txtJugadores, txtEventos, txtParticipaciones] = await Promise.all([
-      resJugadores.text(),
-      resEventos.text(),
-      resParticipaciones.text()
-    ]);
-
-    const jugadores = parseCSV(txtJugadores);
-    const eventos = parseCSV(txtEventos);
-    const participaciones = parseCSV(txtParticipaciones);
+    const jugadores     = parseCSV(txtJ);
+    const eventos       = parseCSV(txtE);
+    const participaciones = parseCSV(txtP);
 
     // Contar goles
     const golesMap = {};
     eventos.forEach(e => {
-      if (e.Tipo_Evento === "Gol") {
-        golesMap[e.Jugador] = (golesMap[e.Jugador] || 0) + 1;
-      }
+      if (e.Tipo_Evento === "Gol") golesMap[e.Jugador] = (golesMap[e.Jugador] || 0) + 1;
     });
 
     // Contar partidos jugados
     const partidosMap = {};
     participaciones.forEach(p => {
-      if (p.Asistio === "TRUE") {
-        partidosMap[p.Jugador] = (partidosMap[p.Jugador] || 0) + 1;
-      }
+      if (p.Asistio === "TRUE") partidosMap[p.Jugador] = (partidosMap[p.Jugador] || 0) + 1;
     });
 
-    const goleadores = jugadores
+    const top3 = jugadores
       .filter(j => golesMap[j.ID_Jugador] > 0)
       .map(j => ({
-        nombre: j.Nombre,
-        equipoID: Number(j.Equipo),
-        numero: j.Numero,
-        posicion: j.Posicion || "",
-        goles: golesMap[j.ID_Jugador] || 0,
+        nombre:    j.Nombre,
+        equipoID:  Number(j.Equipo),
+        numero:    j.Numero,
+        posicion:  j.Posicion || "",
+        goles:     golesMap[j.ID_Jugador] || 0,
         asistencias: partidosMap[j.ID_Jugador] || 0,
-        partidos: partidosMap[j.ID_Jugador] || 0
+        partidos:  partidosMap[j.ID_Jugador] || 0
       }))
       .sort((a, b) => b.goles - a.goles)
-      .slice(0, 8);
+      .slice(0, 3);
 
-    if (goleadores.length === 0) {
+    if (top3.length === 0) {
       contenedor.innerHTML = `<div style="text-align:center;color:#aaa;padding:20px;">Sin goleadores aún</div>`;
       return;
     }
 
+    const tipos = ["gold", "silver", "blue"];
     const grid = document.createElement("div");
-    grid.className = "goleadores-grid";
+    grid.className = "goleadores-wrap";
 
-    goleadores.forEach((j, i) => {
-      grid.appendChild(crearCartaGoleador(j, i + 1));
-    });
+    top3.forEach((j, i) => grid.appendChild(crearCarta(j, tipos[i])));
 
     contenedor.innerHTML = "";
     contenedor.appendChild(grid);

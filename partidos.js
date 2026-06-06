@@ -169,9 +169,18 @@ async function cargarDatos() {
 async function downloadPNG() {
   const btn = document.getElementById('dlBtn');
   const panel = document.querySelector('.editor-panel');
+  const wrapper = document.getElementById('flyerRoot');
+  const container = document.getElementById('flyerScaleContainer');
   panel.style.display = 'none';
   btn.textContent = '⏳ Generando...';
   btn.disabled = true;
+
+  // Resetear escala para captura correcta
+  wrapper.style.transform = 'scale(1)';
+  wrapper.style.transformOrigin = 'top left';
+  container.style.width = '900px';
+  container.style.height = '1270px';
+
   const imgs = document.getElementById('flyerRoot').querySelectorAll('img');
   await Promise.all(Array.from(imgs).map(img => new Promise(resolve => {
     if (img.complete) resolve(); else { img.onload = resolve; img.onerror = resolve; }
@@ -193,6 +202,8 @@ async function downloadPNG() {
   panel.style.display = 'block';
   btn.textContent = '⬇ Descargar Flyer como PNG';
   btn.disabled = false;
+  // Restaurar escala original
+  escalarFlyer();
 }
 
 function escalarFlyer() {

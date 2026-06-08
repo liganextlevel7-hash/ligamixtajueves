@@ -82,13 +82,13 @@ async function cargarDatos() {
     if (tipo === 'jornada') {
       const jornada = document.getElementById('filterJornada').value;
       if (!jornada) { statusEl.textContent = '⚠️ Selecciona una jornada'; return; }
-      filtrados = todosPartidos.filter(p => String(p['Jornada']).trim() === String(jornada));
+      filtrados = todosPartidos.filter(p => p['Jornada'] && String(p['Jornada']).trim() === String(jornada));
       if (!filtrados.length) { statusEl.textContent = `⚠️ No hay partidos para Jornada ${jornada}`; return; }
       document.getElementById('jornadaDisplay').textContent = `DOMINICAL — JORNADA ${jornada}`;
     } else if (tipo === 'fecha') {
       const fecha = document.getElementById('filterFecha').value;
       if (!fecha) { statusEl.textContent = '⚠️ Selecciona una fecha'; return; }
-      filtrados = todosPartidos.filter(p => p['Fecha'].trim() === fecha);
+      filtrados = todosPartidos.filter(p => p['Jornada'] && p['Fecha'].trim() === fecha);
       if (!filtrados.length) { statusEl.textContent = `⚠️ No hay partidos para el ${fecha}`; return; }
       document.getElementById('jornadaDisplay').textContent = `DOMINICAL — ${fecha}`;
     } else if (tipo === 'equipo') {
@@ -101,6 +101,11 @@ async function cargarDatos() {
       });
       if (!filtrados.length) { statusEl.textContent = `⚠️ No hay partidos para el equipo ${equipoSel}`; return; }
       document.getElementById('jornadaDisplay').textContent = `DOMINICAL — EQUIPO ${equipoSel}`;
+      // Calcular jornadas ya asignadas a este equipo
+      const jornadasUsadas = new Set(filtrados.filter(p => p['Jornada']).map(p => Number(p['Jornada'])));
+      const todasJornadas = [1,2,3,4,5,6,7,8,9];
+      const jornadasFaltantes = todasJornadas.filter(j => !jornadasUsadas.has(j));
+      let jornadaFaltanteIdx = 0;
     } else {
       statusEl.textContent = '⚠️ Selecciona un tipo de filtro';
       return;
@@ -126,7 +131,16 @@ async function cargarDatos() {
       const ganPor = (p['Ganado_Por'] || '').trim().toUpperCase();
       const ganPorClass = ganPor.toLowerCase();
       const hora = formatHora(p['Hora']);
-      const jornada = p['Jornada'] ? `Jornada ${p['Jornada']}` : 'Jornada ?';
+      let jornada;
+      if (p['Jornada']) {
+        jornada = `Jornada ${p['Jornada']}`;
+      } else if (tipo === 'equipo' && jornadasFaltantes.length > 0) {
+        const jNum = jornadasFaltantes[jornadaFaltanteIdx % jornadasFaltantes.length];
+        jornadaFaltanteIdx++;
+        jornada = `Jornada ${jNum}`;
+      } else {
+        jornada = 'Jornada ?';
+      }
       const cancha2 = p['Cancha'] || '';
       const fecha2 = p['Fecha'] || '';
 

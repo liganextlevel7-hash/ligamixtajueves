@@ -37,15 +37,17 @@ function abreviarPosicion(pos) {
   return mapa[pos] || pos.substring(0,3).toUpperCase();
 }
 
-function siluetaSVG(tipo) {
+function siluetaSVG(tipo, pos, numero, logoUrl) {
   const colores = {
-    gold:   { main: "#b8860b", detail: "#ffd700", glow: "#ffd700" },
-    silver: { main: "#777",    detail: "#ddd",    glow: "#c0c0c0" },
-    blue:   { main: "#0277bd", detail: "#29b6f6", glow: "#29b6f6" }
+    gold:   { main: "#b8860b", detail: "#ffd700", glow: "#ffd700", text: "#3d2200" },
+    silver: { main: "#777",    detail: "#ddd",    glow: "#c0c0c0", text: "#111" },
+    blue:   { main: "#0277bd", detail: "#29b6f6", glow: "#29b6f6", text: "#fff" }
   };
   const c = colores[tipo] || colores.gold;
+  const logoImg = logoUrl ? `<image href="${logoUrl}" x="130" y="160" width="80" height="80" clip-path="circle(35px at 40px 40px)" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6))"/>` : '';
   return `
     <svg viewBox="0 0 448 448" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;filter:drop-shadow(0 0 8px ${c.glow});">
+      <!-- Camiseta base -->
       <path fill="${c.main}" d="M176,8c-0.677-0.005-1.378,0-2.031,0.256l-95.906,24.563
         c-1.85,0.432-3.475,1.52-4.594,3.063L1.445,138.779c-2.195,3.145-1.86,7.406,0.813,10.156l48.063,48.906
         c3.126,3.139,8.217,3.139,11.344,0l18.437-18.438v192.594h15.938v52H80.101v8.063c-0.016,4.445,3.585,8.049,8.031,8.031
@@ -54,10 +56,17 @@ function siluetaSVG(tipo) {
         c-1.07-1.568-2.643-2.691-4.469-3.188l-96.031-24.437c-0.659-0.192-1.354-0.256-2.031-0.256h-6.375
         c-2.879-0.011-5.534,1.504-6.969,4c-7.177,12.67-20.361,20.427-34.594,20.438c-14.233-0.012-27.323-7.768-34.5-20.438
         c-1.451-2.533-4.142-4.055-7.063-4H176z"/>
-      <path fill="${c.detail}" opacity="0.45" d="M181.744,24.269l0.874,1.312c10.5,13.323,24.314,20.104,41.456,20.118
+      <!-- Parte delantera -->
+      <path fill="${c.detail}" opacity="0.35" d="M181.744,24.269l0.874,1.312c10.5,13.323,24.314,20.104,41.456,20.118
         c17.147-0.014,31.074-6.787,41.575-20.118l1.43-1.629l96.126,23.511l66.496,94.844l-37.677,38.385l-26.221-26.34
         c-5.037-5.115-13.747-1.52-13.701,5.668l0.242,263.977h-256.3v-263.977c-0.058-7.045-8.534-10.58-13.582-5.668
         l-26.457,26.457l-37.559-38.387l66.496-94.842c30.742-7.834,66.078-15.486,96.801-23.316z"/>
+      <!-- Posicion arriba del cuello -->
+      <text x="224" y="58" text-anchor="middle" font-family="Arial" font-weight="900" font-size="28" fill="${c.text}" opacity="0.9">${pos}</text>
+      <!-- Numero en el centro -->
+      <text x="224" y="310" text-anchor="middle" font-family="Arial" font-weight="900" font-size="90" fill="${c.text}" opacity="0.85">${numero}</text>
+      <!-- Escudo en el pecho izquierdo -->
+      ${logoImg}
     </svg>`;
 }
 
@@ -99,8 +108,8 @@ function siluetaSVG(tipo) {
       box-shadow: 0 0 18px #39ff14, 0 0 35px rgba(57,255,20,0.6);
     }
     .fifa-carta {
-      width: 150px;
-      height: 230px;
+      width: 120px;
+      height: 195px;
       border-radius: 16px 16px 10px 10px;
       position: relative;
       display: flex;
@@ -144,8 +153,8 @@ function siluetaSVG(tipo) {
     .fifa-num { font-size: 22px; font-weight: 900; line-height: 1; }
     .fifa-escudo { width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
     .fifa-silueta {
-      width: 95px;
-      height: 105px;
+      width: 115px;
+      height: 128px;
       position: relative;
       z-index: 1;
       margin-top: -4px;
@@ -233,14 +242,7 @@ function crearCarta(jugador, tipo) {
     <div class="gol-outer">
       <div class="fifa-carta ${tipo}">
         <div class="fifa-shimmer"></div>
-        <div class="fifa-top">
-          <div>
-            <div class="fifa-pos">${pos}</div>
-            <div class="fifa-num">${jugador.numero || "—"}</div>
-          </div>
-          <img class="fifa-escudo" src="${logo}" alt="">
-        </div>
-        <div class="fifa-silueta">${siluetaSVG(tipo)}</div>
+        <div class="fifa-silueta">${siluetaSVG(tipo, pos, jugador.numero || "—", logo)}</div>
         <div class="fifa-nombre">${jugador.nombre}</div>
         <div class="fifa-sep"></div>
         <div class="fifa-stats">

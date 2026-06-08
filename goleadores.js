@@ -62,7 +62,7 @@ function siluetaSVG(tipo, pos, numero, logoUrl) {
         c-5.037-5.115-13.747-1.52-13.701,5.668l0.242,263.977h-256.3v-263.977c-0.058-7.045-8.534-10.58-13.582-5.668
         l-26.457,26.457l-37.559-38.387l66.496-94.842c30.742-7.834,66.078-15.486,96.801-23.316z"/>
       <!-- Posicion lateral izquierdo rotada -->
-      <text x="30" y="280" text-anchor="middle" font-family="Arial" font-weight="900" font-size="38" fill="${c.text}" opacity="0.95" transform="rotate(-90, 30, 280)">${pos}</text>
+      <text x="30" y="280" text-anchor="middle" font-family="Arial" font-weight="900" font-size="55" fill="${c.text}" opacity="0.95" transform="rotate(-90, 30, 280)">${pos}</text>
       <!-- Numero en el centro -->
       <text x="224" y="310" text-anchor="middle" font-family="Arial" font-weight="900" font-size="90" fill="${c.text}" opacity="0.85">${numero}</text>
       <!-- Escudo en el pecho izquierdo -->
@@ -94,6 +94,11 @@ function siluetaSVG(tipo, pos, numero, logoUrl) {
       font-weight: bold;
       letter-spacing: 2px;
       text-transform: uppercase;
+    }
+    .gol-rank-label .emoji {
+      font-size: 28px;
+      display: block;
+      margin-bottom: 4px;
     }
     .gol-outer {
       background: rgba(0,0,0,0.75);
@@ -227,7 +232,7 @@ function siluetaSVG(tipo, pos, numero, logoUrl) {
 })();
 
 function crearCarta(jugador, tipo) {
-  const labels = { gold: "🥇 1er Lugar", silver: "🥈 2do Lugar", blue: "🥉 3er Lugar" };
+  const labels = { gold: "<span class='emoji'>🥇</span> 1er Lugar", silver: "<span class='emoji'>🥈</span> 2do Lugar", blue: "<span class='emoji'>🥉</span> 3er Lugar" };
   const labelClass = { gold: "gold-label", silver: "silver-label", blue: "blue-label" };
 
   const pos = abreviarPosicion(jugador.posicion);

@@ -107,10 +107,10 @@ const logos = {
     .equipo-logo {
       width: 44px;
       height: 44px;
-      border-radius: 50%;
+      
       object-fit: contain;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(57,255,20,0.3);
+      
+      
       flex-shrink: 0;
     }
 

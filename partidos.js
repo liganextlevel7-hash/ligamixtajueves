@@ -101,14 +101,18 @@ async function cargarDatos() {
       });
       if (!filtrados.length) { statusEl.textContent = `⚠️ No hay partidos para el equipo ${equipoSel}`; return; }
       document.getElementById('jornadaDisplay').textContent = `DOMINICAL — EQUIPO ${equipoSel}`;
-      // Calcular jornadas ya asignadas a este equipo
-      const jornadasUsadas = new Set(filtrados.filter(p => p['Jornada']).map(p => Number(p['Jornada'])));
-      const todasJornadas = [1,2,3,4,5,6,7,8,9];
-      const jornadasFaltantes = todasJornadas.filter(j => !jornadasUsadas.has(j));
-      let jornadaFaltanteIdx = 0;
     } else {
       statusEl.textContent = '⚠️ Selecciona un tipo de filtro';
       return;
+    }
+
+    // Calcular jornadas faltantes si filtro es por equipo
+    let jornadasFaltantes = [];
+    let jornadaFaltanteIdx = 0;
+    if (tipo === 'equipo') {
+      const jornadasUsadas = new Set(filtrados.filter(p => p['Jornada']).map(p => Number(p['Jornada'])));
+      const todasJornadas = [1,2,3,4,5,6,7,8,9];
+      jornadasFaltantes = todasJornadas.filter(j => !jornadasUsadas.has(j));
     }
 
     const eqMap = {};

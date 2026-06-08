@@ -137,6 +137,7 @@ async function cargarTablaCompleta() {
     </tr>`;
   });
 
+  const equiposData = equipos;
   document.getElementById("tabla-general-completa").innerHTML = `
   <div class="tbl-gn-wrap">
     <table class="tbl-gn">
@@ -161,3 +162,177 @@ async function cargarTablaCompleta() {
 }
 
 cargarTablaCompleta();
+
+// Agregar estilos del popup
+(function() {
+  if (document.getElementById("tabla-popup-style")) return;
+  const style = document.createElement("style");
+  style.id = "tabla-popup-style";
+  style.textContent = `
+    .popup-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+    .popup-overlay.active { display: flex; }
+    .popup-card {
+      background: #080c10;
+      border: 2px solid #39ff14;
+      border-radius: 18px;
+      padding: 24px 20px;
+      width: 85%;
+      max-width: 340px;
+      box-shadow: 0 0 30px rgba(57,255,20,0.3);
+      position: relative;
+    }
+    .popup-close {
+      position: absolute;
+      top: 12px; right: 16px;
+      font-size: 22px;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      background: none;
+      border: none;
+      line-height: 1;
+    }
+    .popup-close:hover { color: #39ff14; }
+    .popup-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(57,255,20,0.2);
+    }
+    .popup-logo { width: 52px; height: 52px; object-fit: contain; }
+    .popup-nombre { font-size: 15px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+    .popup-rank { font-size: 12px; color: rgba(57,255,20,0.7); margin-top: 3px; }
+    .popup-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+    .popup-stat {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 10px 6px;
+      text-align: center;
+    }
+    .popup-stat-val { font-size: 20px; font-weight: 900; color: #fff; line-height: 1; }
+    .popup-stat-val.green { color: #39ff14; }
+    .popup-stat-val.red { color: #ff4444; }
+    .popup-stat-lbl { font-size: 9px; color: rgba(255,255,255,0.4); letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+    .popup-pts {
+      margin-top: 14px;
+      text-align: center;
+      background: rgba(57,255,20,0.08);
+      border: 1px solid rgba(57,255,20,0.3);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .popup-pts-val { font-size: 32px; font-weight: 900; color: #39ff14; line-height: 1; }
+    .popup-pts-lbl { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+
+    @media(min-width: 601px) {
+      .tbl-gn tbody tr { cursor: default; }
+    }
+    @media(max-width: 600px) {
+      .tbl-gn tbody tr { cursor: pointer; }
+      .tbl-gn tbody tr:active { background: rgba(57,255,20,0.08); }
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+// Crear overlay del popup
+function crearPopupOverlay() {
+  if (document.getElementById("equipo-popup")) return;
+  const overlay = document.createElement("div");
+  overlay.className = "popup-overlay";
+  overlay.id = "equipo-popup";
+  overlay.innerHTML = `
+    <div class="popup-card">
+      <button class="popup-close" id="popup-close-btn">&times;</button>
+      <div class="popup-header">
+        <img class="popup-logo" id="popup-logo" src="" alt="">
+        <div>
+          <div class="popup-nombre" id="popup-nombre"></div>
+          <div class="popup-rank" id="popup-rank"></div>
+        </div>
+      </div>
+      <div class="popup-stats">
+        <div class="popup-stat">
+          <div class="popup-stat-val" id="popup-jj"></div>
+          <div class="popup-stat-lbl">JJ</div>
+        </div>
+        <div class="popup-stat">
+          <div class="popup-stat-val green" id="popup-jg"></div>
+          <div class="popup-stat-lbl">JG</div>
+        </div>
+        <div class="popup-stat">
+          <div class="popup-stat-val" id="popup-je"></div>
+          <div class="popup-stat-lbl">JE</div>
+        </div>
+        <div class="popup-stat">
+          <div class="popup-stat-val red" id="popup-jp"></div>
+          <div class="popup-stat-lbl">JP</div>
+        </div>
+        <div class="popup-stat">
+          <div class="popup-stat-val" id="popup-gf"></div>
+          <div class="popup-stat-lbl">GF</div>
+        </div>
+        <div class="popup-stat">
+          <div class="popup-stat-val" id="popup-gc"></div>
+          <div class="popup-stat-lbl">GC</div>
+        </div>
+      </div>
+      <div class="popup-pts">
+        <div class="popup-pts-val" id="popup-pts"></div>
+        <div class="popup-pts-lbl">Puntos</div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  document.getElementById("popup-close-btn").addEventListener("click", cerrarPopup);
+  overlay.addEventListener("click", function(e) {
+    if (e.target === overlay) cerrarPopup();
+  });
+}
+
+function abrirPopup(equipo) {
+  if (window.innerWidth > 600) return;
+  crearPopupOverlay();
+  const dg = Number(equipo.dg);
+  const dgStr = dg > 0 ? `+${dg}` : `${dg}`;
+  document.getElementById("popup-logo").src = logos[equipo.equipo] || '';
+  document.getElementById("popup-nombre").textContent = equipo.equipo;
+  document.getElementById("popup-rank").textContent = `Posición #${equipo.ranking}  •  DG: ${dgStr}`;
+  document.getElementById("popup-jj").textContent = equipo.jj;
+  document.getElementById("popup-jg").textContent = equipo.jg;
+  document.getElementById("popup-je").textContent = equipo.je;
+  document.getElementById("popup-jp").textContent = equipo.jp;
+  document.getElementById("popup-gf").textContent = equipo.gf;
+  document.getElementById("popup-gc").textContent = equipo.gc;
+  document.getElementById("popup-pts").textContent = equipo.pts;
+  document.getElementById("equipo-popup").classList.add("active");
+}
+
+function cerrarPopup() {
+  const overlay = document.getElementById("equipo-popup");
+  if (overlay) overlay.classList.remove("active");
+}
+
+// Agregar eventos click a filas en móvil
+setTimeout(() => {
+  const filas = document.querySelectorAll(".tbl-gn tbody tr");
+  filas.forEach((fila, i) => {
+    if (equiposData[i]) {
+      fila.addEventListener("click", () => abrirPopup(equiposData[i]));
+    }
+  });
+}, 300);

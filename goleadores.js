@@ -44,7 +44,7 @@ function siluetaSVG(tipo, pos, numero, logoUrl) {
     blue:   { main: "#0277bd", detail: "#29b6f6", glow: "#29b6f6", text: "#fff" }
   };
   const c = colores[tipo] || colores.gold;
-  const logoImg = logoUrl ? `<image href="${logoUrl}" x="130" y="160" width="80" height="80" clip-path="circle(35px at 40px 40px)" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6))"/>` : '';
+  const logoImg = logoUrl ? `<image href="${logoUrl}" x="95" y="120" width="100" height="100" style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.7))"/>` : '';
   return `
     <svg viewBox="0 0 448 448" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;filter:drop-shadow(0 0 8px ${c.glow});">
       <!-- Camiseta base -->
@@ -62,7 +62,7 @@ function siluetaSVG(tipo, pos, numero, logoUrl) {
         c-5.037-5.115-13.747-1.52-13.701,5.668l0.242,263.977h-256.3v-263.977c-0.058-7.045-8.534-10.58-13.582-5.668
         l-26.457,26.457l-37.559-38.387l66.496-94.842c30.742-7.834,66.078-15.486,96.801-23.316z"/>
       <!-- Posicion arriba del cuello -->
-      <text x="224" y="58" text-anchor="middle" font-family="Arial" font-weight="900" font-size="28" fill="${c.text}" opacity="0.9">${pos}</text>
+      <text x="224" y="62" text-anchor="middle" font-family="Arial" font-weight="900" font-size="42" fill="${c.text}" opacity="0.95">${pos}</text>
       <!-- Numero en el centro -->
       <text x="224" y="310" text-anchor="middle" font-family="Arial" font-weight="900" font-size="90" fill="${c.text}" opacity="0.85">${numero}</text>
       <!-- Escudo en el pecho izquierdo -->

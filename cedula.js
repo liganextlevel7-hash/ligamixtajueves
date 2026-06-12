@@ -254,8 +254,8 @@ function abrirCedula(idPartido) {
   const eqV = eqMap[String(partidoActual.Equipo_Visita).trim()] || {};
   const estado = partidoActual.Estado?.trim();
   const esEditable = modoArbitro && estado === 'Programado';
+document.getElementById('cedula-header').innerHTML = `
 
-  document.getElementById('cedula-header').innerHTML = `
     <div style="display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:14px;padding:10px;background:rgba(0,0,0,0.4);border-radius:10px;border:1px solid rgba(57,255,20,0.2);">
       <span id="crono-display" style="font-size:28px;font-weight:900;color:#39ff14;font-family:monospace;min-width:70px;text-align:center;">00:00</span>
       <button id="btn-crono-start" ontouchstart="event.preventDefault();toggleCronometro()" onclick="toggleCronometro()" style="padding:8px 14px;background:rgba(57,255,20,0.1);border:1px solid #39ff14;border-radius:8px;color:#39ff14;cursor:pointer;font-size:12px;font-weight:700;touch-action:manipulation;">INICIAR</button>
@@ -475,7 +475,8 @@ async function guardarCedula() {
   if (existing) existing.remove();
   const div = document.createElement('div');
   div.className = 'cedula-data-wrap';
-  div.innerHTML = `
+div.innerHTML = `
+
     <pre style="background:rgba(0,0,0,0.5);border:1px solid #39ff14;border-radius:8px;padding:12px;color:#b8f030;font-size:11px;overflow-x:auto;margin-top:12px;white-space:pre-wrap;">${header}\n${csvData}</pre>
     <button onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent).then(()=>this.textContent='Copiado!')"
       style="margin-top:8px;padding:8px 14px;background:rgba(57,255,20,0.2);border:1px solid #39ff14;border-radius:8px;color:#39ff14;cursor:pointer;font-size:12px;">

@@ -159,14 +159,27 @@ function actualizarMarcador() {
 
 function restaurarEstadoBotones() {
   for (const [id, ev] of Object.entries(eventosRegistrados)) {
-    const btnAsist = document.getElementById('btn-asist-'+id);
-    const btnAm    = document.getElementById('btn-am-'+id);
-    const btnRj    = document.getElementById('btn-rj-'+id);
+    const chkAsist = document.getElementById('chk-asist-'+id);
+    const chkAm    = document.getElementById('chk-am-'+id);
+    const chkRj    = document.getElementById('chk-rj-'+id);
     const spanGol  = document.getElementById('goles-'+id);
-    if (btnAsist) { ev.asistencia ? btnAsist.classList.add('btn-asist-on') : btnAsist.classList.remove('btn-asist-on'); }
-    if (btnAm)    { ev.amarilla   ? btnAm.classList.add('btn-am-on')       : btnAm.classList.remove('btn-am-on'); }
-    if (btnRj)    { ev.roja       ? btnRj.classList.add('btn-rj-on')       : btnRj.classList.remove('btn-rj-on'); }
-    if (spanGol)  { spanGol.textContent = ev.goles.length; }
+    if (chkAsist) chkAsist.checked = ev.asistencia;
+    if (chkAm) {
+      chkAm.checked = ev.amarilla;
+      const lbl = chkAm.parentElement;
+      lbl.style.background  = ev.amarilla ? '#b8860b' : '#111';
+      lbl.style.borderColor = ev.amarilla ? '#ffd700' : '#555';
+      lbl.querySelector('span').style.color = ev.amarilla ? '#fff' : '#888';
+    }
+    if (chkRj) {
+      chkRj.checked = ev.roja;
+      const lbl = chkRj.parentElement;
+      lbl.style.background  = ev.roja ? '#8b0000' : '#111';
+      lbl.style.borderColor = ev.roja ? '#ff4444' : '#555';
+      lbl.querySelector('span').style.color = ev.roja ? '#fff' : '#888';
+    }
+    if (spanGol) spanGol.textContent = ev.goles.length;
+    actualizarResumen(id);
   }
 }
 
@@ -356,8 +369,9 @@ function agregarGol(id) {
   const min = getMinutoActual();
   eventosRegistrados[id].goles.push(min);
   const el = document.getElementById('goles-'+id);
-  if (el) { el.textContent = eventosRegistrados[id].goles.length; el.classList.add('btn-gol-val'); }
+  if (el) el.textContent = eventosRegistrados[id].goles.length;
   actualizarMarcador();
+  actualizarResumen(id);
 }
 function quitarGol(id) {
   if (eventosRegistrados[id].goles.length > 0) {
@@ -365,33 +379,47 @@ function quitarGol(id) {
     const el = document.getElementById('goles-'+id);
     if (el) el.textContent = eventosRegistrados[id].goles.length;
     actualizarMarcador();
+    actualizarResumen(id);
   }
 }
-function toggleAmarilla(id) {
-  eventosRegistrados[id].amarilla = !eventosRegistrados[id].amarilla;
-  if (eventosRegistrados[id].amarilla) eventosRegistrados[id].amarillaMin = getMinutoActual();
-  const btn = document.getElementById('btn-am-'+id);
-  if (btn) {
-    if (eventosRegistrados[id].amarilla) btn.classList.add('btn-am-on');
-    else btn.classList.remove('btn-am-on');
-  }
+function onAsistChange(id) {
+  const chk = document.getElementById('chk-asist-'+id);
+  eventosRegistrados[id].asistencia = chk.checked;
+  actualizarResumen(id);
 }
-function toggleRoja(id) {
-  eventosRegistrados[id].roja = !eventosRegistrados[id].roja;
-  if (eventosRegistrados[id].roja) eventosRegistrados[id].rojaMin = getMinutoActual();
-  const btn = document.getElementById('btn-rj-'+id);
-  if (btn) {
-    if (eventosRegistrados[id].roja) btn.classList.add('btn-rj-on');
-    else btn.classList.remove('btn-rj-on');
-  }
+function onAmarChange(id) {
+  const chk = document.getElementById('chk-am-'+id);
+  eventosRegistrados[id].amarilla = chk.checked;
+  if (chk.checked) eventosRegistrados[id].amarillaMin = getMinutoActual();
+  const lbl = chk.parentElement;
+  lbl.style.background = chk.checked ? '#b8860b' : '#111';
+  lbl.style.borderColor = chk.checked ? '#ffd700' : '#555';
+  lbl.querySelector('span').style.color = chk.checked ? '#fff' : '#888';
+  actualizarResumen(id);
 }
-function toggleAsistencia(id) {
-  eventosRegistrados[id].asistencia = !eventosRegistrados[id].asistencia;
-  const btn = document.getElementById('btn-asist-'+id);
-  if (btn) {
-    if (eventosRegistrados[id].asistencia) btn.classList.add('btn-asist-on');
-    else btn.classList.remove('btn-asist-on');
-  }
+function onRojaChange(id) {
+  const chk = document.getElementById('chk-rj-'+id);
+  eventosRegistrados[id].roja = chk.checked;
+  if (chk.checked) eventosRegistrados[id].rojaMin = getMinutoActual();
+  const lbl = chk.parentElement;
+  lbl.style.background = chk.checked ? '#8b0000' : '#111';
+  lbl.style.borderColor = chk.checked ? '#ff4444' : '#555';
+  lbl.querySelector('span').style.color = chk.checked ? '#fff' : '#888';
+  actualizarResumen(id);
+}
+function toggleAmarilla(id) { onAmarChange(id); }
+function toggleRoja(id) { onRojaChange(id); }
+function toggleAsistencia(id) { onAsistChange(id); }
+function actualizarResumen(id) {
+  const ev = eventosRegistrados[id];
+  const el = document.getElementById('resumen-'+id);
+  if (!el) return;
+  let txt = '';
+  if (ev.asistencia) txt += 'V ';
+  if (ev.goles.length > 0) txt += ev.goles.length + 'GOL ';
+  if (ev.amarilla) txt += 'AM ';
+  if (ev.roja) txt += 'RJ';
+  el.textContent = txt.trim();
 }
 
 function iniciarFirma() {

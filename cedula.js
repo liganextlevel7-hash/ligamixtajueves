@@ -586,4 +586,3 @@ function volverALista() {
   partidoActual = null;
   eventosRegistrados = {};
 }
-"

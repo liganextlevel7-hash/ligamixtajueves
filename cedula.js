@@ -262,24 +262,24 @@ function abrirCedula(idPartido) {
       <button ontouchstart="event.preventDefault();reiniciarCronometro()" onclick="reiniciarCronometro()" style="padding:8px 14px;background:rgba(255,68,68,0.1);border:1px solid #ff4444;border-radius:8px;color:#ff4444;cursor:pointer;font-size:12px;font-weight:700;touch-action:manipulation;">RESET</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;text-align:center;">
-    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;text-align:center;">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-        <img src="${eqL.URL||''}" style="width:60px;height:60px;object-fit:contain;">
-        <div style="font-size:13px;font-weight:700;color:#fff;text-transform:uppercase;">${eqL.Nombre||'?'}</div>
-      </div>
-      <div>
+    <div style="text-align:center;margin-bottom:8px;">
         <div style="font-size:10px;color:rgba(57,255,20,0.6);letter-spacing:2px;">${partidoActual.Jornada?'JORNADA '+partidoActual.Jornada:''}</div>
-        <div id="marcador-live" style="font-size:32px;font-weight:900;color:#d4f030;margin:6px 0;">
+        <div id="marcador-live" style="font-size:32px;font-weight:900;color:#d4f030;margin:4px 0;">
           ${estado==='Jugado'?`${partidoActual.Goles_Local} - ${partidoActual.Goles_Visita}`:'0 - 0'}
         </div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.4);">${partidoActual.Fecha||''} · ${partidoActual.Cancha||''}</div>
-        <div style="font-size:11px;color:${esEditable?'#39ff14':'rgba(255,255,255,0.3)'};margin-top:4px;">${esEditable?'MODO EDICION':'SOLO CONSULTA'}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">${partidoActual.Fecha||''} · ${partidoActual.Cancha||''}</div>
+        <div style="font-size:10px;color:${esEditable?'#39ff14':'rgba(255,255,255,0.3)'};margin-top:2px;">${esEditable?'MODO EDICION':'SOLO CONSULTA'}</div>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-        <img src="${eqV.URL||''}" style="width:60px;height:60px;object-fit:contain;">
-        <div style="font-size:13px;font-weight:700;color:#fff;text-transform:uppercase;">${eqV.Nombre||'?'}</div>
+      <div style="display:flex;align-items:center;justify-content:space-around;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <img src="${eqL.URL||''}" style="width:50px;height:50px;object-fit:contain;">
+          <div style="font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;text-align:center;max-width:100px;">${eqL.Nombre||'?'}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <img src="${eqV.URL||''}" style="width:50px;height:50px;object-fit:contain;">
+          <div style="font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;text-align:center;max-width:100px;">${eqV.Nombre||'?'}</div>
+        </div>
       </div>
-    </div>
     `;
 
   const partLocal  = todasParticipaciones.filter(p => String(p.Partido).trim()===String(idPartido) && String(p.Equipo).trim()===String(partidoActual.Equipo_Local).trim());
@@ -297,32 +297,29 @@ function abrirCedula(idPartido) {
     if (esEditable) {
       eventosRegistrados[id] = { goles:[], amarilla:false, amarillaMin:0, roja:false, rojaMin:0, asistencia:false };
       eventosRegistrados[id] = { goles:[], amarilla:false, amarillaMin:0, roja:false, rojaMin:0, asistencia:false };
-      return `<div id="row-${id}" style="padding:8px 4px;border-bottom:0.5px solid rgba(255,255,255,0.06);">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-          <span style="font-size:11px;font-weight:700;color:rgba(57,255,20,0.7);min-width:22px;">${jug.Numero||'-'}</span>
-          <span style="font-size:12px;color:#fff;flex:1;">${jug.Nombre||'#'+id}</span>
-          <span id="resumen-${id}" style="font-size:11px;color:#d4f030;font-weight:700;"></span>
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <label id="lbl-asist-${id}" style="display:flex;align-items:center;gap:4px;cursor:pointer;padding:6px 10px;border-radius:6px;border:1px solid #555;background:#111;touch-action:manipulation;">
-            <input type="checkbox" id="chk-asist-${id}" onchange="onAsistChange('${id}')" style="width:16px;height:16px;accent-color:#39ff14;cursor:pointer;">
-            <span style="font-size:11px;color:#888;font-weight:700;">ASIST</span>
+      return `<div id="row-${id}" style="padding:6px 4px;border-bottom:0.5px solid rgba(255,255,255,0.06);">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11px;font-weight:700;color:rgba(57,255,20,0.7);min-width:20px;">${jug.Numero||'-'}</span>
+          <span style="font-size:11px;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${jug.Nombre||'#'+id}</span>
+          <label style="display:flex;align-items:center;gap:3px;cursor:pointer;touch-action:manipulation;">
+            <input type="checkbox" id="chk-asist-${id}" onclick="onAsistChange('${id}')" style="width:15px;height:15px;accent-color:#39ff14;cursor:pointer;">
+            <span style="font-size:10px;color:#888;">V</span>
           </label>
-          <div style="display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:6px;border:1px solid rgba(57,255,20,0.3);background:#0a1a0a;">
-            <button ontouchstart="event.preventDefault();quitarGol('${id}')" onclick="quitarGol('${id}')" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0 6px;touch-action:manipulation;line-height:1;">-</button>
-            <span id="goles-${id}" style="font-size:16px;font-weight:900;color:#d4f030;min-width:20px;text-align:center;">0</span>
-            <button ontouchstart="event.preventDefault();agregarGol('${id}')" onclick="agregarGol('${id}')" style="background:none;border:none;color:#39ff14;font-size:20px;cursor:pointer;padding:0 6px;touch-action:manipulation;line-height:1;">+</button>
-            <span style="font-size:10px;color:rgba(255,255,255,0.4);">GOL</span>
+          <div style="display:flex;align-items:center;gap:2px;background:#0a1a0a;border:1px solid rgba(57,255,20,0.3);border-radius:5px;padding:2px 4px;">
+            <button ontouchstart="event.preventDefault();quitarGol('${id}')" onclick="quitarGol('${id}')" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;padding:0 3px;touch-action:manipulation;line-height:1;">-</button>
+            <span id="goles-${id}" style="font-size:13px;font-weight:900;color:#d4f030;min-width:16px;text-align:center;">0</span>
+            <button ontouchstart="event.preventDefault();agregarGol('${id}')" onclick="agregarGol('${id}')" style="background:none;border:none;color:#39ff14;font-size:16px;cursor:pointer;padding:0 3px;touch-action:manipulation;line-height:1;">+</button>
           </div>
-          <label id="lbl-am-${id}" style="display:flex;align-items:center;gap:4px;cursor:pointer;padding:6px 10px;border-radius:6px;border:1px solid #555;background:#111;touch-action:manipulation;">
-            <input type="checkbox" id="chk-am-${id}" onchange="onAmarChange('${id}')" style="width:16px;height:16px;accent-color:#ffd700;cursor:pointer;">
-            <span style="font-size:11px;color:#888;font-weight:700;">AM</span>
+          <label id="lbl-am-${id}" style="display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 7px;border-radius:5px;border:1px solid #555;background:#111;touch-action:manipulation;">
+            <input type="checkbox" id="chk-am-${id}" onclick="onAmarChange('${id}')" style="width:14px;height:14px;accent-color:#ffd700;cursor:pointer;">
+            <span style="font-size:10px;color:#888;font-weight:700;">AM</span>
           </label>
-          <label id="lbl-rj-${id}" style="display:flex;align-items:center;gap:4px;cursor:pointer;padding:6px 10px;border-radius:6px;border:1px solid #555;background:#111;touch-action:manipulation;">
-            <input type="checkbox" id="chk-rj-${id}" onchange="onRojaChange('${id}')" style="width:16px;height:16px;accent-color:#ff4444;cursor:pointer;">
-            <span style="font-size:11px;color:#888;font-weight:700;">RJ</span>
+          <label id="lbl-rj-${id}" style="display:flex;align-items:center;gap:3px;cursor:pointer;padding:3px 7px;border-radius:5px;border:1px solid #555;background:#111;touch-action:manipulation;">
+            <input type="checkbox" id="chk-rj-${id}" onclick="onRojaChange('${id}')" style="width:14px;height:14px;accent-color:#ff4444;cursor:pointer;">
+            <span style="font-size:10px;color:#888;font-weight:700;">RJ</span>
           </label>
         </div>
+        <div id="resumen-${id}" style="font-size:10px;color:#d4f030;font-weight:700;margin-top:2px;padding-left:26px;"></div>
       </div>`;
     } else {
       const ev = getEvsConsulta(id);

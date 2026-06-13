@@ -285,14 +285,28 @@ function abrirCedula(idPartido) {
 }
 
 // ===== EVENTOS =====
-function chkAsist(id) { eventosRegistrados[id].asistencia = document.getElementById('chk-a-'+id).checked; }
-function chkAm(id) {
-  eventosRegistrados[id].amarilla = document.getElementById('chk-am-'+id).checked;
-  if (eventosRegistrados[id].amarilla) eventosRegistrados[id].amarillaMin = getMinuto();
+function tgAsist(id) {
+  eventosRegistrados[id].asistencia = !eventosRegistrados[id].asistencia;
+  const btn = document.getElementById('btn-v-'+id);
+  btn.style.background = eventosRegistrados[id].asistencia ? '#1a3a1a' : '#111';
+  btn.style.color      = eventosRegistrados[id].asistencia ? '#39ff14' : '#555';
+  btn.style.border     = eventosRegistrados[id].asistencia ? '1px solid #39ff14' : '1px solid #444';
 }
-function chkRj(id) {
-  eventosRegistrados[id].roja = document.getElementById('chk-rj-'+id).checked;
+function tgAm(id) {
+  eventosRegistrados[id].amarilla = !eventosRegistrados[id].amarilla;
+  if (eventosRegistrados[id].amarilla) eventosRegistrados[id].amarillaMin = getMinuto();
+  const btn = document.getElementById('btn-am-'+id);
+  btn.style.background = eventosRegistrados[id].amarilla ? '#b8860b' : '#111';
+  btn.style.color      = eventosRegistrados[id].amarilla ? '#fff'    : '#555';
+  btn.style.border     = eventosRegistrados[id].amarilla ? '1px solid #ffd700' : '1px solid #444';
+}
+function tgRj(id) {
+  eventosRegistrados[id].roja = !eventosRegistrados[id].roja;
   if (eventosRegistrados[id].roja) eventosRegistrados[id].rojaMin = getMinuto();
+  const btn = document.getElementById('btn-rj-'+id);
+  btn.style.background = eventosRegistrados[id].roja ? '#8b0000' : '#111';
+  btn.style.color      = eventosRegistrados[id].roja ? '#fff'    : '#555';
+  btn.style.border     = eventosRegistrados[id].roja ? '1px solid #ff4444' : '1px solid #444';
 }
 function golMas(id) {
   eventosRegistrados[id].goles++;
@@ -446,12 +460,9 @@ async function descargarPDF() {
         const id=String(part.Jugador).trim();
         const ev=eventosRegistrados[id]||{goles:0,amarilla:false,roja:false,asistencia:false};
         // Leer estado actual de checkboxes si existen
-        const chkA=document.getElementById('chk-a-'+id);
-        const chkAm=document.getElementById('chk-am-'+id);
-        const chkRj=document.getElementById('chk-rj-'+id);
-        const asist = chkA ? chkA.checked : ev.asistencia;
-        const amar  = chkAm ? chkAm.checked : ev.amarilla;
-        const roja  = chkRj ? chkRj.checked : ev.roja;
+        const asist = ev.asistencia;
+        const amar  = ev.amarilla;
+        const roja  = ev.roja;
         doc.setFontSize(7); doc.setFont('helvetica','bold');
         if(asist){doc.setTextColor(57,255,20);doc.text('V',x,y);}
         else{doc.setTextColor(60,60,60);doc.text('-',x,y);}

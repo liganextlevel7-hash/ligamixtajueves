@@ -230,9 +230,9 @@ function abrirCedula(idPartido) {
         <span style="font-size:11px;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${jug.Nombre||'#'+id}</span>
         <input type="checkbox" id="chk-a-${id}" onclick="chkAsist('${id}')" style="width:16px;height:16px;accent-color:#39ff14;cursor:pointer;flex-shrink:0;">
         <span style="font-size:9px;color:#666;margin-right:4px;">V</span>
-        <button onclick="golMenos('${id}')" style="background:#111;border:1px solid #444;border-radius:4px;color:#fff;width:24px;height:24px;font-size:14px;cursor:pointer;flex-shrink:0;line-height:1;">-</button>
+        <button onclick="golMenos('${id}')" ontouchend="event.preventDefault();golMenos('${id}')" style="background:#111;border:1px solid #444;border-radius:4px;color:#fff;width:24px;height:24px;font-size:14px;cursor:pointer;flex-shrink:0;line-height:1;">-</button>
         <span id="g-${id}" style="font-size:14px;font-weight:900;color:#d4f030;min-width:18px;text-align:center;flex-shrink:0;">0</span>
-        <button onclick="golMas('${id}')" style="background:#1a3a1a;border:1px solid #39ff14;border-radius:4px;color:#39ff14;width:24px;height:24px;font-size:14px;cursor:pointer;flex-shrink:0;line-height:1;">+</button>
+        <button onclick="golMas('${id}')" ontouchend="event.preventDefault();golMas('${id}')" style="background:#1a3a1a;border:1px solid #39ff14;border-radius:4px;color:#39ff14;width:24px;height:24px;font-size:14px;cursor:pointer;flex-shrink:0;line-height:1;">+</button>
         <input type="checkbox" id="chk-am-${id}" onclick="chkAm('${id}')" style="width:16px;height:16px;accent-color:#ffd700;cursor:pointer;flex-shrink:0;margin-left:4px;">
         <span style="font-size:9px;color:#666;margin-right:4px;">AM</span>
         <input type="checkbox" id="chk-rj-${id}" onclick="chkRj('${id}')" style="width:16px;height:16px;accent-color:#ff4444;cursor:pointer;flex-shrink:0;">
@@ -445,13 +445,20 @@ async function descargarPDF() {
         const jug=todosJugadores.find(j=>String(j.ID_Jugador).trim()===String(part.Jugador).trim())||{};
         const id=String(part.Jugador).trim();
         const ev=eventosRegistrados[id]||{goles:0,amarilla:false,roja:false,asistencia:false};
+        // Leer estado actual de checkboxes si existen
+        const chkA=document.getElementById('chk-a-'+id);
+        const chkAm=document.getElementById('chk-am-'+id);
+        const chkRj=document.getElementById('chk-rj-'+id);
+        const asist = chkA ? chkA.checked : ev.asistencia;
+        const amar  = chkAm ? chkAm.checked : ev.amarilla;
+        const roja  = chkRj ? chkRj.checked : ev.roja;
         doc.setFontSize(7); doc.setFont('helvetica','bold');
-        if(ev.asistencia){doc.setTextColor(57,255,20);doc.text('V',x,y);}
+        if(asist){doc.setTextColor(57,255,20);doc.text('V',x,y);}
         else{doc.setTextColor(60,60,60);doc.text('-',x,y);}
         doc.setTextColor(184,240,48); doc.text(String(jug.Numero||'-'),x+5,y);
         doc.setFont('helvetica','normal'); doc.setTextColor(210,210,210);
         doc.text((jug.Nombre||'').substring(0,20),x+12,y);
-        const evStr=(ev.goles>0?ev.goles+'GOL ':'')+(ev.amarilla?'AM':'')+(ev.roja?'RJ':'');
+        const evStr=(ev.goles>0?ev.goles+'GOL ':'')+(amar?'AM ':'')+(roja?'RJ':'');
         if(evStr.trim()){doc.setFont('helvetica','bold');doc.setTextColor(212,240,48);doc.text(evStr.trim(),x+62,y);}
       }
       rj(pL[i],13); rj(pV[i],113); y+=7;

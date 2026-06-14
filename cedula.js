@@ -228,12 +228,12 @@ function abrirCedula(idPartido) {
       <div style="display:flex;align-items:center;gap:4px;padding:7px 2px;border-bottom:0.5px solid rgba(255,255,255,0.06);">
         <span style="font-size:11px;font-weight:700;color:rgba(57,255,20,0.7);min-width:20px;">${jug.Numero||'-'}</span>
         <span style="font-size:11px;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${jug.Nombre||'#'+id}</span>
-        <button id="btn-v-${id}" onclick="tgAsist('${id}')" style="width:30px;height:26px;border-radius:4px;border:1px solid #444;background:#111;color:#555;font-size:11px;font-weight:700;cursor:pointer;">V</button>
-        <button onclick="golMenos('${id}')" style="width:26px;height:26px;border-radius:4px;border:1px solid #444;background:#111;color:#fff;font-size:15px;cursor:pointer;line-height:1;">-</button>
-        <span id="g-${id}" style="font-size:14px;font-weight:900;color:#d4f030;min-width:18px;text-align:center;">0</span>
-        <button onclick="golMas('${id}')" style="width:26px;height:26px;border-radius:4px;border:1px solid #39ff14;background:#1a3a1a;color:#39ff14;font-size:15px;cursor:pointer;line-height:1;">+</button>
-        <button id="btn-am-${id}" onclick="tgAm('${id}')" style="width:30px;height:26px;border-radius:4px;border:1px solid #444;background:#111;color:#555;font-size:10px;font-weight:700;cursor:pointer;">AM</button>
-        <button id="btn-rj-${id}" onclick="tgRj('${id}')" style="width:30px;height:26px;border-radius:4px;border:1px solid #444;background:#111;color:#555;font-size:10px;font-weight:700;cursor:pointer;">RJ</button>
+        <button id="btn-v-${id}" onclick="tgAsist('${id}')" style="width:34px;height:30px;border-radius:4px;border:1px solid #444;background:#111;color:#555;font-size:11px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">V</button>
+        <button onclick="golMenos('${id}')" style="width:30px;height:30px;border-radius:4px;border:1px solid #444;background:#111;color:#fff;font-size:16px;cursor:pointer;line-height:1;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">-</button>
+        <span id="g-${id}" style="font-size:15px;font-weight:900;color:#d4f030;min-width:20px;text-align:center;">0</span>
+        <button onclick="golMas('${id}')" style="width:30px;height:30px;border-radius:4px;border:1px solid #39ff14;background:#1a3a1a;color:#39ff14;font-size:16px;cursor:pointer;line-height:1;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">+</button>
+        <button id="btn-am-${id}" onclick="tgAm('${id}')" style="width:34px;height:30px;border-radius:4px;border:1px solid #444;background:#111;color:#555;font-size:10px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">AM</button>
+        <button id="btn-rj-${id}" onclick="tgRj('${id}')" style="width:34px;height:30px;border-radius:4px;border:1px solid #444;background:#111;color:#555;font-size:10px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">RJ</button>
       </div>`;
     } else {
       const ev = getEvsConsulta(id);

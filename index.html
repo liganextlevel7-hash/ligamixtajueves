@@ -25,7 +25,7 @@
   opacity: 0;
   pointer-events: none;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid #39ff14; box-shadow: 0 0 10px #39ff14, 0 0 20px rgba(57,255,20,0.3);
 }
 .card-sec.c  { transform:translate(-50%,-50%) scale(1);                                  opacity:1; z-index:5; pointer-events:all; }
 .card-sec.l1 { transform:translate(calc(-50% - 240px),-50%) scale(0.75) rotateY(15deg); opacity:0.75; z-index:4; pointer-events:all; }
@@ -64,6 +64,15 @@
 .c-proxima  .card-body { background: linear-gradient(160deg,#2a0d1a,#3a1025); border-color:rgba(255,80,150,0.3); }
 .c-proxima  .card-titulo { color:#ff5096; }
 .c-proxima  .car-btn { background:rgba(255,80,150,0.15); color:#ff5096; border:1px solid #ff5096; }
+.c-equipos  .card-body { background: linear-gradient(160deg,#0d1a2a,#102040); border-color:rgba(100,200,255,0.3); }
+.c-equipos  .card-titulo { color:#64c8ff; }
+.c-equipos  .car-btn { background:rgba(100,200,255,0.15); color:#64c8ff; border:1px solid #64c8ff; }
+.c-liguilla .card-body { background: linear-gradient(160deg,#1a0d2a,#251040); border-color:rgba(180,100,255,0.3); }
+.c-liguilla .card-titulo { color:#b464ff; }
+.c-liguilla .car-btn { background:rgba(180,100,255,0.15); color:#b464ff; border:1px solid #b464ff; }
+.c-cedula   .card-body { background: linear-gradient(160deg,#1a2a0d,#253010); border-color:rgba(180,255,50,0.3); }
+.c-cedula   .card-titulo { color:#b4ff32; }
+.c-cedula   .car-btn { background:rgba(180,255,50,0.15); color:#b4ff32; border:1px solid #b4ff32; }
 
 .mini-fila { display:flex; align-items:center; gap:8px; padding:7px 4px; border-bottom:1px solid rgba(255,255,255,0.07); font-size:12px; color:rgba(255,255,255,0.85); }
 .mini-fila img { width:28px; height:28px; object-fit:contain; }
@@ -159,6 +168,34 @@
       <div class="card-titulo">📅 Próxima Jornada</div>
       <div class="card-contenido" id="car-proxima"><div class="car-cargando">Cargando...</div></div>
       <a href="partidos.html" class="car-btn">VER JORNADA</a>
+    </div>
+  </div>
+
+  <div class="card-sec c-equipos" id="ccard-4">
+    <div class="card-body">
+      <div class="card-titulo">👕 Equipos</div>
+      <div class="card-contenido" id="car-equipos" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;padding:10px 0;">
+        <div class="car-cargando">Cargando...</div>
+      </div>
+      <a href="equipos.html" class="car-btn">VER EQUIPOS</a>
+    </div>
+  </div>
+
+  <div class="card-sec c-liguilla" id="ccard-5">
+    <div class="card-body" style="align-items:center;justify-content:center;">
+      <div class="card-titulo">🥇 Liguilla</div>
+      <div style="font-size:80px;margin:20px 0;">🏆</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.5);text-align:center;font-family:Arial;">Bracket de eliminación directa, semifinales y gran final</div>
+      <a href="liguilla.html" class="car-btn" style="margin-top:20px;">VER LIGUILLA</a>
+    </div>
+  </div>
+
+  <div class="card-sec c-cedula" id="ccard-6">
+    <div class="card-body" style="align-items:center;justify-content:center;">
+      <div class="card-titulo">📝 Cédula Arbitral</div>
+      <div style="font-size:80px;margin:20px 0;">⚽</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.5);text-align:center;font-family:Arial;">Registro oficial de partidos, goles, tarjetas y firmas digitales</div>
+      <a href="cedula.html" class="car-btn" style="margin-top:20px;">IR A CÉDULA</a>
     </div>
   </div>
 
@@ -300,6 +337,13 @@ async function cargarCarrusel() {
       });
     } else { htmlGoles='<div class="car-cargando">Sin goles aún</div>'; }
     document.getElementById('car-goles').innerHTML=htmlGoles;
+
+    // EQUIPOS
+    let htmlEq='';
+    Object.entries(carLogos).forEach(([nombre,url])=>{
+      htmlEq+=`<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><img src="${url}" style="width:40px;height:40px;object-fit:contain;" onerror="this.style.display='none'"><span style="font-size:8px;color:rgba(255,255,255,0.6);text-align:center;max-width:50px;">${nombre}</span></div>`;
+    });
+    document.getElementById('car-equipos').innerHTML=htmlEq;
 
   } catch(e) { console.error(e); }
 }

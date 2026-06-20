@@ -1,5 +1,3 @@
-document.getElementById('flyerBg').src = 'fondo-partidos.png';
-
 const CSV_PARTIDOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=1362473459&single=true&output=csv';
 const CSV_EQUIPOS  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=1894947293&single=true&output=csv';
 const CSV_JUGADORES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=1940220650&single=true&output=csv';
@@ -7,6 +5,8 @@ const CSV_PARTICIPACIONES = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRs
 const CSV_EVENTOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=645868286&single=true&output=csv';
 
 let todosPartidos = [], todosEquipos = [], todosJugadores = [], todasParticipaciones = [], todosEventos = [];
+let vueltaActual = 1;
+let ultimosFiltrados = [];
 
 function parseCSV(text) {
   const lines = text.replace(/\r/g, '').trim().split('\n');
@@ -35,8 +35,14 @@ function formatHora(t) {
   return `${h}:${m} ${ampm}`;
 }
 
-function phSVG() {
-  return `<svg style="width:36px;height:36px;opacity:0.22;" viewBox="0 0 60 60"><circle cx="30" cy="22" r="12" fill="white" opacity="0.4"/><path d="M10 54c0-11 9-18 20-18s20 7 20 18" fill="white" opacity="0.4"/></svg>`;
+function cambiarVuelta(v) {
+  vueltaActual = v;
+  document.getElementById('tabVuelta1').classList.toggle('activo', v === 1);
+  document.getElementById('tabVuelta2').classList.toggle('activo', v === 2);
+  document.getElementById('statusMsg').textContent = 'Selecciona filtro y presiona Cargar Datos';
+  document.getElementById('stackContainer').innerHTML = '<div class="empty-msg">CARGA LOS DATOS PARA VER LOS PARTIDOS</div>';
+  // Refrescar opciones de jornada/fecha/equipo según la vuelta
+  poblarSelectores();
 }
 
 function cambiarFiltro() {
@@ -45,8 +51,30 @@ function cambiarFiltro() {
   document.getElementById('groupFecha').style.display = tipo === 'fecha' ? 'flex' : 'none';
   document.getElementById('groupEquipo').style.display = tipo === 'equipo' ? 'flex' : 'none';
   document.getElementById('statusMsg').textContent = 'Selecciona opción y presiona Cargar Datos';
-  document.getElementById('encFlyer').innerHTML = '';
-  document.getElementById('jornadaDisplay').textContent = 'DOMINICAL';
+  document.getElementById('stackContainer').innerHTML = '<div class="empty-msg">CARGA LOS DATOS PARA VER LOS PARTIDOS</div>';
+}
+
+function poblarSelectores() {
+  const partidosVuelta = todosPartidos.filter(p => String(p['Vuelta']).trim() === String(vueltaActual));
+
+  // Jornadas disponibles en esta vuelta
+  const jornadas = [...new Set(partidosVuelta.filter(p => p['Jornada']).map(p => Number(p['Jornada'])))].sort((a,b)=>a-b);
+  const selJornada = document.getElementById('filterJornada');
+  selJornada.innerHTML = '<option value="">— Selecciona —</option>';
+  jornadas.forEach(j => selJornada.innerHTML += `<option value="${j}">Jornada ${j}</option>`);
+
+  // Fechas disponibles
+  const fechas = [...new Set(partidosVuelta.filter(p => p['Fecha'] && p['Fecha'].trim() !== '').map(p => p['Fecha'].trim()))];
+  const selFecha = document.getElementById('filterFecha');
+  selFecha.innerHTML = '<option value="">— Selecciona una fecha —</option>';
+  fechas.forEach(f => selFecha.innerHTML += `<option value="${f}">${f}</option>`);
+
+  // Equipos (siempre todos, son los mismos en ambas vueltas)
+  const equiposSet = new Set();
+  todosEquipos.forEach(e => { if (e['Nombre']) equiposSet.add(e['Nombre'].toUpperCase()); });
+  const selEquipo = document.getElementById('filterEquipo');
+  selEquipo.innerHTML = '<option value="">— Selecciona un equipo —</option>';
+  Array.from(equiposSet).sort().forEach(eq => selEquipo.innerHTML += `<option value="${eq}">${eq}</option>`);
 }
 
 async function cargarFechasYEquipos() {
@@ -55,30 +83,20 @@ async function cargarFechasYEquipos() {
       fetch(CSV_PARTIDOS), fetch(CSV_EQUIPOS), fetch(CSV_JUGADORES),
       fetch(CSV_PARTICIPACIONES), fetch(CSV_EVENTOS)
     ]);
-    todosPartidos       = parseCSV(await resP.text());
-    todosEquipos        = parseCSV(await resE.text());
-    todosJugadores      = parseCSV(await resJ.text());
-    todasParticipaciones= parseCSV(await resPart.text());
-    todosEventos        = parseCSV(await resEv.text());
+    todosPartidos        = parseCSV(await resP.text());
+    todosEquipos         = parseCSV(await resE.text());
+    todosJugadores       = parseCSV(await resJ.text());
+    todasParticipaciones = parseCSV(await resPart.text());
+    todosEventos          = parseCSV(await resEv.text());
 
-    const fechas = [...new Set(todosPartidos.filter(p => p['Fecha'] && p['Fecha'].trim() !== '').map(p => p['Fecha'].trim()))];
-    const selFecha = document.getElementById('filterFecha');
-    selFecha.innerHTML = '<option value="">— Selecciona una fecha —</option>';
-    fechas.forEach(f => selFecha.innerHTML += `<option value="${f}">${f}</option>`);
-
-    const equiposSet = new Set();
-    todosEquipos.forEach(e => { if (e['Nombre']) equiposSet.add(e['Nombre'].toUpperCase()); });
-    const selEquipo = document.getElementById('filterEquipo');
-    selEquipo.innerHTML = '<option value="">— Selecciona un equipo —</option>';
-    Array.from(equiposSet).sort().forEach(eq => selEquipo.innerHTML += `<option value="${eq}">${eq}</option>`);
-
+    poblarSelectores();
     document.getElementById('statusMsg').textContent = 'Selecciona filtro y presiona Cargar Datos';
   } catch(e) {
     document.getElementById('statusMsg').textContent = '❌ Error: ' + e.message;
   }
 }
 
-// ===== POPUP =====
+// ===== POPUP (igual que antes) =====
 function crearPopupStyles() {
   if (document.getElementById('partido-popup-style')) return;
   const style = document.createElement('style');
@@ -136,9 +154,7 @@ function crearPopupStyles() {
       display: grid; grid-template-columns: 1fr 1fr;
       gap: 0; padding: 0;
     }
-    .pp-col {
-      padding: 12px 10px;
-    }
+    .pp-col { padding: 12px 10px; }
     .pp-col:first-child { border-right: 1px solid rgba(184,240,48,0.15); }
     .pp-col-title {
       font-size: 9px; font-weight: 700; color: rgba(184,240,48,0.5);
@@ -154,9 +170,7 @@ function crearPopupStyles() {
       font-size: 11px; font-weight: 700; color: rgba(184,240,48,0.6);
       min-width: 20px; text-align: right;
     }
-    .pp-player-name {
-      font-size: 11px; color: rgba(255,255,255,0.85); flex:1;
-    }
+    .pp-player-name { font-size: 11px; color: rgba(255,255,255,0.85); flex:1; }
     .pp-player-icons { display: flex; gap: 2px; flex-wrap: wrap; }
     .pp-icon { font-size: 11px; }
   `;
@@ -193,11 +207,9 @@ function abrirPopupPartido(partido) {
   const gV = partido.Goles_Visita !== '' ? partido.Goles_Visita : '-';
   const jornada = partido.Jornada ? `Encuentro · Jornada ${partido.Jornada}` : 'Encuentro · Jornada ?';
 
-  // Jugadores que participaron en este partido
   const partLocal  = todasParticipaciones.filter(p => String(p.Partido).trim() === idPartido && String(p.Equipo).trim() === String(partido.Equipo_Local).trim());
   const partVisita = todasParticipaciones.filter(p => String(p.Partido).trim() === idPartido && String(p.Equipo).trim() === String(partido.Equipo_Visita).trim());
 
-  // Eventos de este partido
   const eventosPartido = todosEventos.filter(e => String(e.Partido).trim() === idPartido);
 
   function getJugador(id) {
@@ -265,119 +277,52 @@ function cerrarPopupPartido() {
   if (overlay) overlay.classList.remove('active');
 }
 
+// ===== CARGAR Y MOSTRAR TARJETAS =====
 async function cargarDatos() {
   const tipo = document.getElementById('filterTipo').value;
   const statusEl = document.getElementById('statusMsg');
   statusEl.textContent = '⏳ Cargando datos...';
 
   try {
+    // Solo partidos de la vuelta actual
+    const base = todosPartidos.filter(p => String(p['Vuelta']).trim() === String(vueltaActual));
     let filtrados = [];
+
     if (tipo === 'jornada') {
       const jornada = document.getElementById('filterJornada').value;
       if (!jornada) { statusEl.textContent = '⚠️ Selecciona una jornada'; return; }
-      filtrados = todosPartidos.filter(p => p['Jornada'] && String(p['Jornada']).trim() === String(jornada));
+      filtrados = base.filter(p => p['Jornada'] && String(p['Jornada']).trim() === String(jornada));
       if (!filtrados.length) { statusEl.textContent = `⚠️ No hay partidos para Jornada ${jornada}`; return; }
-      document.getElementById('jornadaDisplay').textContent = `DOMINICAL — JORNADA ${jornada}`;
+      // Ascendente por jornada (en este caso es una sola jornada, pero ordenamos por ID por si hay varias)
+      filtrados.sort((a,b) => Number(a.Jornada) - Number(b.Jornada) || Number(a.ID_Partido) - Number(b.ID_Partido));
+
     } else if (tipo === 'fecha') {
       const fecha = document.getElementById('filterFecha').value;
       if (!fecha) { statusEl.textContent = '⚠️ Selecciona una fecha'; return; }
-      filtrados = todosPartidos.filter(p => p['Jornada'] && p['Fecha'].trim() === fecha);
+      filtrados = base.filter(p => p['Fecha'] && p['Fecha'].trim() === fecha);
       if (!filtrados.length) { statusEl.textContent = `⚠️ No hay partidos para el ${fecha}`; return; }
-      document.getElementById('jornadaDisplay').textContent = `DOMINICAL — ${fecha}`;
+      // Descendente por fecha (más reciente primero) - usamos parse de dd/mm/yyyy
+      filtrados.sort((a,b) => parseFecha(b.Fecha) - parseFecha(a.Fecha));
+
     } else if (tipo === 'equipo') {
       const equipoSel = document.getElementById('filterEquipo').value.trim().toUpperCase();
       if (!equipoSel) { statusEl.textContent = '⚠️ Selecciona un equipo'; return; }
-      filtrados = todosPartidos.filter(p => {
+      filtrados = base.filter(p => {
         const eqLocal  = (todosEquipos.find(e => String(e.ID_Equipo) === String(p.Equipo_Local))?.Nombre || '').toUpperCase();
         const eqVisita = (todosEquipos.find(e => String(e.ID_Equipo) === String(p.Equipo_Visita))?.Nombre || '').toUpperCase();
         return eqLocal === equipoSel || eqVisita === equipoSel;
       });
       if (!filtrados.length) { statusEl.textContent = `⚠️ No hay partidos para el equipo ${equipoSel}`; return; }
-      document.getElementById('jornadaDisplay').textContent = `DOMINICAL — EQUIPO ${equipoSel}`;
+      // Descendente por ID_Partido
+      filtrados.sort((a,b) => Number(b.ID_Partido) - Number(a.ID_Partido));
+
     } else {
       statusEl.textContent = '⚠️ Selecciona un tipo de filtro';
       return;
     }
 
-    let jornadasFaltantes = [];
-    let jornadaFaltanteIdx = 0;
-    if (tipo === 'equipo') {
-      const jornadasUsadas = new Set(filtrados.filter(p => p['Jornada']).map(p => Number(p['Jornada'])));
-      jornadasFaltantes = [1,2,3,4,5,6,7,8,9].filter(j => !jornadasUsadas.has(j));
-    }
-
-    const eqMap = {};
-    todosEquipos.forEach(e => { eqMap[String(e['ID_Equipo']).trim()] = e; });
-
-    const cont = document.getElementById('encFlyer');
-    cont.innerHTML = '';
-
-    filtrados.forEach((p, idx) => {
-      const eqL = eqMap[String(p['Equipo_Local']).trim()] || {};
-      const eqV = eqMap[String(p['Equipo_Visita']).trim()] || {};
-      const nomL = (eqL['Nombre'] || `Equipo ${p['Equipo_Local']}`).toUpperCase();
-      const nomV = (eqV['Nombre'] || `Equipo ${p['Equipo_Visita']}`).toUpperCase();
-      const urlL = eqL['URL'] || '';
-      const urlV = eqV['URL'] || '';
-      const logoL = urlL ? `<img src="${urlL}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;">` : phSVG();
-      const logoV = urlV ? `<img src="${urlV}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;">` : phSVG();
-      const gL = p['Goles_Local'] !== '' ? p['Goles_Local'] : '-';
-      const gV = p['Goles_Visita'] !== '' ? p['Goles_Visita'] : '-';
-      const ganPor = (p['Ganado_Por'] || '').trim().toUpperCase();
-      const ganPorClass = ganPor.toLowerCase();
-      const hora = formatHora(p['Hora']);
-      const estado = (p['Estado'] || '').trim();
-
-      let jornada;
-      if (p['Jornada']) {
-        jornada = `Jornada ${p['Jornada']}`;
-      } else if (tipo === 'equipo' && jornadasFaltantes.length > 0) {
-        const jNum = jornadasFaltantes[jornadaFaltanteIdx % jornadasFaltantes.length];
-        jornadaFaltanteIdx++;
-        jornada = `Jornada ${jNum}`;
-      } else {
-        jornada = 'Jornada ?';
-      }
-
-      const cancha2 = p['Cancha'] || '';
-      const fecha2  = p['Fecha'] || '';
-
-      // Solo clickeable si es Jugado o Programado
-      const clickable = (estado === 'Jugado' || estado === 'Programado');
-      const clickAttr = clickable ? `onclick="abrirPopupPartido(todosPartidos[${todosPartidos.indexOf(p)}])" style="cursor:pointer;"` : '';
-      const infoBtn   = clickable ? `<div style="font-size:10px;color:rgba(184,240,48,0.5);letter-spacing:1px;margin-top:4px;">👆 VER DETALLE</div>` : '';
-
-      cont.innerHTML += `
-      <div class="enc-row" ${clickAttr}>
-        <div class="teams-section">
-          <div class="team-block">
-            <div class="team-logo-sm">${logoL}</div>
-            <div class="team-name-sm">${nomL}</div>
-          </div>
-          <div class="score-block">
-            <div class="score-nums">${gL} - ${gV}</div>
-            ${infoBtn}
-          </div>
-          <div class="team-block">
-            <div class="team-logo-sm">${logoV}</div>
-            <div class="team-name-sm">${nomV}</div>
-          </div>
-        </div>
-        <div class="enc-divider-v"></div>
-        <div class="info-section">
-          <div class="info-col">
-            ${jornada === 'Jornada ?' ? `<div class="info-item"><span class="icon">🏆</span><span class="val" style="color:#ffd700;">${jornada}</span></div>` : jornada ? `<div class="info-item"><span class="icon">🏆</span><span class="val">${jornada}</span></div>` : ''}
-            ${cancha2 ? `<div class="info-item"><span class="icon">📍</span><span class="val">${cancha2}</span></div>` : ''}
-          </div>
-          <div class="info-col">
-            ${fecha2 ? `<div class="info-item"><span class="icon">📅</span><span class="val">${fecha2}</span></div>` : ''}
-            ${hora ? `<div class="info-item"><span class="icon">⏰</span><span class="val">${hora}</span></div>` : ''}
-          </div>
-          ${ganPor ? `<div class="ganado-badge ${ganPorClass}">${ganPor}</div>` : ''}
-        </div>
-      </div>`;
-    });
-
+    ultimosFiltrados = filtrados;
+    renderStack(filtrados);
     statusEl.textContent = `✅ ${filtrados.length} partido(s) cargado(s)`;
 
   } catch(e) {
@@ -385,54 +330,162 @@ async function cargarDatos() {
   }
 }
 
+function parseFecha(f) {
+  if (!f) return 0;
+  const parts = f.split('/');
+  if (parts.length !== 3) return 0;
+  // dd/mm/yyyy -> Date
+  return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+}
+
+function renderStack(filtrados) {
+  const eqMap = {};
+  todosEquipos.forEach(e => { eqMap[String(e['ID_Equipo']).trim()] = e; });
+
+  const cont = document.getElementById('stackContainer');
+  cont.innerHTML = '';
+
+  filtrados.forEach((p, idx) => {
+    const eqL = eqMap[String(p['Equipo_Local']).trim()] || {};
+    const eqV = eqMap[String(p['Equipo_Visita']).trim()] || {};
+    const nomL = (eqL['Nombre'] || `Equipo ${p['Equipo_Local']}`).toUpperCase();
+    const nomV = (eqV['Nombre'] || `Equipo ${p['Equipo_Visita']}`).toUpperCase();
+    const urlL = eqL['URL'] || '';
+    const urlV = eqV['URL'] || '';
+    const gL = p['Goles_Local'] !== '' ? p['Goles_Local'] : '-';
+    const gV = p['Goles_Visita'] !== '' ? p['Goles_Visita'] : '-';
+    const estado = (p['Estado'] || '').trim();
+    const ganPor = (p['Ganado_Por'] || '').trim();
+    const ganPorClass = ganPor.toLowerCase();
+    const hora = formatHora(p['Hora']);
+    const cancha = p['Cancha'] || '';
+    const fecha = p['Fecha'] || '';
+    const jornadaTxt = p['Jornada'] ? `Jornada ${p['Jornada']}` : 'Jornada ?';
+    const idPartido = p['ID_Partido'];
+
+    const scoreHTML = estado === 'Jugado'
+      ? `<div class="stack-score">${gL} - ${gV}</div>`
+      : `<div class="stack-score programado">VS</div>`;
+
+    const badgeHTML = estado === 'Pendiente'
+      ? `<span class="stack-badge pendiente">PENDIENTE</span>`
+      : (ganPor ? `<span class="stack-badge ${ganPorClass}">${ganPor.toUpperCase()}</span>` : '');
+
+    const clickable = (estado === 'Jugado' || estado === 'Programado');
+    const idxReal = todosPartidos.indexOf(p);
+
+    cont.innerHTML += `
+    <div class="stack-card" style="top:${16 + idx * 4}px; z-index:${idx+1};">
+      <div class="stack-card-inner" ${clickable ? `onclick="abrirPopupPartido(todosPartidos[${idxReal}])"` : ''}>
+        <div class="stack-id-bg">#${idPartido}</div>
+        <div class="stack-top-row">
+          <span class="stack-jornada-tag">${jornadaTxt}</span>
+          <span>V${vueltaActual}</span>
+        </div>
+        <div class="stack-teams">
+          <div class="stack-team">
+            <img src="${urlL}" onerror="this.style.opacity='0.2'">
+            <div class="stack-team-name">${nomL}</div>
+          </div>
+          ${scoreHTML}
+          <div class="stack-team">
+            <img src="${urlV}" onerror="this.style.opacity='0.2'">
+            <div class="stack-team-name">${nomV}</div>
+          </div>
+        </div>
+        <div class="stack-bottom-row">
+          ${fecha ? `<span>📅 ${fecha}</span>` : ''}
+          ${hora ? `<span>⏰ ${hora}</span>` : ''}
+          ${cancha ? `<span>📍 ${cancha}</span>` : ''}
+          ${badgeHTML}
+        </div>
+      </div>
+    </div>`;
+  });
+}
+
+// ===== DESCARGAR PNG (lista vertical simple) =====
 async function downloadPNG() {
+  if (!ultimosFiltrados.length) { alert('Primero carga los datos de los partidos.'); return; }
+
   const btn = document.getElementById('dlBtn');
-  const panel = document.querySelector('.editor-panel');
-  const wrapper = document.getElementById('flyerRoot');
-  const container = document.getElementById('flyerScaleContainer');
-  panel.style.display = 'none';
   btn.textContent = '⏳ Generando...';
   btn.disabled = true;
-  wrapper.style.transform = 'scale(1)';
-  wrapper.style.transformOrigin = 'top left';
-  container.style.width = '900px';
-  container.style.height = '1270px';
-  const imgs = document.getElementById('flyerRoot').querySelectorAll('img');
+
+  const eqMap = {};
+  todosEquipos.forEach(e => { eqMap[String(e['ID_Equipo']).trim()] = e; });
+
+  // Crear contenedor temporal fuera de pantalla con lista vertical simple
+  const temp = document.createElement('div');
+  temp.style.position = 'fixed';
+  temp.style.left = '-9999px';
+  temp.style.top = '0';
+  temp.style.width = '700px';
+  temp.style.background = '#0a0a0a';
+  temp.style.padding = '24px';
+  temp.style.fontFamily = "'Roboto', Arial, sans-serif";
+
+  let html = `<div style="text-align:center;color:#b8f030;font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;margin-bottom:20px;">⚽ DOMINICAL — NEXT LEVEL 7 — VUELTA ${vueltaActual}</div>`;
+
+  ultimosFiltrados.forEach(p => {
+    const eqL = eqMap[String(p['Equipo_Local']).trim()] || {};
+    const eqV = eqMap[String(p['Equipo_Visita']).trim()] || {};
+    const nomL = (eqL['Nombre'] || `Equipo ${p['Equipo_Local']}`).toUpperCase();
+    const nomV = (eqV['Nombre'] || `Equipo ${p['Equipo_Visita']}`).toUpperCase();
+    const urlL = eqL['URL'] || '';
+    const urlV = eqV['URL'] || '';
+    const gL = p['Goles_Local'] !== '' ? p['Goles_Local'] : '-';
+    const gV = p['Goles_Visita'] !== '' ? p['Goles_Visita'] : '-';
+    const estado = (p['Estado'] || '').trim();
+    const fecha = p['Fecha'] || '';
+    const jornadaTxt = p['Jornada'] ? `Jornada ${p['Jornada']}` : 'Jornada ?';
+    const scoreTxt = estado === 'Jugado' ? `${gL} - ${gV}` : 'VS';
+
+    html += `
+    <div style="background:linear-gradient(160deg,#0d1810,#0a1a0d);border:1px solid rgba(57,255,20,0.3);border-radius:14px;padding:16px;margin-bottom:14px;">
+      <div style="font-size:11px;color:#ffd700;font-weight:700;margin-bottom:10px;">#${p.ID_Partido} · ${jornadaTxt} ${fecha?' · '+fecha:''}</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:16px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;width:140px;">
+          <img src="${urlL}" style="width:50px;height:50px;object-fit:contain;" onerror="this.style.display='none'">
+          <div style="font-size:12px;font-weight:700;color:#fff;text-align:center;">${nomL}</div>
+        </div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:#d4f030;min-width:70px;text-align:center;">${scoreTxt}</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;width:140px;">
+          <img src="${urlV}" style="width:50px;height:50px;object-fit:contain;" onerror="this.style.display='none'">
+          <div style="font-size:12px;font-weight:700;color:#fff;text-align:center;">${nomV}</div>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  temp.innerHTML = html;
+  document.body.appendChild(temp);
+
+  const imgs = temp.querySelectorAll('img');
   await Promise.all(Array.from(imgs).map(img => new Promise(resolve => {
     if (img.complete) resolve(); else { img.onload = resolve; img.onerror = resolve; }
   })));
-  await new Promise(r => setTimeout(r, 800));
+  await new Promise(r => setTimeout(r, 500));
+
   try {
-    const canvas = await html2canvas(document.getElementById('flyerRoot'), {
+    const canvas = await html2canvas(temp, {
       useCORS: true, allowTaint: true, scale: 2,
-      width: 900, height: 1600, backgroundColor: '#000', imageTimeout: 20000, logging: false
+      backgroundColor: '#0a0a0a', imageTimeout: 20000, logging: false
     });
     canvas.toBlob(blob => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = 'dominical.png';
+      a.href = url; a.download = `partidos_vuelta${vueltaActual}.png`;
       document.body.appendChild(a); a.click();
       document.body.removeChild(a); URL.revokeObjectURL(url);
     }, 'image/png');
-  } catch(e) { alert('❌ Error: ' + e.message); }
-  panel.style.display = 'block';
-  btn.textContent = '⬇ Descargar Flyer como PNG';
+  } catch(e) {
+    alert('❌ Error: ' + e.message);
+  }
+
+  document.body.removeChild(temp);
+  btn.textContent = '⬇ Descargar Lista como PNG';
   btn.disabled = false;
-  escalarFlyer();
 }
 
-function escalarFlyer() {
-  const wrapper = document.getElementById('flyerRoot');
-  const container = document.getElementById('flyerScaleContainer');
-  const disponible = document.documentElement.clientWidth - 16;
-  const escala = disponible < 900 ? disponible / 900 : 1;
-  wrapper.style.transform = `scale(${escala})`;
-  wrapper.style.transformOrigin = 'top left';
-  container.style.height = Math.round(1600 * escala) + 'px';
-  container.style.width = Math.round(900 * escala) + 'px';
-  container.style.overflow = 'hidden';
-}
-
-escalarFlyer();
-window.addEventListener('resize', escalarFlyer);
 cargarFechasYEquipos();

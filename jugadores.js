@@ -77,12 +77,31 @@ function playerCardHTML(j, goles, asistencias, amarillas, rojas) {
   </div>`;
 }
 
+function jugadorCardHTML(j, goles, porcentaje, suspendido) {
+  return `
+  <div class="jugador-card">
+    <div class="jugador-jersey-wrap">
+      <div class="jugador-jersey-svg">${jerseySVG(j.numero)}</div>
+      <img src="${j.foto}" class="jugador-foto-circle" onerror="this.src='${j.logo}'">
+    </div>
+    <div class="jugador-info">
+      <h3>${j.nombre}</h3>
+      <span class="jugador-posicion">${j.posicion}</span>
+    </div>
+    <div class="jugador-stats">
+      <div class="stat"><span>⚽</span><strong>${goles}</strong><small>Goles</small></div>
+      <div class="stat"><span>🎯</span><strong>${porcentaje}%</strong><small>Asist</small></div>
+      <div class="stat"><span>⛔</span><strong>${suspendido}</strong><small>Susp</small></div>
+    </div>
+  </div>`;
+}
+
 (function() {
   if (document.getElementById("jugadores-card-style")) return;
   const style = document.createElement("style");
   style.id = "jugadores-card-style";
   style.textContent = `
-    /* ===== PLAYER CARD ===== */
+    /* ===== PLAYER CARD (base, sin cambios) ===== */
     .pcards-section { margin-bottom: 24px; }
     .pcards-title {
       font-size: 18px; font-weight: 900; color: #39ff14;
@@ -90,20 +109,14 @@ function playerCardHTML(j, goles, asistencias, amarillas, rojas) {
       margin-bottom: 16px; text-align: center;
       text-shadow: 0 0 10px #39ff14;
     }
-    .pcards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 18px;
-    }
     .pcard {
       background: linear-gradient(160deg, #0a0f1e 0%, #050810 100%);
       border: 1px solid rgba(57,255,20,0.35);
       border-radius: 18px;
       overflow: hidden;
       box-shadow: 0 0 15px rgba(57,255,20,0.15);
-      transition: 0.3s;
+      width: 100%; height: 100%;
     }
-    .pcard:hover { transform: translateY(-5px); box-shadow: 0 0 28px rgba(57,255,20,0.4); }
     .pcard-header {
       display: flex; justify-content: space-between; align-items: center;
       padding: 10px 14px 6px;
@@ -130,10 +143,7 @@ function playerCardHTML(j, goles, asistencias, amarillas, rojas) {
     .pcard-lbl { font-size: 8px; color: rgba(255,255,255,0.4); letter-spacing: 1px; text-transform: uppercase; }
     .pcard-val { font-size: 20px; font-weight: 900; color: #fff; line-height: 1.1; }
     .pcard-center { flex: 1; display: flex; justify-content: center; }
-    .pcard-jersey-wrap {
-      position: relative;
-      width: 120px; height: 130px;
-    }
+    .pcard-jersey-wrap { position: relative; width: 120px; height: 130px; }
     .pcard-jersey-svg { width: 100%; height: 100%; }
     .pcard-foto-circle {
       position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
@@ -156,20 +166,15 @@ function playerCardHTML(j, goles, asistencias, amarillas, rojas) {
       font-size: 10px; font-weight: 700; margin-top: 5px;
     }
 
-    /* ===== JUGADOR CARD (por equipo) ===== */
-    .jugadores-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 20px; margin-top: 20px;
-    }
+    /* ===== JUGADOR CARD (por equipo, base sin cambios) ===== */
     .jugador-card {
       background: rgba(0,0,0,0.75); border: 2px solid #39ff14;
       border-radius: 18px; padding: 12px; text-align: center;
       color: white; box-shadow: 0 0 12px #39ff14;
-      transition: 0.3s; display: flex; flex-direction: column;
+      display: flex; flex-direction: column;
       align-items: center; gap: 8px;
+      width: 100%; height: 100%; box-sizing: border-box;
     }
-    .jugador-card:hover { transform: translateY(-4px); box-shadow: 0 0 22px #39ff14; }
     .jugador-jersey-wrap { position: relative; width: 130px; height: 140px; }
     .jugador-jersey-svg { width: 100%; height: 100%; }
     .jugador-foto-circle {
@@ -192,12 +197,75 @@ function playerCardHTML(j, goles, asistencias, amarillas, rojas) {
     .jugador-stats .stat strong { display: block; font-size: 13px; color: #39ff14; font-weight: 900; }
     .jugador-stats .stat small { display: block; font-size: 9px; color: #aaa; }
 
+    /* ===== CARRUSEL 3D ===== */
+    .pj-carrusel-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto 10px;
+      height: 380px;
+    }
+    .pj-slide {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 230px;
+      transition: all 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+      transform: translate(-50%,-50%) scale(0.4);
+      opacity: 0;
+      pointer-events: none;
+      cursor: pointer;
+      filter: grayscale(1) brightness(0.55);
+    }
+    .pj-slide.pj-c {
+      transform: translate(-50%,-50%) scale(1);
+      opacity: 1; z-index: 5; pointer-events: all;
+      filter: grayscale(0) brightness(1);
+    }
+    .pj-slide.pj-l1 {
+      transform: translate(calc(-50% - 195px),-50%) scale(0.75) rotateY(18deg);
+      opacity: 0.85; z-index: 4; pointer-events: all;
+    }
+    .pj-slide.pj-r1 {
+      transform: translate(calc(-50% + 195px),-50%) scale(0.75) rotateY(-18deg);
+      opacity: 0.85; z-index: 4; pointer-events: all;
+    }
+    .pj-slide.pj-l2 {
+      transform: translate(calc(-50% - 330px),-50%) scale(0.55) rotateY(28deg);
+      opacity: 0.4; z-index: 3; pointer-events: all;
+    }
+    .pj-slide.pj-r2 {
+      transform: translate(calc(-50% + 330px),-50%) scale(0.55) rotateY(-28deg);
+      opacity: 0.4; z-index: 3; pointer-events: all;
+    }
+    .pj-flecha {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(57,255,20,0.4);
+      border-radius: 50%; width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 17px; color: #39ff14; z-index: 10;
+      transition: all 0.3s; touch-action: manipulation; user-select: none;
+    }
+    .pj-flecha:hover { background: rgba(57,255,20,0.2); }
+    .pj-fl { left: 0; } .pj-fr { right: 0; }
+    .pj-dots {
+      display: flex; justify-content: center; gap: 7px; margin-top: 6px;
+    }
+    .pj-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: rgba(255,255,255,0.2); cursor: pointer; transition: all 0.3s;
+    }
+    .pj-dot.pj-on { background: #39ff14; transform: scale(1.3); }
+
     @media(max-width: 600px) {
-      .pcards-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .pj-carrusel-wrap { height: 330px; }
+      .pj-slide { width: 175px; }
+      .pj-slide.pj-l1 { transform: translate(calc(-50% - 130px),-50%) scale(0.72) rotateY(18deg); }
+      .pj-slide.pj-r1 { transform: translate(calc(-50% + 130px),-50%) scale(0.72) rotateY(-18deg); }
+      .pj-slide.pj-l2 { transform: translate(calc(-50% - 200px),-50%) scale(0.5) rotateY(28deg); }
+      .pj-slide.pj-r2 { transform: translate(calc(-50% + 200px),-50%) scale(0.5) rotateY(-28deg); }
       .pcard-jersey-wrap { width: 95px; height: 105px; }
       .pcard-foto-circle { width: 50px; height: 50px; top: -18px; }
       .pcard-val { font-size: 16px; }
-      .jugadores-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
       .jugador-jersey-wrap { width: 110px; height: 118px; }
       .jugador-foto-circle { width: 50px; height: 50px; top: -24px; }
       .jugador-info h3 { font-size: 11px; }
@@ -205,6 +273,81 @@ function playerCardHTML(j, goles, asistencias, amarillas, rojas) {
   `;
   document.head.appendChild(style);
 })();
+
+// ===== HELPER: crear carrusel generico =====
+function crearCarrusel(containerId, cardsHTML) {
+  const wrap = document.getElementById(containerId);
+  if (!cardsHTML.length) {
+    wrap.innerHTML = '<p style="color:rgba(255,255,255,0.4);text-align:center;padding:20px;">Sin datos disponibles</p>';
+    return;
+  }
+
+  let activo = 0;
+  const total = cardsHTML.length;
+
+  const slidesHTML = cardsHTML.map((html, i) => `<div class="pj-slide" data-idx="${i}">${html}</div>`).join('');
+  const dotsHTML = cardsHTML.map((_, i) => `<div class="pj-dot${i===0?' pj-on':''}" data-idx="${i}"></div>`).join('');
+
+  wrap.innerHTML = `
+    <div class="pj-carrusel-wrap">
+      ${slidesHTML}
+      ${total > 1 ? `<div class="pj-flecha pj-fl">&#8592;</div><div class="pj-flecha pj-fr">&#8594;</div>` : ''}
+    </div>
+    ${total > 1 ? `<div class="pj-dots">${dotsHTML}</div>` : ''}
+  `;
+
+  const slides = wrap.querySelectorAll('.pj-slide');
+  const dots = wrap.querySelectorAll('.pj-dot');
+
+  function actualizar() {
+    slides.forEach((slide, i) => {
+      slide.className = 'pj-slide';
+      const diff = ((i - activo) % total + total) % total;
+      let cls = '';
+      if (diff === 0) cls = 'pj-c';
+      else if (diff === 1) cls = 'pj-r1';
+      else if (diff === 2) cls = 'pj-r2';
+      else if (diff === total - 1) cls = 'pj-l1';
+      else if (diff === total - 2) cls = 'pj-l2';
+      if (cls) slide.classList.add(cls);
+    });
+    dots.forEach((d, i) => d.classList.toggle('pj-on', i === activo));
+  }
+
+  function mover(dir) {
+    activo = ((activo + dir) % total + total) % total;
+    actualizar();
+  }
+
+  slides.forEach((slide, i) => {
+    slide.addEventListener('click', e => {
+      if (!slide.classList.contains('pj-c')) {
+        activo = i;
+        actualizar();
+      }
+    });
+  });
+
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => { activo = i; actualizar(); });
+  });
+
+  const flIzq = wrap.querySelector('.pj-fl');
+  const flDer = wrap.querySelector('.pj-fr');
+  if (flIzq) flIzq.addEventListener('click', () => mover(-1));
+  if (flDer) flDer.addEventListener('click', () => mover(1));
+
+  // Swipe
+  let touchStartX = 0;
+  const carruselWrap = wrap.querySelector('.pj-carrusel-wrap');
+  carruselWrap.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  carruselWrap.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) mover(diff > 0 ? 1 : -1);
+  });
+
+  actualizar();
+}
 
 async function cargarJugadores() {
   const [resJ, resE, resP, resPart] = await Promise.all([
@@ -270,36 +413,40 @@ async function cargarJugadores() {
     .sort((a, b) => a.golesRecibidos - b.golesRecibidos)
     .slice(0, 5);
 
-  // Renderizar secciones
-  let htmlGol = goleadores.map(j => playerCardHTML(j,
+  const htmlGolArr = goleadores.map(j => playerCardHTML(j,
     golesMap[j.id] || 0, asistMap[j.id] || 0,
     amarillasMap[j.id] || 0, rojasMap[j.id] || 0
-  )).join('');
+  ));
 
-  let htmlPort = porteros.length
-    ? porteros.map(j => playerCardHTML(
-        {...j, numero: j.numero},
-        j.golesRecibidos, asistMap[j.id] || 0,
-        amarillasMap[j.id] || 0, rojasMap[j.id] || 0
-      )).join('')
-    : '<p style="color:rgba(255,255,255,0.4);text-align:center;padding:20px;">Sin porteros registrados aún</p>';
+  const htmlPortArr = porteros.map(j => playerCardHTML(
+    {...j, numero: j.numero},
+    j.golesRecibidos, asistMap[j.id] || 0,
+    amarillasMap[j.id] || 0, rojasMap[j.id] || 0
+  ));
 
   const listaJugadores = document.getElementById("lista-jugadores");
 
-  // Secciones de tops
   listaJugadores.innerHTML = `
     <div id="tops-section">
       <div class="pcards-section">
         <div class="pcards-title">⚽ Top 5 Goleadores</div>
-        <div class="pcards-grid">${htmlGol}</div>
+        <div id="carrusel-goleadores"></div>
       </div>
       <div class="pcards-section">
         <div class="pcards-title">🧤 Top 5 Porteros</div>
-        <div class="pcards-grid">${htmlPort}</div>
+        <div id="carrusel-porteros"></div>
       </div>
     </div>
-    <div id="equipo-jugadores-section" style="display:none;"></div>
+    <div id="equipo-jugadores-section" style="display:none;">
+      <div class="pcards-section">
+        <div class="pcards-title" id="titulo-equipo-jugadores">Jugadores</div>
+        <div id="carrusel-equipo"></div>
+      </div>
+    </div>
   `;
+
+  crearCarrusel('carrusel-goleadores', htmlGolArr);
+  crearCarrusel('carrusel-porteros', htmlPortArr);
 
   // Selector equipo
   const selector = document.getElementById("selector-equipo-jugador");
@@ -315,45 +462,29 @@ async function cargarJugadores() {
     if (!equipoID) {
       tops.style.display = 'block';
       equipoSection.style.display = 'none';
-      equipoSection.innerHTML = '';
       return;
     }
 
-    // Ocultar tops, mostrar jugadores del equipo
     tops.style.display = 'none';
     equipoSection.style.display = 'block';
+
+    document.getElementById('titulo-equipo-jugadores').textContent = '👕 ' + (equiposID[equipoID] || 'Jugadores');
 
     const lista = jugadores.filter(j =>
       j.equipo === equipoID &&
       j.nombre !== "Penal" && j.nombre !== "Default" && j.nombre !== "Autogol"
     );
 
-    let html = '<div class="jugadores-grid">';
-    lista.forEach(j => {
+    const htmlEquipoArr = lista.map(j => {
       const goles = golesMap[j.id] || 0;
       const rojas = rojasMap[j.id] || 0;
       const asist = asistMap[j.id] || 0;
       const porcentaje = Math.round((asist / 8) * 100);
       const suspendido = rojas > 0 ? "Sí" : "No";
-      html += `
-      <div class="jugador-card">
-        <div class="jugador-jersey-wrap">
-          <div class="jugador-jersey-svg">${jerseySVG(j.numero)}</div>
-          <img src="${j.foto}" class="jugador-foto-circle" onerror="this.src='${j.logo}'">
-        </div>
-        <div class="jugador-info">
-          <h3>${j.nombre}</h3>
-          <span class="jugador-posicion">${j.posicion}</span>
-        </div>
-        <div class="jugador-stats">
-          <div class="stat"><span>⚽</span><strong>${goles}</strong><small>Goles</small></div>
-          <div class="stat"><span>🎯</span><strong>${porcentaje}%</strong><small>Asist</small></div>
-          <div class="stat"><span>⛔</span><strong>${suspendido}</strong><small>Susp</small></div>
-        </div>
-      </div>`;
+      return jugadorCardHTML(j, goles, porcentaje, suspendido);
     });
-    html += '</div>';
-    equipoSection.innerHTML = html;
+
+    crearCarrusel('carrusel-equipo', htmlEquipoArr);
   });
 }
 

@@ -155,6 +155,9 @@
 .fifa-mini.blue   .mn-sep { background:#fff; }
 .fifa-mini-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; }
 .fifa-mini-medal { font-size:18px; }
+.piramide-1 .fifa-mini { width: 95px; height: 150px; }
+.piramide-1 .fifa-mini-medal { font-size: 22px; }
+.piramide-2 .fifa-mini, .piramide-3 .fifa-mini { width: 75px; height: 120px; }
 
 /* ===== PIRAMIDE (1 arriba centro, 2-3 abajo) ===== */
 .piramide-wrap {
@@ -179,12 +182,12 @@
 .podio-frame img.podio-bg { width: 100%; display: block; }
 .podio-frame .podio-content-box {
   position: absolute;
-  top: 62%; left: 50%;
+  top: 60%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 40%;
+  width: 58%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.podio-content-box .pc-escudo { width: 100%; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+.podio-content-box .pc-escudo { width: 100%; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
 .podio-content-box .pc-jersey { width: 100%; }
 .podio-info { text-align: center; margin-top: 8px; }
 .podio-nombre2 { font-size: 11px; font-weight: 900; color: #fff; text-transform: uppercase; line-height: 1.2; max-width: 130px; margin: 0 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -458,21 +461,23 @@ async function cargarCarrusel() {
 
     let htmlGoles='';
     if(top3.length){
+      const tg=['gold','silver','blue'], med=['🥇','🥈','🥉'];
       const claves = ['piramide-1','piramide-2','piramide-3'];
       htmlGoles = '<div class="piramide-wrap">';
       top3.forEach((j,i)=>{
         const pct = Math.min(100, Math.round((j.partidosJugados / totalJornadas) * 100));
         htmlGoles += `
           <div class="${claves[i]}">
-            <div class="podio-frame">
-              <img src="podio.png" class="podio-bg" onerror="this.style.display='none'">
-              <div class="podio-content-box">
-                <div class="pc-jersey">${svgMini('gold', j.numero, carLogosID[j.equipoID]||'')}</div>
+            <div class="fifa-mini-medal">${med[i]}</div>
+            <div class="fifa-mini ${tg[i]}">
+              <div class="mn-shimmer"></div>
+              <div class="mn-svg">${svgMini(tg[i],j.numero,carLogosID[j.equipoID]||'')}</div>
+              <div class="mn-nombre">${j.nombre}</div>
+              <div class="mn-sep"></div>
+              <div class="mn-stats">
+                <div class="mn-stat"><div class="mn-val">${j.goles}</div><div class="mn-lbl">GOLES</div></div>
+                <div class="mn-stat"><div class="mn-val">${pct}%</div><div class="mn-lbl">ASIST</div></div>
               </div>
-            </div>
-            <div class="podio-info">
-              <div class="podio-nombre2">${j.nombre}</div>
-              <div class="podio-pts2">${j.goles}⚽ · ${pct}%</div>
             </div>
           </div>`;
       });

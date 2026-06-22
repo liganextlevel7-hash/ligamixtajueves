@@ -161,8 +161,8 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto;
-  gap: 8px 6px;
-  padding: 6px 4px;
+  gap: 18px 10px;
+  padding: 10px 6px 6px;
   align-items: end;
   justify-content: center;
 }
@@ -172,25 +172,25 @@
 
 .podio-frame {
   position: relative;
-  width: 130px;
+  width: 150px;
 }
-.piramide-2 .podio-frame, .piramide-3 .podio-frame { width: 105px; }
+.piramide-2 .podio-frame, .piramide-3 .podio-frame { width: 115px; }
 
 .podio-frame img.podio-bg { width: 100%; display: block; }
 .podio-frame .podio-content-box {
   position: absolute;
-  top: 56%; left: 50%;
+  top: 62%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 46%;
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  width: 40%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.podio-content-box .pc-escudo { width: 60%; object-fit: contain; }
-.podio-content-box .pc-jersey { width: 85%; }
-.podio-info { text-align: center; margin-top: 4px; }
-.podio-nombre2 { font-size: 10px; font-weight: 900; color: #fff; text-transform: uppercase; line-height: 1.15; max-width: 120px; margin: 0 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.piramide-1 .podio-nombre2 { font-size: 12px; max-width: 150px; }
-.podio-pts2 { font-size: 11px; font-weight: 700; margin-top: 2px; }
-.piramide-1 .podio-pts2 { font-size: 13px; }
+.podio-content-box .pc-escudo { width: 100%; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+.podio-content-box .pc-jersey { width: 100%; }
+.podio-info { text-align: center; margin-top: 8px; }
+.podio-nombre2 { font-size: 11px; font-weight: 900; color: #fff; text-transform: uppercase; line-height: 1.2; max-width: 130px; margin: 0 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.piramide-1 .podio-nombre2 { font-size: 13px; max-width: 160px; }
+.podio-pts2 { font-size: 11px; font-weight: 700; margin-top: 3px; }
+.piramide-1 .podio-pts2 { font-size: 14px; }
 .piramide-1 .podio-pts2 { color: #ffd700; }
 .piramide-2 .podio-pts2 { color: #c0c0c0; }
 .piramide-3 .podio-pts2 { color: #cd7f32; }

@@ -139,7 +139,7 @@
 .car-dot.on { background:#39ff14; transform:scale(1.3); }
 
 /* FIFA MINI */
-.fifa-mini { width:75px; height:120px; border-radius:10px 10px 6px 6px; position:relative; display:flex; flex-direction:column; align-items:center; overflow:hidden; }
+.fifa-mini { width:85px; height:135px; position:relative; display:flex; flex-direction:column; align-items:center; overflow:visible; }
 .fifa-mini.gold   { background:linear-gradient(160deg,#ffe566,#f5a500,#b8720a,#f5d020); border:1.5px solid #ffd700; box-shadow:0 0 10px #ffd700; }
 .fifa-mini.silver { background:linear-gradient(160deg,#f0f0f0,#c0c0c0,#808080,#d8d8d8); border:1.5px solid #c0c0c0; box-shadow:0 0 8px #bbb; }
 .fifa-mini.blue   { background:linear-gradient(160deg,#64d0ff,#0288d1,#01579b,#29b6f6); border:1.5px solid #29b6f6; box-shadow:0 0 8px #29b6f6; }
@@ -159,9 +159,9 @@
 .fifa-mini.blue   .mn-sep { background:#fff; }
 .fifa-mini-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; }
 .fifa-mini-medal { font-size:18px; }
-.piramide-1 .fifa-mini { width: 95px; height: 150px; }
+.piramide-1 .fifa-mini { width: 110px; height: 175px; }
 .piramide-1 .fifa-mini-medal { font-size: 22px; }
-.piramide-2 .fifa-mini, .piramide-3 .fifa-mini { width: 75px; height: 120px; }
+.piramide-2 .fifa-mini, .piramide-3 .fifa-mini { width: 85px; height: 135px; }
 
 /* ===== PIRAMIDE (1 arriba centro, 2-3 abajo) ===== */
 .piramide-wrap {
@@ -186,14 +186,14 @@
 .podio-frame img.podio-bg { width: 100%; display: block; }
 .podio-frame .podio-content-box {
   position: absolute;
-  top: 60%; left: 50%;
+  top: 42%; left: 50%;
   transform: translate(-50%, -50%);
   width: 58%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 .podio-content-box .pc-escudo { width: 100%; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
 .podio-content-box .pc-jersey { width: 100%; }
-.podio-info { text-align: center; margin-top: 8px; }
+.podio-info { text-align: center; margin-top: 4px; }
 .podio-nombre2 { font-size: 11px; font-weight: 900; color: #fff; text-transform: uppercase; line-height: 1.2; max-width: 130px; margin: 0 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .piramide-1 .podio-nombre2 { font-size: 13px; max-width: 160px; }
 .podio-pts2 { font-size: 11px; font-weight: 700; margin-top: 3px; }
@@ -371,13 +371,41 @@ function carParseCSV(text) {
 }
 
 function svgMini(tipo, num, logoUrl) {
-  const c={gold:{main:"#b8860b",detail:"#ffd700",glow:"#ffd700",text:"#3d2200"},silver:{main:"#777",detail:"#ddd",glow:"#c0c0c0",text:"#111"},blue:{main:"#0277bd",detail:"#29b6f6",glow:"#29b6f6",text:"#fff"}}[tipo];
-  const li=logoUrl?`<image href="${logoUrl}" x="255" y="120" width="100" height="100"/>`:'';
-  return `<svg viewBox="0 0 448 448" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;filter:drop-shadow(0 0 6px ${c.glow});">
-    <path fill="${c.main}" d="M176,8c-0.677-0.005-1.378,0-2.031,0.256l-95.906,24.563c-1.85,0.432-3.475,1.52-4.594,3.063L1.445,138.779c-2.195,3.145-1.86,7.406,0.813,10.156l48.063,48.906c3.126,3.139,8.217,3.139,11.344,0l18.437-18.438v192.594h15.938v52H80.101v8.063c-0.016,4.445,3.585,8.049,8.031,8.031l272.125-0.16c4.396,0,7.984-3.512,8.031-7.906l-0.064-127.781h-16.031v-52h16l-0.032-72.75l18.188,18.188c3.139,3.217,8.329,3.217,11.469,0l47.938-48.906c2.739-2.77,3.105-7.111,0.843-10.281l-72.062-102.625c-1.07-1.568-2.643-2.691-4.469-3.188l-96.031-24.437c-0.659-0.192-1.354-0.256-2.031-0.256h-6.375c-2.879-0.011-5.534,1.504-6.969,4c-7.177,12.67-20.361,20.427-34.594,20.438c-14.233-0.012-27.323-7.768-34.5-20.438c-1.451-2.533-4.142-4.055-7.063-4H176z"/>
-    <path fill="${c.detail}" opacity="0.35" d="M181.744,24.269l0.874,1.312c10.5,13.323,24.314,20.104,41.456,20.118c17.147-0.014,31.074-6.787,41.575-20.118l1.43-1.629l96.126,23.511l66.496,94.844l-37.677,38.385l-26.221-26.34c-5.037-5.115-13.747-1.52-13.701,5.668l0.242,263.977h-256.3v-263.977c-0.058-7.045-8.534-10.58-13.582-5.668l-26.457,26.457l-37.559-38.387l66.496-94.842c30.742-7.834,66.078-15.486,96.801-23.316z"/>
-    <text x="224" y="310" text-anchor="middle" font-family="Arial" font-weight="900" font-size="90" fill="${c.text}" opacity="0.85">${num}</text>
-    ${li}
+  const c={
+    gold:{bg1:"#ffe566",bg2:"#b8720a",border:"#ffd700",glow:"#ffd700",text:"#3d2200",shimmer:"rgba(255,255,255,0.3)"},
+    silver:{bg1:"#f0f0f0",bg2:"#606060",border:"#c0c0c0",glow:"#c0c0c0",text:"#1a1a1a",shimmer:"rgba(255,255,255,0.25)"},
+    blue:{bg1:"#64d0ff",bg2:"#01579b",border:"#29b6f6",glow:"#29b6f6",text:"#fff",shimmer:"rgba(255,255,255,0.2)"}
+  }[tipo];
+  const shield = logoUrl ? `<image href="${logoUrl}" x="60" y="55" width="80" height="80" clip-path="url(#logoClip)"/>` : `<circle cx="100" cy="95" r="35" fill="rgba(255,255,255,0.2)"/><text x="100" y="102" text-anchor="middle" font-size="28" fill="rgba(255,255,255,0.5)">⚽</text>`;
+  return `<svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;filter:drop-shadow(0 4px 12px ${c.glow}) drop-shadow(0 0 20px ${c.glow}40);">
+    <defs>
+      <linearGradient id="bg${tipo}" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:${c.bg1}"/>
+        <stop offset="100%" style="stop-color:${c.bg2}"/>
+      </linearGradient>
+      <linearGradient id="shine${tipo}" x1="0%" y1="0%" x2="60%" y2="100%">
+        <stop offset="0%" style="stop-color:${c.shimmer}"/>
+        <stop offset="100%" style="stop-color:transparent"/>
+      </linearGradient>
+      <clipPath id="logoClip"><circle cx="100" cy="95" r="40"/></clipPath>
+    </defs>
+    <!-- Card shape -->
+    <path d="M20,0 L180,0 Q200,0 200,20 L200,240 Q200,280 160,280 L40,280 Q0,280 0,240 L0,20 Q0,0 20,0Z" fill="url(#bg${tipo})"/>
+    <!-- Border -->
+    <path d="M20,0 L180,0 Q200,0 200,20 L200,240 Q200,280 160,280 L40,280 Q0,280 0,240 L0,20 Q0,0 20,0Z" fill="none" stroke="${c.border}" stroke-width="3"/>
+    <!-- Shine -->
+    <path d="M20,0 L180,0 Q200,0 200,20 L200,240 Q200,280 160,280 L40,280 Q0,280 0,240 L0,20 Q0,0 20,0Z" fill="url(#shine${tipo})"/>
+    <!-- Rating -->
+    <text x="22" y="38" font-family="Arial" font-weight="900" font-size="28" fill="${c.text}" opacity="0.9">${num}</text>
+    <!-- Logo/Shield -->
+    <circle cx="100" cy="95" r="42" fill="rgba(0,0,0,0.15)"/>
+    ${shield}
+    <!-- Divider -->
+    <line x1="20" y1="148" x2="180" y2="148" stroke="${c.text}" stroke-width="1" opacity="0.3"/>
+    <!-- Stats labels -->
+    <text x="33" y="168" font-family="Arial" font-weight="700" font-size="9" fill="${c.text}" opacity="0.7" text-anchor="middle">GOL</text>
+    <text x="100" y="168" font-family="Arial" font-weight="700" font-size="9" fill="${c.text}" opacity="0.7" text-anchor="middle">ASIST</text>
+    <text x="167" y="168" font-family="Arial" font-weight="700" font-size="9" fill="${c.text}" opacity="0.7" text-anchor="middle">POS</text>
   </svg>`;
 }
 
@@ -459,7 +487,7 @@ async function cargarCarrusel() {
       htmlGoles = '<div class="piramide-wrap">';
       top3.forEach((j,i)=>{
         const pct = Math.min(100, Math.round((j.partidosJugados / totalJornadas) * 100));
-        htmlGoles += `<div class="${claves[i]}"><div class="fifa-mini-medal">${med[i]}</div><div class="fifa-mini ${tg[i]}"><div class="mn-shimmer"></div><div class="mn-svg">${svgMini(tg[i],j.numero,carLogosID[j.equipoID]||'')}</div><div class="mn-nombre">${j.nombre}</div><div class="mn-sep"></div><div class="mn-stats"><div class="mn-stat"><div class="mn-val">${j.goles}</div><div class="mn-lbl">GOLES</div></div><div class="mn-stat"><div class="mn-val">${pct}%</div><div class="mn-lbl">ASIST</div></div></div></div></div>`;
+        htmlGoles += `<div class="${claves[i]}"><div class="fifa-mini-medal">${med[i]}</div><div class="fifa-mini ${tg[i]}"><div class="mn-svg">${svgMini(tg[i],j.numero,carLogosID[j.equipoID]||'')}</div><div class="mn-nombre">${j.nombre}</div><div class="mn-stats"><div class="mn-stat"><div class="mn-val">${j.goles}</div><div class="mn-lbl">GOLES</div></div><div class="mn-stat"><div class="mn-val">${pct}%</div><div class="mn-lbl">ASIST</div></div></div></div></div>`;
       });
       htmlGoles += '</div>';
     } else { htmlGoles='<div class="car-cargando">Sin goles aún</div>'; }

@@ -64,12 +64,12 @@
   margin: 20px auto 30px;
   padding: 0 10px;
   position: relative;
-  height: 420px;
+  height: 480px;
 }
 .card-sec {
   position: absolute;
   top: 50%; left: 50%;
-  width: 280px;
+  width: 320px;
   border-radius: 22px;
   cursor: pointer;
   transition: all 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
@@ -86,7 +86,7 @@
 .card-sec.l2 { transform:translate(calc(-50% - 400px),-50%) scale(0.55) rotateY(22deg);  opacity:0.3; z-index:3; pointer-events:all; }
 .card-sec.r2 { transform:translate(calc(-50% + 400px),-50%) scale(0.55) rotateY(-22deg); opacity:0.3; z-index:3; pointer-events:all; }
 
-.card-body { padding:22px 18px 18px; display:flex; flex-direction:column; gap:10px; min-height:380px; }
+.card-body { padding:22px 18px 18px; display:flex; flex-direction:column; gap:10px; min-height:440px; }
 .card-titulo { font-size:15px; font-weight:900; letter-spacing:2px; text-transform:uppercase; text-align:center; }
 .card-contenido { flex:1; font-size:12px; font-family:Arial,sans-serif; }
 .car-btn { display:block; text-align:center; padding:10px; border-radius:20px; font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; text-decoration:none; cursor:pointer; border:none; width:100%; transition:filter 0.3s; touch-action:manipulation; }
@@ -118,10 +118,6 @@
 .c-cedula   .card-titulo { color:#ffd700; position:absolute; top:14px; left:0; right:0; z-index:2; text-shadow:0 2px 6px rgba(0,0,0,0.8); }
 .c-cedula   .car-btn { background:rgba(255,215,0,0.85); color:#000; border:1px solid #ffd700; position:absolute; bottom:14px; left:18px; right:18px; z-index:2; width:auto; }
 .c-cedula   .cedula-img { width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; }
-.c-mundial  .card-body { background:#000; padding:0 !important; }
-.c-mundial  .card-titulo { color:#ffd700; position:absolute; top:14px; left:0; right:0; z-index:2; text-shadow:0 2px 6px rgba(0,0,0,0.8); }
-.c-mundial  .car-btn { background:rgba(255,215,0,0.85); color:#000; border:1px solid #ffd700; position:absolute; bottom:14px; left:18px; right:18px; z-index:2; width:auto; }
-.c-mundial  .mundial-img { width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; }
 
 .mini-fila { display:flex; align-items:center; gap:8px; padding:7px 4px; border-bottom:1px solid rgba(255,255,255,0.07); font-size:12px; color:rgba(255,255,255,0.85); }
 .mini-fila img { width:28px; height:28px; object-fit:contain; }
@@ -139,7 +135,7 @@
 .car-dot.on { background:#39ff14; transform:scale(1.3); }
 
 /* FIFA MINI */
-.fifa-mini { width:85px; height:135px; position:relative; display:flex; flex-direction:column; align-items:center; overflow:visible; }
+.fifa-mini { width:75px; height:120px; border-radius:10px 10px 6px 6px; position:relative; display:flex; flex-direction:column; align-items:center; overflow:hidden; }
 .fifa-mini.gold   { background:linear-gradient(160deg,#ffe566,#f5a500,#b8720a,#f5d020); border:1.5px solid #ffd700; box-shadow:0 0 10px #ffd700; }
 .fifa-mini.silver { background:linear-gradient(160deg,#f0f0f0,#c0c0c0,#808080,#d8d8d8); border:1.5px solid #c0c0c0; box-shadow:0 0 8px #bbb; }
 .fifa-mini.blue   { background:linear-gradient(160deg,#64d0ff,#0288d1,#01579b,#29b6f6); border:1.5px solid #29b6f6; box-shadow:0 0 8px #29b6f6; }
@@ -157,11 +153,11 @@
 .fifa-mini.silver .mn-sep { background:#1a1a1a; }
 .fifa-mini.blue   .mn-nombre,.fifa-mini.blue   .mn-val,.fifa-mini.blue   .mn-lbl { color:#fff; }
 .fifa-mini.blue   .mn-sep { background:#fff; }
-.fifa-mini-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; }
-.fifa-mini-medal { font-size:18px; }
-.piramide-1 .fifa-mini { width: 110px; height: 175px; }
-.piramide-1 .fifa-mini-medal { font-size: 22px; }
-.piramide-2 .fifa-mini, .piramide-3 .fifa-mini { width: 85px; height: 135px; }
+.fifa-mini-wrap { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.fifa-mini-medal { font-size:20px; }
+.piramide-1 .fifa-mini { width: 95px; height: 150px; }
+.piramide-1 .fifa-mini-medal { font-size: 26px; }
+.piramide-2 .fifa-mini, .piramide-3 .fifa-mini { width: 75px; height: 120px; }
 
 /* ===== PIRAMIDE (1 arriba centro, 2-3 abajo) ===== */
 .piramide-wrap {
@@ -179,9 +175,9 @@
 
 .podio-frame {
   position: relative;
-  width: 150px;
+  width: 175px;
 }
-.piramide-2 .podio-frame, .piramide-3 .podio-frame { width: 115px; }
+.piramide-2 .podio-frame, .piramide-3 .podio-frame { width: 135px; }
 
 .podio-frame img.podio-bg { width: 100%; display: block; }
 .podio-frame .podio-content-box {
@@ -193,7 +189,18 @@
 }
 .podio-content-box .pc-escudo { width: 100%; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
 .podio-content-box .pc-jersey { width: 100%; }
-.podio-info { text-align: center; margin-top: 4px; }
+.podio-medal-num {
+  position: absolute;
+  top: -6px; left: 50%; transform: translateX(-50%);
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 900; color: #000;
+  z-index: 3; border: 2px solid #000;
+}
+.piramide-1 .podio-medal-num { background: #ffd700; }
+.piramide-2 .podio-medal-num { background: #c0c0c0; }
+.piramide-3 .podio-medal-num { background: #cd7f32; }
+.podio-info { text-align: center; margin-top: -8px; }
 .podio-nombre2 { font-size: 11px; font-weight: 900; color: #fff; text-transform: uppercase; line-height: 1.2; max-width: 130px; margin: 0 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .piramide-1 .podio-nombre2 { font-size: 13px; max-width: 160px; }
 .podio-pts2 { font-size: 11px; font-weight: 700; margin-top: 3px; }
@@ -283,14 +290,6 @@
     </div>
   </div>
 
-  <div class="card-sec c-mundial" id="ccard-7">
-    <div class="card-body" style="position:relative;">
-      <img src="mundial.png" class="mundial-img" alt="Veamos el Mundial" onerror="this.style.display='none'">
-      <div class="card-titulo">🌍 VEAMOS EL MUNDIAL</div>
-      <a href="mundial.html" class="car-btn">VER EN VIVO</a>
-    </div>
-  </div>
-
   <div class="car-flecha car-fl" onclick="carMover(-1)">&#8592;</div>
   <div class="car-flecha car-fr" onclick="carMover(1)">&#8594;</div>
   <div class="car-dots" id="car-dots"></div>
@@ -314,6 +313,7 @@ palabras.forEach((palabra, pi) => {
     span.className = 'titulo-letra';
     span.textContent = ch;
     span.dataset.idx = totalLetras;
+    // La primera I de LIGA (palabra 0, indice 1)
     if (pi === 0 && ch === 'I' && !letraIEl) letraIEl = span;
     letrasEl.appendChild(span);
     totalLetras++;
@@ -371,41 +371,13 @@ function carParseCSV(text) {
 }
 
 function svgMini(tipo, num, logoUrl) {
-  const c={
-    gold:{bg1:"#ffe566",bg2:"#b8720a",border:"#ffd700",glow:"#ffd700",text:"#3d2200",shimmer:"rgba(255,255,255,0.3)"},
-    silver:{bg1:"#f0f0f0",bg2:"#606060",border:"#c0c0c0",glow:"#c0c0c0",text:"#1a1a1a",shimmer:"rgba(255,255,255,0.25)"},
-    blue:{bg1:"#64d0ff",bg2:"#01579b",border:"#29b6f6",glow:"#29b6f6",text:"#fff",shimmer:"rgba(255,255,255,0.2)"}
-  }[tipo];
-  const shield = logoUrl ? `<image href="${logoUrl}" x="60" y="55" width="80" height="80" clip-path="url(#logoClip)"/>` : `<circle cx="100" cy="95" r="35" fill="rgba(255,255,255,0.2)"/><text x="100" y="102" text-anchor="middle" font-size="28" fill="rgba(255,255,255,0.5)">⚽</text>`;
-  return `<svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;filter:drop-shadow(0 4px 12px ${c.glow}) drop-shadow(0 0 20px ${c.glow}40);">
-    <defs>
-      <linearGradient id="bg${tipo}" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${c.bg1}"/>
-        <stop offset="100%" style="stop-color:${c.bg2}"/>
-      </linearGradient>
-      <linearGradient id="shine${tipo}" x1="0%" y1="0%" x2="60%" y2="100%">
-        <stop offset="0%" style="stop-color:${c.shimmer}"/>
-        <stop offset="100%" style="stop-color:transparent"/>
-      </linearGradient>
-      <clipPath id="logoClip"><circle cx="100" cy="95" r="40"/></clipPath>
-    </defs>
-    <!-- Card shape -->
-    <path d="M20,0 L180,0 Q200,0 200,20 L200,240 Q200,280 160,280 L40,280 Q0,280 0,240 L0,20 Q0,0 20,0Z" fill="url(#bg${tipo})"/>
-    <!-- Border -->
-    <path d="M20,0 L180,0 Q200,0 200,20 L200,240 Q200,280 160,280 L40,280 Q0,280 0,240 L0,20 Q0,0 20,0Z" fill="none" stroke="${c.border}" stroke-width="3"/>
-    <!-- Shine -->
-    <path d="M20,0 L180,0 Q200,0 200,20 L200,240 Q200,280 160,280 L40,280 Q0,280 0,240 L0,20 Q0,0 20,0Z" fill="url(#shine${tipo})"/>
-    <!-- Rating -->
-    <text x="22" y="38" font-family="Arial" font-weight="900" font-size="28" fill="${c.text}" opacity="0.9">${num}</text>
-    <!-- Logo/Shield -->
-    <circle cx="100" cy="95" r="42" fill="rgba(0,0,0,0.15)"/>
-    ${shield}
-    <!-- Divider -->
-    <line x1="20" y1="148" x2="180" y2="148" stroke="${c.text}" stroke-width="1" opacity="0.3"/>
-    <!-- Stats labels -->
-    <text x="33" y="168" font-family="Arial" font-weight="700" font-size="9" fill="${c.text}" opacity="0.7" text-anchor="middle">GOL</text>
-    <text x="100" y="168" font-family="Arial" font-weight="700" font-size="9" fill="${c.text}" opacity="0.7" text-anchor="middle">ASIST</text>
-    <text x="167" y="168" font-family="Arial" font-weight="700" font-size="9" fill="${c.text}" opacity="0.7" text-anchor="middle">POS</text>
+  const c={gold:{main:"#b8860b",detail:"#ffd700",glow:"#ffd700",text:"#3d2200"},silver:{main:"#777",detail:"#ddd",glow:"#c0c0c0",text:"#111"},blue:{main:"#0277bd",detail:"#29b6f6",glow:"#29b6f6",text:"#fff"}}[tipo];
+  const li=logoUrl?`<image href="${logoUrl}" x="255" y="120" width="100" height="100"/>`:'';
+  return `<svg viewBox="0 0 448 448" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;filter:drop-shadow(0 0 6px ${c.glow});">
+    <path fill="${c.main}" d="M176,8c-0.677-0.005-1.378,0-2.031,0.256l-95.906,24.563c-1.85,0.432-3.475,1.52-4.594,3.063L1.445,138.779c-2.195,3.145-1.86,7.406,0.813,10.156l48.063,48.906c3.126,3.139,8.217,3.139,11.344,0l18.437-18.438v192.594h15.938v52H80.101v8.063c-0.016,4.445,3.585,8.049,8.031,8.031l272.125-0.16c4.396,0,7.984-3.512,8.031-7.906l-0.064-127.781h-16.031v-52h16l-0.032-72.75l18.188,18.188c3.139,3.217,8.329,3.217,11.469,0l47.938-48.906c2.739-2.77,3.105-7.111,0.843-10.281l-72.062-102.625c-1.07-1.568-2.643-2.691-4.469-3.188l-96.031-24.437c-0.659-0.192-1.354-0.256-2.031-0.256h-6.375c-2.879-0.011-5.534,1.504-6.969,4c-7.177,12.67-20.361,20.427-34.594,20.438c-14.233-0.012-27.323-7.768-34.5-20.438c-1.451-2.533-4.142-4.055-7.063-4H176z"/>
+    <path fill="${c.detail}" opacity="0.35" d="M181.744,24.269l0.874,1.312c10.5,13.323,24.314,20.104,41.456,20.118c17.147-0.014,31.074-6.787,41.575-20.118l1.43-1.629l96.126,23.511l66.496,94.844l-37.677,38.385l-26.221-26.34c-5.037-5.115-13.747-1.52-13.701,5.668l0.242,263.977h-256.3v-263.977c-0.058-7.045-8.534-10.58-13.582-5.668l-26.457,26.457l-37.559-38.387l66.496-94.842c30.742-7.834,66.078-15.486,96.801-23.316z"/>
+    <text x="224" y="310" text-anchor="middle" font-family="Arial" font-weight="900" font-size="90" fill="${c.text}" opacity="0.85">${num}</text>
+    ${li}
   </svg>`;
 }
 
@@ -416,6 +388,7 @@ async function cargarCarrusel() {
     ]);
     const [tE,tP,tJ,tEv,tPart] = await Promise.all([resE.text(),resP.text(),resJ.text(),resEv.text(),resPart.text()]);
 
+    // TABLA - PIRAMIDE con imagen podio (1 arriba centro, 2-3 abajo)
     const filasE=tE.trim().split('\n'); const equipos=[];
     for(let i=1;i<filasE.length;i++){
       const c=filasE[i].split(','); const n=(c[1]||'').trim();
@@ -429,12 +402,26 @@ async function cargarCarrusel() {
       const claves = ['piramide-1','piramide-2','piramide-3'];
       htmlTabla = '<div class="piramide-wrap">';
       top3eq.forEach((e, i) => {
-        htmlTabla += `<div class="${claves[i]}"><div class="podio-frame"><img src="podio.png" class="podio-bg" onerror="this.style.display='none'"><div class="podio-content-box"><img src="${carLogos[e.nombre]||''}" class="pc-escudo" onerror="this.style.display='none'"></div></div><div class="podio-info"><div class="podio-nombre2">${e.nombre}</div><div class="podio-pts2">${e.pts} PTS</div></div></div>`;
+        htmlTabla += `
+          <div class="${claves[i]}">
+            <div class="podio-frame">
+              <img src="podio.png" class="podio-bg" onerror="this.style.display='none'">
+              <div class="podio-content-box">
+                <span class="podio-medal-num">${i+1}</span>
+                <img src="${carLogos[e.nombre]||''}" class="pc-escudo" onerror="this.style.display='none'">
+              </div>
+            </div>
+            <div class="podio-info">
+              <div class="podio-nombre2">${e.nombre}</div>
+              <div class="podio-pts2">${e.pts} PTS</div>
+            </div>
+          </div>`;
       });
       htmlTabla += '</div>';
     }
     document.getElementById('car-tabla').innerHTML=htmlTabla||'<div class="car-cargando">Sin datos</div>';
 
+    // PARTIDOS
     const filasP=tP.trim().split('\n'); const jugados=[],programados=[];
     for(let i=1;i<filasP.length;i++){
       const c=filasP[i].split(','); const estado=(c[6]||'').trim();
@@ -444,6 +431,7 @@ async function cargarCarrusel() {
       if(estado==='Programado') programados.push(p);
     }
 
+    // Resultados
     let htmlRes='';
     if(jugados.length){
       const fu=jugados[jugados.length-1].fecha;
@@ -454,6 +442,7 @@ async function cargarCarrusel() {
     }
     document.getElementById('car-resultados').innerHTML=htmlRes||'<div class="car-cargando">Sin resultados</div>';
 
+    // Próxima
     let htmlProx='';
     if(programados.length){
       const fp=programados[0].fecha;
@@ -464,11 +453,13 @@ async function cargarCarrusel() {
     }
     document.getElementById('car-proxima').innerHTML=htmlProx||'<div class="car-cargando">Sin partidos programados</div>';
 
+    // GOLEADORES - PODIO (con asistencia real %)
     const jugadores=carParseCSV(tJ), eventos=carParseCSV(tEv), partic=carParseCSV(tPart);
     const golMap={}, partMap={};
     eventos.filter(e=>e.Tipo_Evento==='Gol').forEach(e=>{golMap[e.Jugador]=(golMap[e.Jugador]||0)+1;});
     partic.filter(p=>p.Asistio==='TRUE').forEach(p=>{partMap[p.Jugador]=(partMap[p.Jugador]||0)+1;});
 
+    // Total real de jornadas jugadas (partidos con Estado=Jugado, jornadas unicas)
     const jornadasJugadas = new Set();
     filasP.slice(1).forEach(line => {
       const c = line.split(',');
@@ -487,7 +478,20 @@ async function cargarCarrusel() {
       htmlGoles = '<div class="piramide-wrap">';
       top3.forEach((j,i)=>{
         const pct = Math.min(100, Math.round((j.partidosJugados / totalJornadas) * 100));
-        htmlGoles += `<div class="${claves[i]}"><div class="fifa-mini-medal">${med[i]}</div><div class="fifa-mini ${tg[i]}"><div class="mn-svg">${svgMini(tg[i],j.numero,carLogosID[j.equipoID]||'')}</div><div class="mn-nombre">${j.nombre}</div><div class="mn-stats"><div class="mn-stat"><div class="mn-val">${j.goles}</div><div class="mn-lbl">GOLES</div></div><div class="mn-stat"><div class="mn-val">${pct}%</div><div class="mn-lbl">ASIST</div></div></div></div></div>`;
+        htmlGoles += `
+          <div class="${claves[i]}">
+            <div class="fifa-mini-medal">${med[i]}</div>
+            <div class="fifa-mini ${tg[i]}">
+              <div class="mn-shimmer"></div>
+              <div class="mn-svg">${svgMini(tg[i],j.numero,carLogosID[j.equipoID]||'')}</div>
+              <div class="mn-nombre">${j.nombre}</div>
+              <div class="mn-sep"></div>
+              <div class="mn-stats">
+                <div class="mn-stat"><div class="mn-val">${j.goles}</div><div class="mn-lbl">GOLES</div></div>
+                <div class="mn-stat"><div class="mn-val">${pct}%</div><div class="mn-lbl">ASIST</div></div>
+              </div>
+            </div>
+          </div>`;
       });
       htmlGoles += '</div>';
     } else { htmlGoles='<div class="car-cargando">Sin goles aún</div>'; }

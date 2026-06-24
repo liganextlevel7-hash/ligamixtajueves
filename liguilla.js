@@ -60,9 +60,11 @@ function crearEquipo(nombre, url, color) {
 
 function crearVS(p) {
     const esJ = (p.estado||"").trim().toLowerCase() === "jugado";
-    const marcador = esJ ? `${(p.golesLocal||0).trim()} - ${(p.golesVisita||0).trim()}` : "VS";
+    const gl = (p.golesLocal||"0").trim();
+    const gv = (p.golesVisita||"0").trim();
     return `<div style="text-align:center;padding:4px 0 4px 62px;font-weight:900;font-size:14px;
-        color:${esJ ? '#ffd700' : 'rgba(255,255,255,0.25)'};">${marcador}</div>`;
+        color:${esJ ? '#ffd700' : 'rgba(255,255,255,0.25)'};">
+        ${esJ ? `${gl} - ${gv}` : "VS"}</div>`;
 }
 
 function crearCard(p, color, subtitulo) {
@@ -83,13 +85,17 @@ function crearCard(p, color, subtitulo) {
 
 function crearCopa(ganador) {
     const hay = !esPD(ganador);
-    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;">
-        <div style="font-size:clamp(60px,9vw,100px);line-height:1;filter:drop-shadow(0 0 18px rgba(255,215,0,0.8));">🏆</div>
-        <div style="color:${hay ? '#ffd700' : 'rgba(255,255,255,0.35)'};font-weight:900;
-            font-size:${hay ? 'clamp(14px,2.5vw,18px)' : '12px'};letter-spacing:2px;
-            text-transform:uppercase;text-shadow:0 0 10px rgba(255,215,0,0.5);">
-            ${hay ? ganador.trim() : 'Por Definir'}</div>
-        <div style="color:#fff;font-weight:900;font-size:clamp(18px,3vw,26px);letter-spacing:3px;">CAMPEÓN</div>
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;min-width:160px;">
+        <div style="font-size:clamp(70px,10vw,120px);line-height:1;filter:drop-shadow(0 0 20px rgba(255,215,0,0.9));">🏆</div>
+        ${hay
+            ? `<div style="display:flex;align-items:center;gap:8px;justify-content:center;">
+                <div style="width:40px;height:40px;border-radius:50%;border:2px solid #ffd700;overflow:hidden;flex-shrink:0;box-shadow:0 0 8px rgba(255,215,0,0.6);">
+                </div>
+               </div>
+               <div style="color:#ffd700;font-weight:900;font-size:clamp(13px,2vw,17px);letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 10px rgba(255,215,0,0.6);">${ganador.trim()}</div>`
+            : `<div style="color:rgba(255,255,255,0.35);font-weight:700;font-size:12px;letter-spacing:2px;">Por Definir</div>`
+        }
+        <div style="color:#fff;font-weight:900;font-size:clamp(20px,3.5vw,30px);letter-spacing:3px;text-shadow:0 0 10px rgba(255,255,255,0.3);">CAMPEÓN</div>
     </div>`;
 }
 
@@ -101,74 +107,102 @@ function renderBracket(partidos, vista) {
     const semi    = partidos.filter(p => p.ronda.toLowerCase().trim() === "semifinal");
     const finalP  = partidos.filter(p => p.ronda.toLowerCase().trim() === "final");
 
-    // Opacidad por sección según vista
-    // Completa: todo normal
-    // Cuartos:  todo normal
-    // Semifinal: cuartos desvanecidos, semis+final normales
-    // Final:    cuartos+semis desvanecidos, final normal
-    const opQ = (vista === "Semifinal" || vista === "Final") ? "0.18" : "1";
-    const opS = (vista === "Final") ? "0.18" : "1";
-    const opF = "1";
+    // Opacidades según vista
+    const opQ = (vista === "Semifinal" || vista === "Final") ? 0.15 : 1;
+    const opS = (vista === "Final") ? 0.15 : 1;
+    const opF = 1;
 
-    const scroll = document.createElement("div");
-    scroll.style.cssText = "overflow-x:auto;padding:10px 0 20px;";
+    // Usamos SVG para las líneas conectoras — control total
+    // Layout con posicionamiento absoluto dentro de un contenedor relativo
 
-    const row = document.createElement("div");
-    row.style.cssText = "display:flex;flex-direction:row;align-items:stretch;gap:0;min-width:760px;";
+    const wrapper = document.createElement("div");
+    wrapper.style.cssText = "overflow-x:auto;padding:10px 0 30px;";
 
-    // ======== CUARTOS ========
+    // Contenedor con grid de 4 columnas: cuartos | conn | semis | conn | final+copa
+    const grid = document.createElement("div");
+    grid.style.cssText = `
+        display:grid;
+        grid-template-columns:260px 40px 240px 40px 1fr;
+        align-items:stretch;
+        min-width:760px;
+        gap:0;
+    `;
+
+    // ===== CUARTOS =====
     const colQ = document.createElement("div");
-    colQ.style.cssText = `display:flex;flex-direction:column;gap:10px;min-width:255px;padding:10px;opacity:${opQ};transition:opacity 0.4s;`;
+    colQ.style.cssText = `display:flex;flex-direction:column;gap:10px;padding:10px;opacity:${opQ};transition:opacity 0.4s;`;
     const titQ = document.createElement("div");
     titQ.style.cssText = "color:#ffd700;font-weight:900;font-size:11px;letter-spacing:3px;text-align:center;margin-bottom:6px;";
     titQ.textContent = "CUARTOS DE FINAL";
     colQ.appendChild(titQ);
     cuartos.forEach((p, i) => colQ.appendChild(crearCard(p, coloresCuartos[i%4])));
-    row.appendChild(colQ);
 
-    // Conector Q→S
+    // ===== CONECTOR Q→S con SVG =====
+    // El SVG dibuja 2 brackets: uno para Q0+Q1→S1, otro para Q2+Q3→S2
     const connQS = document.createElement("div");
-    connQS.style.cssText = `display:flex;flex-direction:column;align-self:stretch;min-width:28px;padding-top:34px;opacity:${opQ};transition:opacity 0.4s;`;
-    connQS.innerHTML = `
-        <div style="flex:1;display:flex;flex-direction:column;">
-            <div style="flex:1;border-right:2px solid rgba(255,255,255,0.2);border-top:2px solid rgba(255,255,255,0.2);border-radius:0 6px 0 0;"></div>
-            <div style="height:2px;background:rgba(255,255,255,0.2);width:100%;"></div>
-            <div style="flex:1;border-right:2px solid rgba(255,255,255,0.2);border-bottom:2px solid rgba(255,255,255,0.2);border-radius:0 0 6px 0;"></div>
-        </div>
-        <div style="height:10px;"></div>
-        <div style="flex:1;display:flex;flex-direction:column;">
-            <div style="flex:1;border-right:2px solid rgba(255,255,255,0.2);border-top:2px solid rgba(255,255,255,0.2);border-radius:0 6px 0 0;"></div>
-            <div style="height:2px;background:rgba(255,255,255,0.2);width:100%;"></div>
-            <div style="flex:1;border-right:2px solid rgba(255,255,255,0.2);border-bottom:2px solid rgba(255,255,255,0.2);border-radius:0 0 6px 0;"></div>
-        </div>
-    `;
-    row.appendChild(connQS);
+    connQS.style.cssText = `position:relative;opacity:${opQ};transition:opacity 0.4s;`;
+    connQS.innerHTML = `<svg width="40" height="100%" style="position:absolute;top:0;left:0;width:100%;height:100%;" preserveAspectRatio="none">
+        <!-- Línea superior par 1: de 25% hacia el centro -->
+        <line x1="0" y1="25%" x2="20" y2="25%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+        <!-- Línea vertical par 1 -->
+        <line x1="20" y1="25%" x2="20" y2="50%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+        <!-- Línea inferior par 1 -->
+        <line x1="0" y1="50%" x2="20" y2="50%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+        <!-- Horizontal hacia semi 1 -->
+        <line x1="20" y1="37.5%" x2="40" y2="37.5%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
 
-    // ======== SEMIS ========
+        <!-- Línea superior par 2 -->
+        <line x1="0" y1="75%" x2="20" y2="75%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+        <!-- Línea vertical par 2 -->
+        <line x1="20" y1="75%" x2="20" y2="100%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+        <!-- Línea inferior par 2 -->
+        <line x1="0" y1="100%" x2="20" y2="100%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+        <!-- Horizontal hacia semi 2 -->
+        <line x1="20" y1="87.5%" x2="40" y2="87.5%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+    </svg>`;
+
+    // ===== SEMIS =====
     const colS = document.createElement("div");
-    colS.style.cssText = `display:flex;flex-direction:column;justify-content:space-around;gap:10px;min-width:235px;padding:10px;align-self:stretch;opacity:${opS};transition:opacity 0.4s;`;
+    colS.style.cssText = `display:flex;flex-direction:column;padding:10px;opacity:${opS};transition:opacity 0.4s;`;
     const titS = document.createElement("div");
     titS.style.cssText = "color:#ffd700;font-weight:900;font-size:11px;letter-spacing:3px;text-align:center;margin-bottom:6px;font-style:italic;";
     titS.textContent = "SEMIFINALES";
     colS.appendChild(titS);
-    semi.forEach((p, i) => colS.appendChild(crearCard(p, colorSemi, `SEMIFINAL ${i+1}`)));
-    row.appendChild(colS);
 
-    // Conector S→F
+    // Semi 1 en el primer cuarto del espacio (centrado entre Q0 y Q1)
+    const wrapS1 = document.createElement("div");
+    wrapS1.style.cssText = "flex:1;display:flex;align-items:center;justify-content:center;padding:5px 0;";
+    if (semi[0]) wrapS1.appendChild(crearCard(semi[0], colorSemi, "SEMIFINAL 1"));
+    colS.appendChild(wrapS1);
+
+    // Espacio entre semis
+    const spacer = document.createElement("div");
+    spacer.style.cssText = "flex:1;";
+    colS.appendChild(spacer);
+
+    // Semi 2 en el segundo cuarto
+    const wrapS2 = document.createElement("div");
+    wrapS2.style.cssText = "flex:1;display:flex;align-items:center;justify-content:center;padding:5px 0;";
+    if (semi[1]) wrapS2.appendChild(crearCard(semi[1], colorSemi, "SEMIFINAL 2"));
+    colS.appendChild(wrapS2);
+
+    // ===== CONECTOR S→F con SVG =====
     const connSF = document.createElement("div");
-    connSF.style.cssText = `display:flex;flex-direction:column;align-self:stretch;min-width:28px;padding-top:34px;opacity:${opS};transition:opacity 0.4s;`;
-    connSF.innerHTML = `
-        <div style="flex:1;display:flex;flex-direction:column;">
-            <div style="flex:1;border-right:2px solid rgba(255,152,0,0.4);border-top:2px solid rgba(255,152,0,0.4);border-radius:0 6px 0 0;"></div>
-            <div style="height:2px;background:rgba(255,152,0,0.4);width:100%;"></div>
-            <div style="flex:1;border-right:2px solid rgba(255,152,0,0.4);border-bottom:2px solid rgba(255,152,0,0.4);border-radius:0 0 6px 0;"></div>
-        </div>
-    `;
-    row.appendChild(connSF);
+    connSF.style.cssText = `position:relative;opacity:${opS};transition:opacity 0.4s;`;
+    connSF.innerHTML = `<svg width="40" height="100%" style="position:absolute;top:0;left:0;width:100%;height:100%;" preserveAspectRatio="none">
+        <!-- Línea desde semi 1 -->
+        <line x1="0" y1="30%" x2="20" y2="30%" stroke="rgba(255,152,0,0.5)" stroke-width="2"/>
+        <!-- Línea vertical uniendo semis -->
+        <line x1="20" y1="30%" x2="20" y2="70%" stroke="rgba(255,152,0,0.5)" stroke-width="2"/>
+        <!-- Línea desde semi 2 -->
+        <line x1="0" y1="70%" x2="20" y2="70%" stroke="rgba(255,152,0,0.5)" stroke-width="2"/>
+        <!-- Horizontal hacia final -->
+        <line x1="20" y1="50%" x2="40" y2="50%" stroke="rgba(255,152,0,0.5)" stroke-width="2"/>
+    </svg>`;
 
-    // ======== FINAL + COPA ========
+    // ===== FINAL + COPA =====
     const colF = document.createElement("div");
-    colF.style.cssText = `display:flex;flex-direction:row;align-items:center;justify-content:center;min-width:300px;padding:10px;gap:16px;align-self:stretch;opacity:${opF};transition:opacity 0.4s;`;
+    colF.style.cssText = `display:flex;flex-direction:row;align-items:center;justify-content:center;padding:10px;gap:20px;opacity:${opF};transition:opacity 0.4s;`;
 
     const f = finalP[0];
     if (f) {
@@ -187,10 +221,16 @@ function renderBracket(partidos, vista) {
         wCopa.innerHTML = crearCopa(f.ganador);
         colF.appendChild(wCopa);
     }
-    row.appendChild(colF);
 
-    scroll.appendChild(row);
-    contenedor.appendChild(scroll);
+    // Ensamblar grid
+    grid.appendChild(colQ);
+    grid.appendChild(connQS);
+    grid.appendChild(colS);
+    grid.appendChild(connSF);
+    grid.appendChild(colF);
+
+    wrapper.appendChild(grid);
+    contenedor.appendChild(wrapper);
 }
 
 cargarLiguilla();

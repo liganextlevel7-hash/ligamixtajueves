@@ -3,1290 +3,644 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chat Next Level 7</title>
+<title>Liga Next Level 7</title>
+<link rel="stylesheet" href="styles.css">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --verde:#166534;--vm:#16a34a;--vl:#dcfce7;--vb:#bbf7d0;
-  --neon:#39ff14;--neon-dim:rgba(57,255,20,0.15);
-  --gold:#ffd700;--gold-dim:rgba(255,215,0,0.15);
-  --mod:#7c3aed;--mod-dim:rgba(124,58,237,0.15);--mod-border:#a78bfa;
-  --g50:#f8fafc;--g100:#f1f5f9;--g200:#e2e8f0;--g400:#94a3b8;--g500:#64748b;--g700:#334155;--g900:#0f172a;
-  --dark:#0a0a0a;--dark2:#111;--dark3:#1a1a1a;
-  --w:#fff;--r:12px;--rs:8px;
-  --font:'Segoe UI',system-ui,-apple-system,sans-serif;
+
+/* ===== ANIMACION TITULO (letras dentro del h1 existente) ===== */
+#titulo-letras { display:inline; }
+.titulo-letra {
+  display: inline-block;
+  opacity: 0;
+}
+.titulo-letra.animar {
+  animation: letraCae 0.5s cubic-bezier(0.36,0.07,0.19,0.97) forwards;
+}
+@keyframes letraCae {
+  0%   { transform: translateY(-50px) scale(1.3); opacity:0; }
+  50%  { transform: translateY(6px) scale(0.96); opacity:1; }
+  70%  { transform: translateY(-3px) scale(1.01); }
+  100% { transform: translateY(0) scale(1); opacity:1; }
+}
+.titulo-espacio { display:inline-block; width:0.4em; }
+
+/* Balón */
+.balon-container {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+  display: none;
+}
+.balon-emoji {
+  font-size: clamp(18px, 4vw, 36px);
+  display: block;
+  animation: balonSube 0.55s cubic-bezier(0.36,0.07,0.19,0.97) infinite alternate,
+             balonGira 0.55s linear infinite;
+}
+@keyframes balonSube {
+  0%   { transform: translateY(-30px) scaleX(1) scaleY(1); }
+  85%  { transform: translateY(-2px) scaleX(1.15) scaleY(0.85); }
+  100% { transform: translateY(2px) scaleX(1) scaleY(1); }
+}
+@keyframes balonGira {
+  from { filter: hue-rotate(0deg); }
+  to   { filter: hue-rotate(360deg); }
+}
+.balon-sombra {
+  width: 20px; height: 5px;
+  background: rgba(57,255,20,0.4);
+  border-radius: 50%;
+  margin: 0 auto;
+  animation: sombraBalon 0.55s ease infinite alternate;
+}
+@keyframes sombraBalon {
+  0%   { transform: scaleX(0.3); opacity: 0.1; }
+  100% { transform: scaleX(1);   opacity: 0.5; }
 }
 
-body{font-family:var(--font);background:linear-gradient(135deg,#064e26 0%,#0a1628 100%);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:20px 16px}
-
-/* ── PANTALLA CARGA ── */
-#loading-screen{background:var(--dark);border:1px solid rgba(57,255,20,.2);border-radius:20px;padding:48px 32px;width:100%;max-width:400px;margin-top:40px;text-align:center}
-.load-ball{font-size:48px;margin-bottom:16px;animation:bounce 1s infinite alternate}
-@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-12px)}}
-.load-title{font-size:20px;font-weight:800;color:var(--neon);margin-bottom:6px}
-.load-sub{font-size:13px;color:var(--g400);margin-bottom:24px}
-.progress-bar{background:var(--dark3);border-radius:10px;height:6px;overflow:hidden;margin-bottom:12px}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--verde),var(--neon));border-radius:10px;transition:width .4s ease;width:0%}
-.load-msg{font-size:12px;color:var(--g400)}
-
-/* ── LOGIN ── */
-#login-screen{display:none;background:var(--dark);border:1px solid rgba(57,255,20,.2);border-radius:20px;width:100%;max-width:480px;margin-top:20px;overflow:hidden}
-.login-hero{background:linear-gradient(135deg,#064e26,#0a1628);padding:28px;text-align:center;border-bottom:1px solid rgba(57,255,20,.15)}
-.login-hero-icon{font-size:40px;margin-bottom:10px}
-.login-hero-title{font-size:22px;font-weight:800;color:var(--neon);margin-bottom:4px;letter-spacing:1px}
-.login-hero-sub{font-size:13px;color:var(--g400)}
-.login-body{padding:24px 28px 28px}
-.field{margin-bottom:16px}
-.field label{display:block;font-size:12px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
-.field input{width:100%;padding:11px 14px;border:1.5px solid var(--dark3);border-radius:var(--rs);font-size:14px;color:var(--w);background:var(--dark2);outline:none;transition:border .15s}
-.field input:focus{border-color:var(--neon)}
-.field input::placeholder{color:var(--g500)}
-.select-label{font-size:12px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
-.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;max-height:300px;overflow-y:auto}
-.team-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--dark3);border-radius:var(--r);background:var(--dark2);cursor:pointer;transition:all .15s;text-align:left}
-.team-btn:hover{border-color:var(--neon);background:var(--neon-dim)}
-.team-btn.selected{border-color:var(--neon);background:var(--neon-dim)}
-.team-btn img{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid var(--dark3)}
-.team-btn-name{font-size:13px;font-weight:600;color:var(--w);line-height:1.2}
-.team-btn.selected .team-btn-name{color:var(--neon)}
-.team-btn-city{font-size:11px;color:var(--g500)}
-
-/* MOD option */
-.mod-option{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--dark3);border-radius:var(--r);background:var(--dark2);cursor:pointer;margin-bottom:20px;transition:all .15s}
-.mod-option:hover,.mod-option.selected{border-color:var(--mod-border);background:var(--mod-dim)}
-.mod-icon{font-size:28px;flex-shrink:0}
-.mod-info-name{font-size:14px;font-weight:700;color:var(--w)}
-.mod-option.selected .mod-info-name{color:var(--mod-border)}
-.mod-info-sub{font-size:11px;color:var(--g500)}
-
-/* password field */
-.mod-pass{display:none;margin-bottom:16px}
-.mod-pass.show{display:block}
-
-/* preview */
-.cap-preview{display:none;background:var(--dark2);border:1px solid var(--dark3);border-radius:var(--r);padding:14px 16px;margin-bottom:18px;align-items:center;gap:12px}
-.cap-preview.show{display:flex}
-.cap-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--neon);flex-shrink:0}
-.cap-avatar.mod-av{border-color:var(--mod-border)}
-.cap-name-txt{font-size:15px;font-weight:700;color:var(--w)}
-.cap-team-txt{font-size:12px;color:var(--g400);margin-top:2px}
-.cap-badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;display:inline-block;margin-top:4px}
-.cap-badge.eq{background:var(--neon-dim);color:var(--neon)}
-.cap-badge.mod{background:var(--mod-dim);color:var(--mod-border)}
-
-.btn-enter{width:100%;padding:14px;background:var(--verde);color:white;border:none;border-radius:var(--r);font-size:15px;font-weight:700;cursor:pointer;transition:background .15s}
-.btn-enter:hover{background:var(--vm)}
-.btn-enter:disabled{background:var(--dark3);color:var(--g500);cursor:not-allowed}
-.login-msg{font-size:12px;color:var(--g400);text-align:center;margin-top:10px;min-height:18px}
-.err{color:#f87171!important}
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── APP ── */
-#app-screen{display:none;width:100%;max-width:920px;background:var(--dark);border:1px solid rgba(57,255,20,.15);border-radius:20px;overflow:hidden;margin-top:20px}
-
-.app-header{background:linear-gradient(135deg,#064e26,#0a1628);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(57,255,20,.15)}
-.app-header-left{display:flex;align-items:center;gap:12px;min-width:0}
-.hdr-avatar-wrap{position:relative;flex-shrink:0}
-.hdr-logo{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--neon)}
-.hdr-logo.mod-hdr{border-color:var(--mod-border)}
-.hdr-dot{width:18px;height:18px;border-radius:50%;background:var(--vm);border:2px solid var(--dark);position:absolute;bottom:-1px;right:-1px;display:flex;align-items:center;justify-content:center;font-size:9px;color:white;font-weight:700}
-.hdr-dot.mod-dot{background:var(--mod)}
-.hdr-capname{font-size:15px;font-weight:700;color:var(--w)}
-.hdr-teamname{font-size:12px;color:var(--g400);margin-top:1px}
-.btn-logout{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:var(--g400);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;white-space:nowrap}
-.btn-logout:hover{color:var(--w)}
-
-/* online users bar */
-.online-bar{padding:10px 20px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--dark2)}
-.online-label{font-size:11px;color:var(--g500);font-weight:600;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
-.online-avatars{display:flex;gap:6px;flex-wrap:wrap}
-.online-chip{display:flex;align-items:center;gap:5px;background:var(--dark3);border-radius:20px;padding:3px 8px 3px 3px;border:1px solid rgba(255,255,255,.06)}
-.online-chip img{width:20px;height:20px;border-radius:50%;object-fit:cover}
-.online-chip span{font-size:11px;color:var(--g400)}
-.online-chip.mod-chip{border-color:rgba(124,58,237,.3);background:rgba(124,58,237,.1)}
-.online-chip.mod-chip span{color:var(--mod-border)}
-.online-dot{width:6px;height:6px;border-radius:50%;background:var(--neon);margin-left:2px;flex-shrink:0}
-
-/* tabs */
-.tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.06);background:var(--dark2);overflow-x:auto}
-.tab{padding:12px 16px;font-size:13px;font-weight:500;color:var(--g500);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;flex-shrink:0}
-.tab.active{color:var(--neon);border-bottom-color:var(--neon)}
-.tab:hover:not(.active){color:var(--w)}
-.nbadge{background:rgba(255,165,0,.2);color:#ffa500;font-size:11px;padding:1px 7px;border-radius:10px;font-weight:700;margin-left:4px}
-
-.tab-content{display:none}
-.tab-content.active{display:flex;flex-direction:column}
-
-/* ── CHAT PRINCIPAL ── */
-#chat-main{flex-direction:column;height:580px}
-.chat-messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px;background:var(--dark)}
-.chat-messages::-webkit-scrollbar{width:4px}
-.chat-messages::-webkit-scrollbar-track{background:transparent}
-.chat-messages::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
-
-/* bubbles */
-.bubble{max-width:72%}
-.bubble.mine{align-self:flex-end}
-.bubble.theirs{align-self:flex-start}
-.bubble.sys-bubble{align-self:center;max-width:90%}
-.bub-meta{display:flex;align-items:center;gap:6px;margin-bottom:4px}
-.bubble.mine .bub-meta{flex-direction:row-reverse}
-.bub-av{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.1);flex-shrink:0}
-.bub-name{font-size:11px;color:var(--g500);font-weight:600}
-.bub-name.mod-name{color:var(--mod-border)}
-.bub-text{padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.5;word-break:break-word}
-.bubble.mine .bub-text{background:var(--verde);color:white;border-bottom-right-radius:3px}
-.bubble.theirs .bub-text{background:var(--dark3);color:var(--w);border:1px solid rgba(255,255,255,.07);border-bottom-left-radius:3px}
-.bubble.sys-bubble .bub-text{background:var(--mod-dim);color:var(--mod-border);border:1px solid rgba(124,58,237,.3);border-radius:12px;text-align:center;font-size:13px}
-.bub-time{font-size:10px;color:var(--g500);margin-top:3px}
-.bubble.mine .bub-time{text-align:right}
-
-/* anuncio moderador */
-.anuncio-card{background:var(--dark2);border:1px solid rgba(124,58,237,.4);border-radius:var(--r);padding:14px 16px;margin:4px 0;align-self:center;width:92%;max-width:600px}
-.anuncio-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.anuncio-badge{background:var(--mod-dim);color:var(--mod-border);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid rgba(124,58,237,.3)}
-.anuncio-team{font-size:13px;font-weight:700;color:var(--w);margin-bottom:8px}
-.anuncio-matches{display:flex;flex-direction:column;gap:6px}
-.anuncio-match{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--dark3);border-radius:var(--rs);border:1px solid rgba(255,255,255,.05)}
-.anuncio-logos{display:flex;align-items:center;gap:4px;flex-shrink:0}
-.anuncio-logos img{width:28px;height:28px;border-radius:50%;object-fit:cover}
-.anuncio-vs{font-size:10px;color:var(--g500);font-weight:700}
-.anuncio-info{flex:1;min-width:0}
-.anuncio-teams{font-size:12px;font-weight:600;color:var(--w)}
-.anuncio-meta{font-size:11px;color:var(--g500);margin-top:2px}
-.anuncio-time{font-size:10px;color:var(--g500);margin-top:6px;text-align:right}
-
-/* fecha separador */
-.date-sep{text-align:center;font-size:11px;color:var(--g500);padding:8px 0;display:flex;align-items:center;gap:10px}
-.date-sep::before,.date-sep::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
-
-/* chat input */
-.chat-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,.06);background:var(--dark2)}
-.msg-row{display:flex;gap:8px}
-.msg-input{flex:1;padding:10px 14px;border:1.5px solid var(--dark3);border-radius:var(--rs);font-size:14px;color:var(--w);background:var(--dark);outline:none;transition:border .15s}
-.msg-input:focus{border-color:var(--neon)}
-.msg-input::placeholder{color:var(--g500)}
-.btn-send{background:var(--verde);color:white;border:none;border-radius:var(--rs);padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap}
-.btn-send:hover{background:var(--vm)}
-
-/* ── PANEL MODERADOR ── */
-#mod-panel{flex-direction:column;padding:20px}
-.mod-section-title{font-size:12px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;margin-top:4px}
-.mod-team-select{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
-.mod-team-btn{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1.5px solid var(--dark3);border-radius:var(--rs);background:var(--dark2);cursor:pointer;transition:all .15s}
-.mod-team-btn:hover{border-color:var(--mod-border);background:var(--mod-dim)}
-.mod-team-btn.selected{border-color:var(--mod-border);background:var(--mod-dim)}
-.mod-team-btn img{width:32px;height:32px;border-radius:50%;object-fit:cover}
-.mod-team-btn span{font-size:12px;font-weight:600;color:var(--w)}
-.mod-team-btn.selected span{color:var(--mod-border)}
-.mod-preview{background:var(--dark2);border:1px solid rgba(124,58,237,.3);border-radius:var(--r);padding:14px;margin-bottom:14px;min-height:80px}
-.mod-preview-empty{font-size:13px;color:var(--g500);text-align:center;padding:20px 0}
-.mod-match-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--dark3);border-radius:var(--rs);border:1px solid rgba(255,255,255,.05);margin-bottom:6px}
-.mod-match-row img{width:28px;height:28px;border-radius:50%;object-fit:cover}
-.mod-match-name{flex:1;font-size:12px;font-weight:600;color:var(--w);min-width:0}
-.mod-match-meta{font-size:11px;color:var(--g500)}
-.btn-anunciar{width:100%;padding:12px;background:var(--mod);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-anunciar:hover{background:#6d28d9}
-.btn-anunciar:disabled{background:var(--dark3);color:var(--g500);cursor:not-allowed}
-
-/* vuelta toggle */
-.vuelta-toggle{display:flex;gap:8px;margin-bottom:16px}
-.vbtn{flex:1;padding:9px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--dark3);background:var(--dark2);color:var(--g500);transition:all .15s}
-.vbtn.active{border-color:var(--neon);background:var(--neon-dim);color:var(--neon)}
-
-/* ── PARTIDOS TAB ── */
-#tab-partidos-content{flex-direction:column;padding:20px}
-.match-card{border:1px solid rgba(255,255,255,.07);border-radius:var(--r);padding:12px 14px;margin-bottom:7px;display:flex;align-items:center;gap:12px;background:var(--dark2);transition:all .15s}
-.match-card:hover{border-color:rgba(57,255,20,.2)}
-.match-card.pend{border-left:3px solid #f59e0b}
-.match-card.ok{border-left:3px solid var(--vm)}
-.logos-vs{display:flex;align-items:center;gap:5px;flex-shrink:0}
-.logo-sm{width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--dark3);border:1px solid rgba(255,255,255,.08)}
-.vs-lbl{font-size:10px;font-weight:700;color:var(--g500)}
-.match-info{flex:1;min-width:0}
-.match-teams{font-size:13px;font-weight:600;color:var(--w)}
-.match-meta{font-size:11px;color:var(--g500);margin-top:3px}
-.hora-ok{color:var(--vm);font-weight:700}
-.badge{font-size:11px;padding:3px 10px;border-radius:20px;white-space:nowrap;font-weight:600;flex-shrink:0}
-.bp{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
-.bo{background:var(--vl);color:var(--verde);border:1px solid var(--vb)}
-.sec-title{font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;margin-top:4px}
-
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
-.stat-card{background:var(--dark2);border-radius:var(--r);padding:14px;text-align:center;border:1px solid rgba(255,255,255,.06)}
-.stat-num{font-size:26px;font-weight:800;color:var(--w)}
-.stat-label{font-size:11px;color:var(--g500);margin-top:2px}
-
-.empty{text-align:center;padding:40px 20px;color:var(--g500)}
-.empty-icon{font-size:32px;margin-bottom:10px}
-
-@media(max-width:580px){
-  body{padding:0;align-items:flex-start}
-  #login-screen,#app-screen{border-radius:0;margin-top:0}
-  .team-grid,.mod-team-select{grid-template-columns:1fr}
-  .match-card{flex-wrap:wrap}
-  .logos-vs{display:none}
-  .stats-row{grid-template-columns:1fr 1fr}
-  #chat-main{height:calc(100vh - 200px)}
+/* ===== CARRUSEL ===== */
+.carrusel-seccion {
+  max-width: 1100px;
+  margin: 20px auto 30px;
+  padding: 0 10px;
+  position: relative;
+  height: 480px;
 }
+.card-sec {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 320px;
+  border-radius: 22px;
+  cursor: pointer;
+  transition: all 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+  transform: translate(-50%,-50%) scale(0.4);
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border: 1px solid #39ff14;
+  box-shadow: 0 0 10px #39ff14, 0 0 20px rgba(57,255,20,0.3);
+}
+.card-sec.c  { transform:translate(-50%,-50%) scale(1);                                   opacity:1; z-index:5; pointer-events:all; }
+.card-sec.l1 { transform:translate(calc(-50% - 240px),-50%) scale(0.75) rotateY(15deg);  opacity:0.75; z-index:4; pointer-events:all; }
+.card-sec.r1 { transform:translate(calc(-50% + 240px),-50%) scale(0.75) rotateY(-15deg); opacity:0.75; z-index:4; pointer-events:all; }
+.card-sec.l2 { transform:translate(calc(-50% - 400px),-50%) scale(0.55) rotateY(22deg);  opacity:0.3; z-index:3; pointer-events:all; }
+.card-sec.r2 { transform:translate(calc(-50% + 400px),-50%) scale(0.55) rotateY(-22deg); opacity:0.3; z-index:3; pointer-events:all; }
+
+.card-body { padding:22px 18px 18px; display:flex; flex-direction:column; gap:10px; min-height:440px; }
+.card-titulo { font-size:15px; font-weight:900; letter-spacing:2px; text-transform:uppercase; text-align:center; }
+.card-contenido { flex:1; font-size:12px; font-family:Arial,sans-serif; }
+.car-btn { display:block; text-align:center; padding:10px; border-radius:20px; font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; text-decoration:none; cursor:pointer; border:none; width:100%; transition:filter 0.3s; touch-action:manipulation; }
+.car-btn:hover { filter:brightness(1.3); }
+
+.c-tabla    .card-body { background:#0a0a0a; position:relative; overflow:hidden; }
+.c-tabla    .card-titulo { color:#ffd700; position:relative; z-index:2; }
+.c-tabla    .car-btn { background:rgba(255,215,0,0.15); color:#ffd700; border:1px solid #ffd700; position:relative; z-index:2; }
+.c-goles    .card-body { background:#0a0a0a; position:relative; overflow:hidden; }
+.c-goles    .card-titulo { color:#ffd700; position:relative; z-index:2; }
+.c-goles    .car-btn { background:rgba(255,215,0,0.15); color:#ffd700; border:1px solid #ffd700; position:relative; z-index:2; }
+.c-partidos .card-body { background:#0a0a0a; position:relative; overflow:hidden; }
+.c-partidos .card-titulo { color:#ffd700; position:relative; z-index:2; }
+.c-partidos .car-btn { background:rgba(255,215,0,0.15); color:#ffd700; border:1px solid #ffd700; position:relative; z-index:2; }
+.c-proxima  .card-body { background:#0a0a0a; position:relative; overflow:hidden; }
+.c-proxima  .card-titulo { color:#ffd700; position:relative; z-index:2; }
+.c-proxima  .car-btn { background:rgba(255,215,0,0.15); color:#ffd700; border:1px solid #ffd700; position:relative; z-index:2; }
+.card-fondo-img { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0; opacity:0.45; }
+.card-overlay-color { position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; }
+.card-contenido, .card-contenido + .car-btn { position:relative; z-index:2; }
+.c-equipos  .card-body { background:linear-gradient(rgba(10,20,30,0.88),rgba(10,25,40,0.92)), url('fondo-partidos.png'); background-size:cover; background-position:center; }
+.c-equipos  .card-titulo { color:#ffd700; }
+.c-equipos  .car-btn { background:rgba(255,215,0,0.15); color:#ffd700; border:1px solid #ffd700; }
+.c-liguilla .card-body { background:#000; padding:0 !important; }
+.c-liguilla .card-titulo { color:#ffd700; position:absolute; top:14px; left:0; right:0; z-index:2; text-shadow:0 2px 6px rgba(0,0,0,0.8); }
+.c-liguilla .car-btn { background:rgba(255,215,0,0.85); color:#000; border:1px solid #ffd700; position:absolute; bottom:14px; left:18px; right:18px; z-index:2; width:auto; }
+.c-liguilla .liguilla-img { width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; }
+.c-cedula   .card-body { background:#000; padding:0 !important; }
+.c-cedula   .card-titulo { color:#ffd700; position:absolute; top:14px; left:0; right:0; z-index:2; text-shadow:0 2px 6px rgba(0,0,0,0.8); }
+.c-cedula   .car-btn { background:rgba(255,215,0,0.85); color:#000; border:1px solid #ffd700; position:absolute; bottom:14px; left:18px; right:18px; z-index:2; width:auto; }
+.c-cedula   .cedula-img { width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; }
+
+/* ===== CARD CHAT — nueva ===== */
+.c-chat .card-body {
+  background: #000;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+.c-chat .card-titulo { color: #39ff14; position: relative; z-index: 2; }
+.c-chat .car-btn { background: rgba(57,255,20,0.15); color: #39ff14; border: 1px solid #39ff14; position: relative; z-index: 10; }
+.c-chat .car-btn:hover { background: #39ff14; color: #000; }
+.c-chat .chat-card-bg,.c-chat .chat-card-logos,.c-chat .chat-card-desc,.c-chat .chat-card-bubbles,.c-chat .card-titulo { pointer-events: none; }
+.chat-card-bg {
+  position: absolute; top:0; left:0; width:100%; height:100%; z-index:0;
+  background: radial-gradient(ellipse at 50% 30%, rgba(57,255,20,0.08) 0%, transparent 70%);
+}
+.chat-card-logos {
+  position: relative; z-index: 2;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+  padding: 10px 0;
+}
+.chat-card-logos img {
+  width: 46px; height: 46px; border-radius: 50%; object-fit: cover;
+  border: 1.5px solid rgba(57,255,20,0.4);
+  box-shadow: 0 0 8px rgba(57,255,20,0.3);
+}
+.chat-card-desc {
+  position: relative; z-index: 2;
+  text-align: center; color: rgba(255,255,255,0.6);
+  font-size: 11px; font-family: Arial,sans-serif; line-height: 1.6;
+  padding: 0 10px;
+}
+.chat-card-desc strong { color: #39ff14; }
+.chat-card-bubbles {
+  position: relative; z-index: 2; width: 100%; padding: 0 8px;
+}
+.chat-bubble-demo {
+  border-radius: 12px; padding: 7px 12px; font-size: 11px;
+  font-family: Arial,sans-serif; margin-bottom: 6px; max-width: 80%;
+}
+.chat-bubble-demo.left  { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); border-bottom-left-radius: 3px; }
+.chat-bubble-demo.right { background: rgba(57,255,20,0.15); color: #39ff14; border-bottom-right-radius: 3px; margin-left: auto; text-align:right; }
+
+.mini-fila { display:flex; align-items:center; gap:8px; padding:7px 4px; border-bottom:1px solid rgba(255,255,255,0.07); font-size:12px; color:rgba(255,255,255,0.85); }
+.mini-fila img { width:28px; height:28px; object-fit:contain; }
+.mini-rank { font-weight:900; color:#ffd700; min-width:20px; text-align:center; }
+.mini-pts  { font-weight:900; color:#39ff14; margin-left:auto; }
+.mini-marcador { font-weight:900; color:#ffd700; margin-left:auto; font-size:13px; }
+.mini-vs   { font-weight:900; color:#ffd700; margin-left:auto; }
+.car-cargando { color:rgba(255,255,255,0.3); text-align:center; padding:20px; font-size:12px; }
+
+.car-flecha { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:#fff; z-index:10; transition:all 0.3s; touch-action:manipulation; user-select:none; }
+.car-flecha:hover { background:rgba(255,255,255,0.2); }
+.car-fl { left:5px; } .car-fr { right:5px; }
+.car-dots { position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:flex; gap:8px; }
+.car-dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.2); cursor:pointer; transition:all 0.3s; }
+.car-dot.on { background:#39ff14; transform:scale(1.3); }
+
+/* FIFA MINI */
+.fifa-mini { width:75px; height:120px; border-radius:10px 10px 6px 6px; position:relative; display:flex; flex-direction:column; align-items:center; overflow:hidden; }
+.fifa-mini.gold   { background:linear-gradient(160deg,#ffe566,#f5a500,#b8720a,#f5d020); border:1.5px solid #ffd700; box-shadow:0 0 10px #ffd700; }
+.fifa-mini.silver { background:linear-gradient(160deg,#f0f0f0,#c0c0c0,#808080,#d8d8d8); border:1.5px solid #c0c0c0; box-shadow:0 0 8px #bbb; }
+.fifa-mini.blue   { background:linear-gradient(160deg,#64d0ff,#0288d1,#01579b,#29b6f6); border:1.5px solid #29b6f6; box-shadow:0 0 8px #29b6f6; }
+.fifa-mini .mn-shimmer { position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,rgba(255,255,255,0.2) 0%,transparent 50%);pointer-events:none;border-radius:inherit; }
+.fifa-mini .mn-svg  { width:70px; height:80px; z-index:1; }
+.fifa-mini .mn-nombre { font-size:6.5px; font-weight:900; text-align:center; padding:1px 4px; line-height:1.2; z-index:1; text-transform:uppercase; max-width:70px; word-break:break-word; }
+.fifa-mini .mn-sep  { width:80%; height:1px; opacity:0.3; margin:2px 0; z-index:1; }
+.fifa-mini .mn-stats { display:flex; gap:8px; z-index:1; margin-bottom:4px; }
+.fifa-mini .mn-stat { text-align:center; }
+.fifa-mini .mn-val  { font-size:11px; font-weight:900; line-height:1; }
+.fifa-mini .mn-lbl  { font-size:5.5px; opacity:0.8; }
+.fifa-mini.gold   .mn-nombre,.fifa-mini.gold   .mn-val,.fifa-mini.gold   .mn-lbl { color:#3d2200; }
+.fifa-mini.gold   .mn-sep { background:#3d2200; }
+.fifa-mini.silver .mn-nombre,.fifa-mini.silver .mn-val,.fifa-mini.silver .mn-lbl { color:#1a1a1a; }
+.fifa-mini.silver .mn-sep { background:#1a1a1a; }
+.fifa-mini.blue   .mn-nombre,.fifa-mini.blue   .mn-val,.fifa-mini.blue   .mn-lbl { color:#fff; }
+.fifa-mini.blue   .mn-sep { background:#fff; }
+.fifa-mini-wrap { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.fifa-mini-medal { font-size:20px; }
+.piramide-1 .fifa-mini { width: 95px; height: 150px; }
+.piramide-1 .fifa-mini-medal { font-size: 26px; }
+.piramide-2 .fifa-mini, .piramide-3 .fifa-mini { width: 75px; height: 120px; }
+
+/* ===== PIRAMIDE ===== */
+.piramide-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 18px 10px;
+  padding: 10px 6px 6px;
+  align-items: end;
+  justify-content: center;
+}
+.piramide-1 { grid-column: 1 / 3; justify-self: center; }
+.piramide-2 { grid-column: 1; justify-self: end; }
+.piramide-3 { grid-column: 2; justify-self: start; }
+
+.podio-frame {
+  position: relative;
+  width: 175px;
+}
+.piramide-2 .podio-frame, .piramide-3 .podio-frame { width: 135px; }
+
+.podio-frame img.podio-bg { width: 100%; display: block; }
+.podio-frame .podio-content-box {
+  position: absolute;
+  top: 34%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 42%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.podio-content-box .pc-escudo { width: 100%; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8)); }
+.podio-content-box .pc-jersey { width: 100%; }
+.podio-medal-num {
+  position: absolute;
+  top: 99%; left: 50%; transform: translate(-50%, 0);
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 900; color: #000;
+  z-index: 4; border: 2px solid #000;
+}
+.piramide-1 .podio-medal-num { background: #ffd700; }
+.piramide-2 .podio-medal-num { background: #c0c0c0; }
+.piramide-3 .podio-medal-num { background: #cd7f32; }
+.podio-info { text-align: center; margin-top: 0; }
+.podio-nombre2 { font-size: 11px; font-weight: 900; color: #fff; text-transform: uppercase; line-height: 1.2; max-width: 130px; margin: 0 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.piramide-1 .podio-nombre2 { font-size: 13px; max-width: 160px; }
+.podio-pts2 { font-size: 11px; font-weight: 700; margin-top: 3px; }
+.piramide-1 .podio-pts2 { font-size: 14px; }
+.piramide-1 .podio-pts2 { color: #ffd700; }
+.piramide-2 .podio-pts2 { color: #c0c0c0; }
+.piramide-3 .podio-pts2 { color: #cd7f32; }
 </style>
 </head>
 <body>
-
-<!-- CARGA -->
-<div id="loading-screen">
-  <div class="load-ball">⚽</div>
-  <div class="load-title">LIGA NEXT LEVEL 7</div>
-  <div class="load-sub">Torneo Dominical · Cargando datos...</div>
-  <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
-  <div class="load-msg" id="load-msg">Conectando...</div>
-</div>
-
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-hero">
-    <div class="login-hero-icon">⚽</div>
-    <div class="login-hero-title">LIGA NEXT LEVEL 7</div>
-    <div class="login-hero-sub">Torneo Dominical · Chat de coordinación</div>
-  </div>
-  <div class="login-body">
-
-    <!-- Moderador -->
-    <div class="select-label" style="margin-bottom:8px">¿Cómo entras?</div>
-    <div class="mod-option" id="mod-option" onclick="toggleMod()">
-      <div class="mod-icon">🛡️</div>
-      <div>
-        <div class="mod-info-name">Entrar como Moderador</div>
-        <div class="mod-info-sub">Administrador de la liga · Panel especial</div>
-      </div>
+<header>
+  <img src="logo-liga.png.png" class="logo-liga">
+  <h1 style="position:relative;display:inline-block;">
+    <div class="balon-container" id="balon-wrap">
+      <div class="balon-emoji">⚽</div>
+      <div class="balon-sombra"></div>
     </div>
+    <span id="titulo-letras"></span>
+  </h1>
+  <p class="subtitulo">Torneo Dominical</p>
+</header>
 
-    <div class="mod-pass" id="mod-pass">
-      <div class="field">
-        <label>Contraseña del moderador</label>
-        <input type="password" id="mod-password" placeholder="Ingresa la contraseña..." oninput="updatePreview()">
-      </div>
-    </div>
+<!-- ===== CARRUSEL ===== -->
+<div class="carrusel-seccion" id="carrusel-wrap">
 
-    <!-- Capitán -->
-    <div id="captain-section">
-      <div class="field">
-        <label>Tu nombre (capitán)</label>
-        <input type="text" id="cap-name" placeholder="Ej: Carlos López" oninput="updatePreview()" maxlength="40">
-      </div>
-      <div class="select-label">Selecciona tu equipo</div>
-      <div class="team-grid" id="team-grid"></div>
-    </div>
-
-    <div class="cap-preview" id="cap-preview">
-      <img class="cap-avatar" id="cap-avatar-img" src="" alt="">
-      <div>
-        <div class="cap-name-txt" id="cap-preview-name"></div>
-        <div class="cap-team-txt" id="cap-preview-team"></div>
-        <span class="cap-badge eq" id="cap-preview-badge">Capitán</span>
-      </div>
-    </div>
-
-    <button class="btn-enter" id="btn-enter" disabled onclick="enterApp()">Entrar →</button>
-    <div class="login-msg" id="login-msg"></div>
-  </div>
-</div>
-
-<!-- APP -->
-<div id="app-screen">
-  <div class="app-header">
-    <div class="app-header-left">
-      <div class="hdr-avatar-wrap">
-        <img class="hdr-logo" id="hdr-logo" src="" alt="">
-        <div class="hdr-dot" id="hdr-dot">C</div>
-      </div>
-      <div>
-        <div class="hdr-capname" id="hdr-capname"></div>
-        <div class="hdr-teamname" id="hdr-teamname"></div>
-      </div>
-    </div>
-    <button class="btn-logout" onclick="logout()">← Salir</button>
-  </div>
-
-  <!-- Usuarios online -->
-  <div class="online-bar">
-    <span class="online-label">🟢 En línea:</span>
-    <div class="online-avatars" id="online-avatars"></div>
-  </div>
-
-  <div class="tabs" id="tabs-bar">
-    <div class="tab active" data-tab="chat" onclick="switchTab('chat')">💬 Chat General</div>
-    <div class="tab" data-tab="partidos" onclick="switchTab('partidos')">⚽ Mis partidos</div>
-    <div class="tab mod-tab" data-tab="modpanel" onclick="switchTab('modpanel')" style="display:none">🛡️ Panel Mod</div>
-  </div>
-
-  <!-- TAB CHAT -->
-  <div id="tab-chat" class="tab-content active" style="display:flex">
-    <div id="chat-main" style="display:flex;flex-direction:column;flex:1;position:relative">
-      <div class="chat-messages" id="chat-messages"></div>
-      <div class="chat-footer"><div id="mention-list" style="display:none;position:absolute;bottom:70px;left:14px;right:14px;background:#1a1a1a;border:1px solid rgba(57,255,20,0.4);border-radius:10px;overflow:hidden;z-index:20;box-shadow:0 -4px 20px rgba(0,0,0,0.5);"></div>
-        <div class="msg-row">
-          <input type="text" class="msg-input" id="msg-input" placeholder="Escribe @ para mencionar un equipo..." onkeydown="if(event.key==='Enter')sendMsg()" oninput="onMsgInput(this)">
-          <button class="btn-send" onclick="sendMsg()">Enviar</button>
-        </div>
-      </div>
+  <div class="card-sec c-tabla" id="ccard-0">
+    <div class="card-body">
+      <img src="fondo-partidos.png" class="card-fondo-img" onerror="this.style.display='none'">
+      <div class="card-overlay-color" style="background:linear-gradient(rgba(10,30,10,0.55),rgba(15,30,15,0.65));"></div>
+      <div class="card-titulo">🏆 Tabla General</div>
+      <div class="card-contenido" id="car-tabla"><div class="car-cargando">Cargando...</div></div>
+      <a href="tablaGeneral.html" class="car-btn">VER TABLA COMPLETA</a>
     </div>
   </div>
 
-  <!-- TAB PARTIDOS -->
-  <div id="tab-partidos" class="tab-content">
-    <div id="tab-partidos-content" style="display:flex;flex-direction:column;padding:20px"></div>
+  <div class="card-sec c-goles" id="ccard-1">
+    <div class="card-body" style="padding:14px 10px;">
+      <img src="fondo-partidos.png" class="card-fondo-img" onerror="this.style.display='none'">
+      <div class="card-overlay-color" style="background:linear-gradient(rgba(30,20,0,0.55),rgba(35,25,0,0.65));"></div>
+      <div class="card-titulo">⚽ Top Goleadores</div>
+      <div class="card-contenido" id="car-goles" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:4px 0;"><div class="car-cargando">Cargando...</div></div>
+      <a href="jugadores.html" class="car-btn">VER TODOS</a>
+    </div>
   </div>
 
-  <!-- TAB MOD PANEL -->
-  <div id="tab-modpanel" class="tab-content">
-    <div id="mod-panel" style="display:flex;flex-direction:column;padding:20px;gap:16px;overflow-y:auto;max-height:600px">
+  <div class="card-sec c-partidos" id="ccard-2">
+    <div class="card-body">
+      <img src="fondo-partidos.png" class="card-fondo-img" onerror="this.style.display='none'">
+      <div class="card-overlay-color" style="background:linear-gradient(rgba(8,20,30,0.55),rgba(10,25,40,0.65));"></div>
+      <div class="card-titulo">📊 Últimos Resultados</div>
+      <div class="card-contenido" id="car-resultados"><div class="car-cargando">Cargando...</div></div>
+      <a href="partidos.html" class="car-btn">VER PARTIDOS</a>
+    </div>
+  </div>
 
-      <!-- VUELTA -->
-      <div>
-        <div class="mod-section-title">📅 Vuelta</div>
-        <div class="vuelta-toggle">
-          <button class="vbtn active" id="vbtn1" onclick="setVuelta(1)">🔜 Vuelta 1 (Actual)</button>
-          <button class="vbtn" id="vbtn2" onclick="setVuelta(2)">🔄 Vuelta 2</button>
-        </div>
-      </div>
+  <div class="card-sec c-proxima" id="ccard-3">
+    <div class="card-body">
+      <img src="fondo-partidos.png" class="card-fondo-img" onerror="this.style.display='none'">
+      <div class="card-overlay-color" style="background:linear-gradient(rgba(30,10,20,0.55),rgba(35,15,25,0.65));"></div>
+      <div class="card-titulo">📅 Próxima Jornada</div>
+      <div class="card-contenido" id="car-proxima"><div class="car-cargando">Cargando...</div></div>
+      <a href="partidos.html" class="car-btn">VER JORNADA</a>
+    </div>
+  </div>
 
-      <!-- ROL DEL DOMINGO -->
-      <div>
-        <div class="mod-section-title" style="color:var(--neon)">📋 Armar Rol del Domingo</div>
-        
-        <!-- Fecha -->
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <label style="font-size:12px;color:var(--g400);white-space:nowrap">📆 Fecha:</label>
-          <input type="date" id="rol-fecha" class="msg-input" style="flex:1;padding:8px 12px;font-size:13px">
+  <div class="card-sec c-equipos" id="ccard-4">
+    <div class="card-body" style="position:relative;padding:0 !important;">
+      <img src="equipos.png" class="liguilla-img" alt="Equipos" onerror="this.style.display='none'">
+      <div class="card-titulo">👕 EQUIPOS</div>
+      <a href="equipos.html" class="car-btn">VER EQUIPOS</a>
+    </div>
+  </div>
+
+  <div class="card-sec c-liguilla" id="ccard-5">
+    <div class="card-body" style="position:relative;">
+      <img src="liguilla.png" class="liguilla-img" alt="Liguilla" onerror="this.style.display='none'">
+      <div class="card-titulo">🥇 LIGUILLA</div>
+      <a href="liguilla.html" class="car-btn">VER LIGUILLA</a>
+    </div>
+  </div>
+
+  <div class="card-sec c-cedula" id="ccard-6">
+    <div class="card-body" style="position:relative;">
+      <img src="arbitro.png" class="cedula-img" alt="Cedula Arbitral" onerror="this.style.display='none'">
+      <div class="card-titulo">📝 CÉDULA</div>
+      <a href="cedula.html" class="car-btn">IR A CÉDULA</a>
+    </div>
+  </div>
+
+  <!-- ===== NUEVA CARD: CHAT ===== -->
+  <div class="card-sec c-chat" id="ccard-7">
+    <div class="card-body" style="position:relative;padding:0 !important;background:#0a0a0a;min-height:440px;overflow:hidden;">
+      <!-- fondo glow -->
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 20%,rgba(57,255,20,0.07) 0%,transparent 65%);pointer-events:none;z-index:0;"></div>
+      <!-- contenido -->
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;padding:16px 14px 60px;pointer-events:none;z-index:1;gap:6px;overflow:hidden;">
+        <!-- titulo -->
+        <div style="font-size:13px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-align:center;color:#39ff14;margin-bottom:4px;">💬 Chat Next Level 7</div>
+
+        <!-- burbujas con escudos — izquierda -->
+        <div style="display:flex;align-items:flex-end;gap:6px;">
+          <div style="position:relative;flex-shrink:0;">
+            <img src="https://i.imgur.com/gBvmM4v.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(57,255,20,0.5);display:block;">
+            <div style="position:absolute;bottom:-2px;left:-2px;width:9px;height:9px;background:#111;border-radius:50% 0 50% 50%;transform:rotate(45deg);"></div>
+          </div>
+          <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);border-radius:12px 12px 12px 2px;padding:6px 10px;font-size:10px;color:rgba(255,255,255,0.75);max-width:75%;">¿A qué hora juegan el domingo? ⚽</div>
         </div>
 
-        <!-- Slots de horario -->
-        <div id="rol-slots" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
-
-        <!-- Botones -->
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button onclick="addSlot()" style="padding:8px 14px;background:var(--dark2);border:1px solid rgba(57,255,20,0.3);border-radius:var(--rs);color:var(--neon);font-size:12px;font-weight:600;cursor:pointer">+ Agregar horario</button>
-          <button onclick="autoRol()" style="padding:8px 14px;background:var(--dark2);border:1px solid rgba(167,139,250,0.3);border-radius:var(--rs);color:#a78bfa;font-size:12px;font-weight:600;cursor:pointer">⚡ Auto-proponer rol</button>
+        <!-- burbuja derecha -->
+        <div style="display:flex;align-items:flex-end;gap:6px;flex-direction:row-reverse;">
+          <div style="position:relative;flex-shrink:0;">
+            <img src="https://i.imgur.com/fGQAhE5.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(57,255,20,0.5);display:block;">
+            <div style="position:absolute;bottom:-2px;right:-2px;width:9px;height:9px;background:#111;border-radius:50% 50% 0 50%;transform:rotate(-45deg);"></div>
+          </div>
+          <div style="background:rgba(57,255,20,0.15);border:1px solid rgba(57,255,20,0.3);border-radius:12px 12px 2px 12px;padding:6px 10px;font-size:10px;color:#39ff14;max-width:75%;">Nosotros a las 9am 👍</div>
         </div>
-      </div>
 
-      <!-- PREVIEW DEL ROL -->
-      <div id="rol-preview-wrap" style="display:none">
-        <div class="mod-section-title">👁️ Vista previa</div>
-        <div id="rol-preview" style="background:var(--dark2);border:1px solid rgba(57,255,20,0.2);border-radius:var(--r);padding:14px"></div>
-        <button class="btn-anunciar" onclick="publicarRol()" style="margin-top:10px">
-          📣 Publicar Rol en el chat
-        </button>
-      </div>
-
-      <!-- ANUNCIO POR EQUIPO -->
-      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:16px">
-        <div class="mod-section-title">👕 Mostrar partidos de un equipo</div>
-        <div class="mod-team-select" id="mod-team-select"></div>
-        <div class="mod-preview" id="mod-preview" style="margin-top:10px">
-          <div class="mod-preview-empty">Selecciona un equipo</div>
+        <!-- burbuja izquierda -->
+        <div style="display:flex;align-items:flex-end;gap:6px;">
+          <div style="position:relative;flex-shrink:0;">
+            <img src="https://i.imgur.com/5TAVBS7.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(57,255,20,0.5);display:block;">
+            <div style="position:absolute;bottom:-2px;left:-2px;width:9px;height:9px;background:#111;border-radius:50% 0 50% 50%;transform:rotate(45deg);"></div>
+          </div>
+          <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);border-radius:12px 12px 12px 2px;padding:6px 10px;font-size:10px;color:rgba(255,255,255,0.75);max-width:75%;">Confirmado ✅ nos vemos!</div>
         </div>
-        <button class="btn-anunciar" id="btn-anunciar" disabled onclick="publicarAnuncio()" style="margin-top:10px">
-          📣 Publicar en el chat
-        </button>
-      </div>
 
-      <!-- MENSAJE MODERADOR -->
-      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:16px">
-        <div class="mod-section-title">✍️ Mensaje del moderador</div>
-        <div class="msg-row">
-          <input type="text" class="msg-input" id="mod-msg-input" placeholder="Escribe un anuncio o aviso..." onkeydown="if(event.key==='Enter')sendModMsg()">
-          <button class="btn-send" style="background:var(--mod)" onclick="sendModMsg()">Publicar</button>
+        <!-- burbuja derecha -->
+        <div style="display:flex;align-items:flex-end;gap:6px;flex-direction:row-reverse;">
+          <div style="position:relative;flex-shrink:0;">
+            <img src="https://i.imgur.com/Qrx4JSj.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(57,255,20,0.5);display:block;">
+            <div style="position:absolute;bottom:-2px;right:-2px;width:9px;height:9px;background:#111;border-radius:50% 50% 0 50%;transform:rotate(-45deg);"></div>
+          </div>
+          <div style="background:rgba(57,255,20,0.15);border:1px solid rgba(57,255,20,0.3);border-radius:12px 12px 2px 12px;padding:6px 10px;font-size:10px;color:#39ff14;max-width:75%;">🗓️ Dom · 9:00 am · Campo 1</div>
         </div>
-      </div>
 
-      <!-- ZONA PELIGROSA -->
-      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:16px">
-        <div class="mod-section-title" style="color:#f87171">⚠️ Zona peligrosa</div>
-        <button class="btn-anunciar" id="btn-limpiar" onclick="limpiarChat()" style="background:#7f1d1d;border:1px solid #f87171;margin-top:0">
-          🗑️ Limpiar chat — Nueva sesión
-        </button>
-        <div style="font-size:11px;color:var(--g500);margin-top:8px;text-align:center">Se borran todos los mensajes. No se puede deshacer.</div>
-      </div>
+        <!-- burbuja izquierda -->
+        <div style="display:flex;align-items:flex-end;gap:6px;">
+          <div style="position:relative;flex-shrink:0;">
+            <img src="https://i.imgur.com/KTMLCv9.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(57,255,20,0.5);display:block;">
+            <div style="position:absolute;bottom:-2px;left:-2px;width:9px;height:9px;background:#111;border-radius:50% 0 50% 50%;transform:rotate(45deg);"></div>
+          </div>
+          <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);border-radius:12px 12px 12px 2px;padding:6px 10px;font-size:10px;color:rgba(255,255,255,0.75);max-width:75%;">Ahí estaremos 💪🏽</div>
+        </div>
 
+      </div>
+      <a href="chat-next-level-7.html" class="car-btn" style="position:absolute;bottom:14px;left:18px;right:18px;width:auto;z-index:5;background:rgba(57,255,20,0.2);color:#39ff14;border:1px solid #39ff14;">ENTRAR AL CHAT</a>
     </div>
   </div>
+  <!-- ===== FIN NUEVA CARD ===== -->
+
+  <div class="car-flecha car-fl" onclick="carMover(-1)">&#8592;</div>
+  <div class="car-flecha car-fr" onclick="carMover(1)">&#8594;</div>
+  <div class="car-dots" id="car-dots"></div>
 </div>
 
 <script>
-// ════════════════════════════════
-//  CONFIG
-// ════════════════════════════════
-const FIREBASE_URL = 'https://liga-next-level-7-default-rtdb.firebaseio.com';
-const SHEET_ID     = '1BhDkqSWYzkahtaG19_uO28no5FQbQkDeomjZoMWBYfE';
-const GID_EQUIPOS  = '1894947293';
-const GID_PARTIDOS = '1362473459';
-const MOD_PASS     = 'nl7admin'; // ← puedes cambiar esta contraseña
+// ===== ANIMACION TITULO =====
+const palabras = ['LIGA', 'NEXT', 'LEVEL', '7'];
+const letrasEl = document.getElementById('titulo-letras');
+let letraIEl = null;
+let totalLetras = 0;
 
-// ════════════════════════════════
-//  ESTADO LOCAL
-// ════════════════════════════════
-S = {
-  teams: {},
-  matches: [],
-  capName: '',
-  teamId: null,
-  isMod: false,
-  vuelta: 1,
-  modTeamSelected: null,
-  onlineKey: null
-};
-
-// ════════════════════════════════
-//  FIREBASE HELPERS
-// ════════════════════════════════
-async function fbGet(path){
-  const r = await fetch(`${FIREBASE_URL}/${path}.json`);
-  return r.ok ? r.json() : null;
-}
-async function fbPush(path, data){
-  const r = await fetch(`${FIREBASE_URL}/${path}.json`, {
-    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)
+palabras.forEach((palabra, pi) => {
+  if (pi > 0) {
+    const esp = document.createElement('span');
+    esp.className = 'titulo-espacio';
+    letrasEl.appendChild(esp);
+  }
+  palabra.split('').forEach((ch, ci) => {
+    const span = document.createElement('span');
+    span.className = 'titulo-letra';
+    span.textContent = ch;
+    span.dataset.idx = totalLetras;
+    if (pi === 0 && ch === 'I' && !letraIEl) letraIEl = span;
+    letrasEl.appendChild(span);
+    totalLetras++;
   });
-  return r.ok ? r.json() : null;
-}
-async function fbSet(path, data){
-  await fetch(`${FIREBASE_URL}/${path}.json`, {
-    method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)
-  });
-}
-async function fbDelete(path){
-  await fetch(`${FIREBASE_URL}/${path}.json`, {method:'DELETE'});
+});
+
+let delay = 300;
+const todasLetras = document.querySelectorAll('.titulo-letra');
+todasLetras.forEach((letra, i) => {
+  setTimeout(() => {
+    letra.classList.add('animar');
+    if (letra === letraIEl) {
+      setTimeout(() => posicionarBalon(), 200);
+    }
+  }, delay);
+  delay += 80;
+});
+
+function posicionarBalon() {
+  if (!letraIEl) return;
+  const wrap = letraIEl.closest('h1');
+  const balonWrap = document.getElementById('balon-wrap');
+  const rectI = letraIEl.getBoundingClientRect();
+  const rectWrap = wrap.getBoundingClientRect();
+  const balonSize = parseInt(getComputedStyle(document.querySelector('.balon-emoji')).fontSize);
+  balonWrap.style.left = (rectI.left - rectWrap.left + rectI.width/2 - balonSize/2) + 'px';
+  balonWrap.style.top  = (-balonSize - 6) + 'px';
+  balonWrap.style.display = 'block';
 }
 
+window.addEventListener('resize', () => { if (letraIEl) posicionarBalon(); });
 
+// ===== CARRUSEL DATOS =====
+const CAR_ESTADISTICAS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=979195152&single=true&output=csv";
+const CAR_PARTIDOS     = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=1362473459&single=true&output=csv";
+const CAR_JUGADORES    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=1940220650&single=true&output=csv";
+const CAR_EVENTOS      = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=645868286&single=true&output=csv";
+const CAR_PARTIC       = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=626975401&single=true&output=csv";
 
-// ════════════════════════════════
-//  GOOGLE SHEETS
-// ════════════════════════════════
-async function fetchCSV(gid){
-  const r = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`);
-  if(!r.ok) throw new Error('No se pudo leer el Sheet (gid='+gid+'). Asegúrate de que sea público.');
-  return parseCSV(await r.text());
-}
-function parseCSV(text){
-  const lines=text.trim().split('\n');
-  if(lines.length<2)return[];
-  const sep=lines[0].includes('\t')?'\t':',';
-  const headers=csvLine(lines[0],sep).map(h=>h.toLowerCase().trim().replace(/\s+/g,'_'));
-  return lines.slice(1).map(l=>{
-    const vals=csvLine(l,sep);
+const carLogos = {"Soldados Del Amor":"https://i.imgur.com/gBvmM4v.png","Cuervos F.C":"https://i.imgur.com/fGQAhE5.png","Unión 8":"https://i.imgur.com/Qrx4JSj.png","La Garra":"https://i.imgur.com/8BWFWBW.png","Pumas KAP":"https://i.imgur.com/5TAVBS7.png","Los Chipotles":"https://i.imgur.com/KTMLCv9.png","Deportivo CT":"https://i.imgur.com/hqOAa7J.png","Gusanitos":"https://i.imgur.com/5TARJkD.png","Bacachitos":"https://i.imgur.com/ddKmNL6.png"};
+const carEqID  = {1:"Soldados Del Amor",2:"Cuervos F.C",3:"Unión 8",4:"La Garra",5:"Pumas KAP",6:"Los Chipotles",7:"Deportivo CT",8:"Gusanitos",9:"Bacachitos"};
+const carLogosID = {1:"https://i.imgur.com/gBvmM4v.png",2:"https://i.imgur.com/fGQAhE5.png",3:"https://i.imgur.com/Qrx4JSj.png",4:"https://i.imgur.com/8BWFWBW.png",5:"https://i.imgur.com/5TAVBS7.png",6:"https://i.imgur.com/KTMLCv9.png",7:"https://i.imgur.com/hqOAa7J.png",8:"https://i.imgur.com/5TARJkD.png",9:"https://i.imgur.com/ddKmNL6.png"};
+
+function carParseCSV(text) {
+  const lines = text.replace(/\r/g,'').trim().split('\n');
+  const headers = lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+  return lines.slice(1).filter(l=>l.trim()).map(line=>{
+    const vals=[]; let cur='',inQ=false;
+    for(let ch of line){ if(ch==='"') inQ=!inQ; else if(ch===','&&!inQ){vals.push(cur.trim());cur='';} else cur+=ch; }
+    vals.push(cur.trim());
     const obj={};
-    headers.forEach((h,i)=>obj[h]=(vals[i]||'').trim().replace(/^"|"$/g,''));
+    headers.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/^"|"$/g,'').trim());
     return obj;
-  }).filter(r=>Object.values(r).some(v=>v));
-}
-function csvLine(line,sep){
-  const res=[];let cur='';let q=false;
-  for(let i=0;i<line.length;i++){
-    const c=line[i];
-    if(c==='"'){q=!q}else if(c===sep&&!q){res.push(cur);cur=''}else{cur+=c}
-  }
-  res.push(cur);
-  return res;
-}
-
-// ════════════════════════════════
-//  INIT
-// ════════════════════════════════
-async function init(){
-  setP(10,'Conectando con Google Sheets...');
-  try{
-    setP(30,'Cargando equipos...');
-    const eq = await fetchCSV(GID_EQUIPOS);
-    eq.forEach(r=>{
-      const id=r['id_equipo']||r['id'];
-      if(!id||id==='10') return;
-      S.teams[id]={id, nombre:r['nombre']||'Equipo '+id, ciudad:r['ciudad']||'', logo:r['url']||r['logo']||''};
-    });
-    setP(65,'Cargando partidos...');
-    const pt = await fetchCSV(GID_PARTIDOS);
-    S.matches = pt
-      .filter(r=>(r['estado']||'').toLowerCase()==='pendiente')
-      .map(r=>({
-        id:r['id_partido']||r['id']||'',
-        jornada:r['jornada']||'',
-        local:r['equipo_local']||r['local']||'',
-        visita:r['equipo_visita']||r['visita']||'',
-        ll:r['ll']||'', lv:r['lv']||'',
-        vuelta:r['vuelta']||'1'
-      }))
-      .filter(m=>m.local&&m.visita&&m.local!=='10'&&m.visita!=='10');
-    setP(100,'¡Listo!');
-    setTimeout(()=>{
-      document.getElementById('loading-screen').style.display='none';
-      document.getElementById('login-screen').style.display='block';
-      renderTeamGrid();
-    },400);
-  }catch(e){
-    setP(100,'');
-    document.getElementById('load-msg').innerHTML=`<span style="color:#f87171">❌ ${e.message}</span>`;
-  }
-}
-
-function setP(pct,msg){
-  document.getElementById('progress').style.width=pct+'%';
-  if(msg) document.getElementById('load-msg').textContent=msg;
-}
-
-// ════════════════════════════════
-//  LOGIN
-// ════════════════════════════════
-let selectedTeamId=null;
-let isMod=false;
-
-function toggleMod(){
-  isMod=!isMod;
-  const opt=document.getElementById('mod-option');
-  const cap=document.getElementById('captain-section');
-  const pass=document.getElementById('mod-pass');
-  opt.classList.toggle('selected',isMod);
-  cap.style.display=isMod?'none':'block';
-  pass.classList.toggle('show',isMod);
-  selectedTeamId=null;
-  document.querySelectorAll('.team-btn').forEach(b=>b.classList.remove('selected'));
-  updatePreview();
-};
-
-function renderTeamGrid(){
-  const used=new Set();
-  S.matches.forEach(m=>{used.add(m.local);used.add(m.visita);});
-  const teams=Object.values(S.teams).filter(t=>used.has(t.id)).sort((a,b)=>a.nombre.localeCompare(b.nombre));
-  const grid=document.getElementById('team-grid');
-  grid.innerHTML='';
-  teams.forEach(t=>{
-    const btn=document.createElement('button');
-    btn.className='team-btn';
-    btn.innerHTML=`<img src="${t.logo}" onerror="this.style.opacity='.3'"><div><div class="team-btn-name">${t.nombre}</div><div class="team-btn-city">${t.ciudad}</div></div>`;
-    btn.onclick=()=>{selectedTeamId=t.id;document.querySelectorAll('.team-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');updatePreview();};
-    grid.appendChild(btn);
   });
 }
 
-function updatePreview(){
-  const name=document.getElementById('cap-name').value.trim();
-  const preview=document.getElementById('cap-preview');
-  const btn=document.getElementById('btn-enter');
-  const badge=document.getElementById('cap-preview-badge');
-  if(isMod){
-    const pass=document.getElementById('mod-password').value;
-    if(pass===MOD_PASS){
-      document.getElementById('cap-avatar-img').src='https://i.imgur.com/placeholder.png';
-      document.getElementById('cap-avatar-img').style.border='2px solid #a78bfa';
-      document.getElementById('cap-preview-name').textContent='Moderador';
-      document.getElementById('cap-preview-team').textContent='Liga Next Level 7 · Panel Admin';
-      badge.textContent='Moderador'; badge.className='cap-badge mod';
-      preview.classList.add('show');
-      btn.disabled=false;
-      document.getElementById('login-msg').textContent='';
-    }else if(pass.length>0){
-      document.getElementById('login-msg').className='login-msg err';
-      document.getElementById('login-msg').textContent='Contraseña incorrecta';
-      preview.classList.remove('show');
-      btn.disabled=true;
-    }else{
-      preview.classList.remove('show');
-      btn.disabled=true;
+function svgMini(tipo, num, logoUrl) {
+  const c={gold:{main:"#b8860b",detail:"#ffd700",glow:"#ffd700",text:"#3d2200"},silver:{main:"#777",detail:"#ddd",glow:"#c0c0c0",text:"#111"},blue:{main:"#0277bd",detail:"#29b6f6",glow:"#29b6f6",text:"#fff"}}[tipo];
+  const li=logoUrl?`<image href="${logoUrl}" x="255" y="120" width="100" height="100"/>`:'';
+  return `<svg viewBox="0 0 448 448" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;filter:drop-shadow(0 0 6px ${c.glow});">
+    <path fill="${c.main}" d="M176,8c-0.677-0.005-1.378,0-2.031,0.256l-95.906,24.563c-1.85,0.432-3.475,1.52-4.594,3.063L1.445,138.779c-2.195,3.145-1.86,7.406,0.813,10.156l48.063,48.906c3.126,3.139,8.217,3.139,11.344,0l18.437-18.438v192.594h15.938v52H80.101v8.063c-0.016,4.445,3.585,8.049,8.031,8.031l272.125-0.16c4.396,0,7.984-3.512,8.031-7.906l-0.064-127.781h-16.031v-52h16l-0.032-72.75l18.188,18.188c3.139,3.217,8.329,3.217,11.469,0l47.938-48.906c2.739-2.77,3.105-7.111,0.843-10.281l-72.062-102.625c-1.07-1.568-2.643-2.691-4.469-3.188l-96.031-24.437c-0.659-0.192-1.354-0.256-2.031-0.256h-6.375c-2.879-0.011-5.534,1.504-6.969,4c-7.177,12.67-20.361,20.427-34.594,20.438c-14.233-0.012-27.323-7.768-34.5-20.438c-1.451-2.533-4.142-4.055-7.063-4H176z"/>
+    <path fill="${c.detail}" opacity="0.35" d="M181.744,24.269l0.874,1.312c10.5,13.323,24.314,20.104,41.456,20.118c17.147-0.014,31.074-6.787,41.575-20.118l1.43-1.629l96.126,23.511l66.496,94.844l-37.677,38.385l-26.221-26.34c-5.037-5.115-13.747-1.52-13.701,5.668l0.242,263.977h-256.3v-263.977c-0.058-7.045-8.534-10.58-13.582-5.668l-26.457,26.457l-37.559-38.387l66.496-94.842c30.742-7.834,66.078-15.486,96.801-23.316z"/>
+    <text x="224" y="310" text-anchor="middle" font-family="Arial" font-weight="900" font-size="90" fill="${c.text}" opacity="0.85">${num}</text>
+    ${li}
+  </svg>`;
+}
+
+async function cargarCarrusel() {
+  try {
+    const [resE,resP,resJ,resEv,resPart] = await Promise.all([
+      fetch(CAR_ESTADISTICAS),fetch(CAR_PARTIDOS),fetch(CAR_JUGADORES),fetch(CAR_EVENTOS),fetch(CAR_PARTIC)
+    ]);
+    const [tE,tP,tJ,tEv,tPart] = await Promise.all([resE.text(),resP.text(),resJ.text(),resEv.text(),resPart.text()]);
+
+    const filasE=tE.trim().split('\n'); const equipos=[];
+    for(let i=1;i<filasE.length;i++){
+      const c=filasE[i].split(','); const n=(c[1]||'').trim();
+      if(n==='Descansa'||!n) continue;
+      equipos.push({ranking:Number(c[10])||999,nombre:n,pts:Number(c[9])||0});
     }
-    return;
-  }
-  document.getElementById('login-msg').textContent='';
-  if(name&&selectedTeamId){
-    const t=S.teams[selectedTeamId];
-    document.getElementById('cap-avatar-img').src=t.logo;
-    document.getElementById('cap-avatar-img').style.border='2px solid #39ff14';
-    document.getElementById('cap-preview-name').textContent=name;
-    document.getElementById('cap-preview-team').textContent=t.nombre+' · '+t.ciudad;
-    badge.textContent='Capitán'; badge.className='cap-badge eq';
-    preview.classList.add('show');
-    btn.disabled=false;
-  }else{
-    preview.classList.remove('show');
-    btn.disabled=true;
-  }
-};
-
-async function enterApp(){
-  const btn=document.getElementById('btn-enter');
-  btn.disabled=true;
-  btn.innerHTML='<span class="spinner"></span> Entrando...';
-  S.isMod=isMod;
-  if(isMod){
-    S.capName='Moderador'; S.teamId='mod';
-  }else{
-    S.capName=document.getElementById('cap-name').value.trim();
-    S.teamId=selectedTeamId;
-  }
-  // Registrar online
-  const onlineData={
-    name: S.isMod?'Moderador':S.capName,
-    team: S.isMod?'mod':S.teamId,
-    teamName: S.isMod?'Moderador':tname(S.teamId),
-    logo: S.isMod?'':tlogo(S.teamId),
-    isMod: S.isMod,
-    ts: Date.now()
-  };
-  const res=await fbPush('online',onlineData);
-  S.onlineKey=res?.name;
-
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app-screen').style.display='block';
-
-  // Header
-  document.getElementById('hdr-logo').src=S.isMod?'':tlogo(S.teamId);
-  document.getElementById('hdr-logo').className='hdr-logo'+(S.isMod?' mod-hdr':'');
-  document.getElementById('hdr-dot').className='hdr-dot'+(S.isMod?' mod-dot':'');
-  document.getElementById('hdr-dot').textContent=S.isMod?'🛡':'C';
-  document.getElementById('hdr-capname').textContent=S.isMod?'Moderador':S.capName;
-  document.getElementById('hdr-teamname').textContent=S.isMod?'Panel de administración':'Capitán · '+tname(S.teamId);
-
-  if(S.isMod){
-    document.querySelector('.mod-tab').style.display='block';
-    renderModPanel();
-    initRol();
-  }
-
-  renderPartidos();
-  startListeners();
-};
-
-async function logout(){
-  if(pollInterval){ clearInterval(pollInterval); pollInterval=null; lastMsgCount=0; }
-  if(S.onlineKey) await fbDelete('online/'+S.onlineKey);
-  S.capName=''; S.teamId=null; S.isMod=false; S.onlineKey=null;
-  isMod=false; selectedTeamId=null;
-  document.getElementById('app-screen').style.display='none';
-  document.getElementById('login-screen').style.display='block';
-  document.getElementById('cap-name').value='';
-  document.getElementById('mod-password').value='';
-  document.getElementById('cap-preview').classList.remove('show');
-  document.getElementById('btn-enter').disabled=true;
-  document.getElementById('btn-enter').textContent='Entrar →';
-  document.getElementById('mod-option').classList.remove('selected');
-  document.getElementById('captain-section').style.display='block';
-  document.getElementById('mod-pass').classList.remove('show');
-  document.querySelectorAll('.team-btn').forEach(b=>b.classList.remove('selected'));
-  document.getElementById('login-msg').textContent='';
-  document.querySelector('.mod-tab').style.display='none';
-};
-
-// ════════════════════════════════
-//  POLLING (tiempo real cada 2s)
-// ════════════════════════════════
-let pollInterval=null;
-let lastMsgCount=0;
-
-function startListeners(){
-  // Carga inicial
-  pollChat();
-  pollOnline();
-  // Polling cada 2 segundos
-  pollInterval=setInterval(()=>{
-    pollChat();
-    pollOnline();
-  },2000);
-}
-
-async function pollChat(){
-  const data=await fbGet('chat');
-  const count=data?Object.keys(data).length:0;
-  // Solo re-renderizar si hay mensajes nuevos
-  if(count!==lastMsgCount){
-    lastMsgCount=count;
-    renderMessages(data);
-  }
-}
-
-async function pollOnline(){
-  const data=await fbGet('online');
-  renderOnline(data);
-}
-
-// ════════════════════════════════
-//  MENCIONES
-// ════════════════════════════════
-function onMsgInput(inp){
-  const val=inp.value;
-  const atIdx=val.lastIndexOf('@');
-  if(atIdx===-1){ hideMentions(); return; }
-  const query=val.slice(atIdx+1).toLowerCase();
-  const matches=Object.values(S.teams).filter(t=>t.nombre.toLowerCase().includes(query)).slice(0,5);
-  if(!matches.length){ hideMentions(); return; }
-  const list=document.getElementById('mention-list');
-  list.style.display='block';
-  list.innerHTML=matches.map(t=>`
-    <div onclick="insertMention('${t.nombre}')" style="display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);transition:background .1s" onmouseover="this.style.background='rgba(57,255,20,0.08)'" onmouseout="this.style.background='transparent'">
-      <img src="${t.logo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid rgba(57,255,20,0.3)">
-      <span style="font-size:13px;font-weight:600;color:#fff">@${t.nombre}</span>
-    </div>`).join('');
-}
-
-function insertMention(nombre){
-  const inp=document.getElementById('msg-input');
-  const val=inp.value;
-  const atIdx=val.lastIndexOf('@');
-  inp.value=val.slice(0,atIdx)+'@'+nombre+' ';
-  hideMentions();
-  inp.focus();
-}
-
-function hideMentions(){
-  const list=document.getElementById('mention-list');
-  if(list) list.style.display='none';
-}
-
-// Extraer menciones del texto
-function extractMentions(text){
-  const found=[];
-  Object.values(S.teams).forEach(t=>{
-    if(text.includes('@'+t.nombre)) found.push(t.id);
-  });
-  return found;
-}
-
-// Sonido de notificación (Web Audio API)
-function playNotif(){
-  try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const osc=ctx.createOscillator();
-    const gain=ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.frequency.setValueAtTime(880,ctx.currentTime);
-    osc.frequency.setValueAtTime(1100,ctx.currentTime+0.1);
-    gain.gain.setValueAtTime(0.3,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime+0.4);
-  }catch(e){}
-}
-
-// Resaltar menciones en el texto
-function resaltarMenciones(text){
-  let result=esc(text);
-  Object.values(S.teams).forEach(t=>{
-    const tag='@'+t.nombre;
-    const esTag=esc(tag);
-    const isMine=t.id===S.teamId;
-    const color=isMine?'#39ff14':'#a78bfa';
-    const bg=isMine?'rgba(57,255,20,0.15)':'rgba(167,139,250,0.15)';
-    result=result.split(esTag).join(`<span style="color:${color};background:${bg};padding:1px 6px;border-radius:6px;font-weight:700">${esTag}</span>`);
-  });
-  return result;
-}
-
-// ════════════════════════════════
-//  CHAT
-// ════════════════════════════════
-async function sendMsg(){
-  const inp=document.getElementById('msg-input');
-  const text=inp.value.trim();
-  if(!text) return;
-  inp.value='';
-  hideMentions();
-  const mentions=extractMentions(text);
-  await fbPush('chat',{
-    type:'msg',
-    sender: S.isMod?'mod':S.teamId,
-    senderName: S.isMod?'Moderador':S.capName+' ('+tname(S.teamId)+')',
-    senderLogo: S.isMod?'':tlogo(S.teamId),
-    isMod: S.isMod,
-    mentions, text, ts:Date.now(),
-    time: now()
-  });
-};
-
-async function sendModMsg(){
-  const inp=document.getElementById('mod-msg-input');
-  const text=inp.value.trim();
-  if(!text) return;
-  inp.value='';
-  await fbPush('chat',{
-    type:'mod_msg',
-    senderName:'Moderador',
-    text, ts:Date.now(), time:now()
-  });
-};
-
-function renderMessages(data){
-  const container=document.getElementById('chat-messages');
-  if(!data){ container.innerHTML='<div class="empty"><div class="empty-icon">💬</div><div>Sé el primero en escribir</div></div>'; return; }
-  const msgs=Object.values(data).sort((a,b)=>(a.ts||0)-(b.ts||0));
-
-  // Detectar si hay mensajes nuevos que me mencionan
-  const newCount=msgs.length;
-  if(newCount>lastMsgCount && lastMsgCount>0){
-    const newMsgs=msgs.slice(lastMsgCount);
-    newMsgs.forEach(msg=>{
-      if(msg.mentions && Array.isArray(msg.mentions) && msg.mentions.includes(S.teamId) && msg.sender!==S.teamId){
-        playNotif();
-        // Flash en el tab
-        const tab=document.querySelector('[data-tab="chat"]');
-        if(tab){ tab.style.background='rgba(57,255,20,0.2)'; setTimeout(()=>tab.style.background='',1500); }
-      }
-    });
-  }
-
-  let html='';
-  let lastDate='';
-  msgs.forEach(msg=>{
-    const d=msg.ts?new Date(msg.ts).toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'}):'';
-    if(d&&d!==lastDate){ html+=`<div class="date-sep">${d}</div>`; lastDate=d; }
-
-    if(msg.type==='anuncio'){
-      html+=renderAnuncio(msg);
-    }else if(msg.type==='rol'){
-      html+=renderRol(msg);
-    }else if(msg.type==='mod_msg'){
-      html+=`<div class="bubble sys-bubble">
-        <div class="bub-text">🛡️ <strong>Moderador:</strong> ${resaltarMenciones(msg.text)}</div>
-        <div class="bub-time">${msg.time||''}</div>
-      </div>`;
-    }else{
-      const mine=(!S.isMod&&msg.sender===S.teamId)||(S.isMod&&msg.sender==='mod');
-      // Resaltar burbuja si me mencionan
-      const mecionaMe=msg.mentions&&Array.isArray(msg.mentions)&&msg.mentions.includes(S.teamId)&&!mine;
-      html+=`<div class="bubble ${mine?'mine':'theirs'}" style="${mecionaMe?'border-left:3px solid #39ff14;padding-left:8px;':''}" >
-        <div class="bub-meta">
-          <img class="bub-av" src="${msg.senderLogo||''}" onerror="this.style.opacity='.2'">
-          <span class="bub-name${msg.isMod?' mod-name':''}">${esc(msg.senderName||'')}</span>
-          ${mecionaMe?'<span style="font-size:10px;background:rgba(57,255,20,0.2);color:#39ff14;padding:1px 6px;border-radius:8px;margin-left:4px;">@ te mencionaron</span>':''}
-        </div>
-        <div class="bub-text">${resaltarMenciones(msg.text)}</div>
-        <div class="bub-time">${msg.time||''}</div>
-      </div>`;
+    equipos.sort((a,b)=>a.ranking-b.ranking);
+    const top3eq = equipos.slice(0,3);
+    let htmlTabla='';
+    if (top3eq.length) {
+      const claves = ['piramide-1','piramide-2','piramide-3'];
+      htmlTabla = '<div class="piramide-wrap">';
+      top3eq.forEach((e, i) => {
+        htmlTabla += `
+          <div class="${claves[i]}">
+            <div class="podio-frame">
+              <img src="podio.png" class="podio-bg" onerror="this.style.display='none'">
+              <div class="podio-content-box">
+                <span class="podio-medal-num">${i+1}</span>
+                <img src="${carLogos[e.nombre]||''}" class="pc-escudo" onerror="this.style.display='none'">
+              </div>
+            </div>
+            <div class="podio-info">
+              <div class="podio-nombre2">${e.nombre}</div>
+              <div class="podio-pts2">${e.pts} PTS</div>
+            </div>
+          </div>`;
+      });
+      htmlTabla += '</div>';
     }
-  });
-  container.innerHTML=html||'<div class="empty"><div class="empty-icon">💬</div><div>Sé el primero en escribir</div></div>';
-  container.scrollTop=container.scrollHeight;
-}
+    document.getElementById('car-tabla').innerHTML=htmlTabla||'<div class="car-cargando">Sin datos</div>';
 
-function renderAnuncio(msg){
-  const matches=msg.matches||[];
-  let matchesHtml='';
-  matches.forEach(m=>{
-    matchesHtml+=`<div class="anuncio-match">
-      <div class="anuncio-logos">
-        <img src="${m.ll||''}" width="28" height="28" style="border-radius:50%;object-fit:cover" onerror="this.style.opacity='.2'">
-        <span class="anuncio-vs">vs</span>
-        <img src="${m.lv||''}" width="28" height="28" style="border-radius:50%;object-fit:cover" onerror="this.style.opacity='.2'">
-      </div>
-      <div class="anuncio-info">
-        <div class="anuncio-teams">${esc(m.local)} vs ${esc(m.visita)}</div>
-        <div class="anuncio-meta">Jornada ${m.jornada||'?'} · Vuelta ${m.vuelta||1}</div>
-      </div>
-    </div>`;
-  });
-  return `<div class="anuncio-card">
-    <div class="anuncio-header">
-      <span class="anuncio-badge">🛡️ Moderador</span>
-    </div>
-    <div class="anuncio-team">📋 Partidos pendientes: <strong>${esc(msg.teamName||'')}</strong></div>
-    <div class="anuncio-matches">${matchesHtml}</div>
-    <div class="anuncio-time">${msg.time||''}</div>
-  </div>`;
-}
-
-// ════════════════════════════════
-//  ONLINE USERS
-// ════════════════════════════════
-function renderOnline(data){
-  const container=document.getElementById('online-avatars');
-  if(!data){ container.innerHTML=''; return; }
-  // Limpiar entradas viejas (>5 min)
-  const now5=Date.now()-5*60*1000;
-  const users=Object.values(data).filter(u=>!u.ts||u.ts>now5);
-  if(!users.length){ container.innerHTML='<span style="font-size:12px;color:var(--g500)">Nadie conectado aún</span>'; return; }
-  container.innerHTML=users.map(u=>`
-    <div class="online-chip ${u.isMod?'mod-chip':''}">
-      <img src="${u.logo||''}" onerror="this.style.display='none'">
-      <span>${esc(u.isMod?'🛡️ Mod':u.name)}</span>
-      <div class="online-dot"></div>
-    </div>`).join('');
-}
-
-// ════════════════════════════════
-//  PARTIDOS
-// ════════════════════════════════
-function renderPartidos(){
-  const tid=S.teamId;
-  const mine=S.matches.filter(m=>(m.local===tid||m.visita===tid)&&m.vuelta==='1');
-  const v2=S.matches.filter(m=>(m.local===tid||m.visita===tid)&&m.vuelta==='2');
-  let html=`<div class="stats-row">
-    <div class="stat-card"><div class="stat-num">${mine.length+v2.length}</div><div class="stat-label">Total pendientes</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:#f59e0b">${mine.length}</div><div class="stat-label">Vuelta 1</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--g500)">${v2.length}</div><div class="stat-label">Vuelta 2</div></div>
-  </div>`;
-  if(mine.length){
-    html+='<div class="sec-title">🔜 Vuelta 1 — Pendientes</div>';
-    mine.forEach(m=>{html+=matchCardHTML(m);});
-  }
-  if(v2.length){
-    html+='<div class="sec-title" style="margin-top:16px;color:var(--g500)">🔄 Vuelta 2 — Pendientes</div>';
-    v2.forEach(m=>{html+=matchCardHTML(m);});
-  }
-  if(!mine.length&&!v2.length) html='<div class="empty"><div class="empty-icon">🎉</div><div>No tienes partidos pendientes</div></div>';
-  document.getElementById('tab-partidos-content').innerHTML=html;
-}
-
-function matchCardHTML(m){
-  const ll=m.ll||tlogo(m.local); const lv=m.lv||tlogo(m.visita);
-  return `<div class="match-card pend">
-    <div class="logos-vs">
-      <img class="logo-sm" src="${ll}" onerror="this.style.opacity='.2'">
-      <span class="vs-lbl">VS</span>
-      <img class="logo-sm" src="${lv}" onerror="this.style.opacity='.2'">
-    </div>
-    <div class="match-info">
-      <div class="match-teams">${tname(m.local)} vs ${tname(m.visita)}</div>
-      <div class="match-meta">Jornada ${m.jornada||'?'} · Vuelta ${m.vuelta||1}</div>
-    </div>
-    <span class="badge bp">Pendiente</span>
-  </div>`;
-}
-
-// ════════════════════════════════
-//  ROL DEL DOMINGO
-// ════════════════════════════════
-const HORARIOS_DEFAULT = ['09:00','10:00','11:00','12:00'];
-let rolSlots = []; // [{hora, matchId, localId, visitaId}]
-
-function initRol(){
-  // Fecha default: próximo domingo
-  const hoy = new Date();
-  const dia = hoy.getDay();
-  const diasHastaDom = dia===0 ? 7 : 7-dia;
-  const dom = new Date(hoy);
-  dom.setDate(hoy.getDate()+diasHastaDom);
-  document.getElementById('rol-fecha').value = dom.toISOString().split('T')[0];
-  rolSlots = [];
-  document.getElementById('rol-slots').innerHTML = '';
-  document.getElementById('rol-preview-wrap').style.display = 'none';
-}
-
-function addSlot(hora, matchId){
-  const vuelta = String(S.vuelta);
-  const pending = S.matches.filter(m => m.vuelta===vuelta);
-  const idx = rolSlots.length;
-  const horaDefault = hora || HORARIOS_DEFAULT[idx] || '09:00';
-
-  // Equipos ya usados (los que jugaron ya ese domingo) — permitir hasta 2 veces
-  const usados = {};
-  rolSlots.forEach(s=>{
-    if(s.localId){ usados[s.localId]=(usados[s.localId]||0)+1; }
-    if(s.visitaId){ usados[s.visitaId]=(usados[s.visitaId]||0)+1; }
-  });
-
-  // Partidos disponibles (ningún equipo más de 2 veces)
-  const disponibles = pending.filter(m=>{
-    const lUsos = usados[m.local]||0;
-    const vUsos = usados[m.visita]||0;
-    return lUsos < 2 && vUsos < 2;
-  });
-
-  const slot = { hora: horaDefault, matchId: matchId || (disponibles[0]?.id||''), localId:'', visitaId:'' };
-  if(slot.matchId){
-    const m = S.matches.find(x=>x.id===slot.matchId);
-    if(m){ slot.localId=m.local; slot.visitaId=m.visita; }
-  }
-  rolSlots.push(slot);
-  renderSlots();
-}
-
-function removeSlot(idx){
-  rolSlots.splice(idx,1);
-  renderSlots();
-}
-
-function renderSlots(){
-  const vuelta = String(S.vuelta);
-  const pending = S.matches.filter(m=>m.vuelta===vuelta);
-  const container = document.getElementById('rol-slots');
-
-  container.innerHTML = rolSlots.map((slot,idx)=>{
-    // Calcular usos excluyendo este slot
-    const usados = {};
-    rolSlots.forEach((s,i)=>{
-      if(i===idx) return;
-      if(s.localId){ usados[s.localId]=(usados[s.localId]||0)+1; }
-      if(s.visitaId){ usados[s.visitaId]=(usados[s.visitaId]||0)+1; }
-    });
-
-    const disponibles = pending.filter(m=>{
-      const lUsos = usados[m.local]||0;
-      const vUsos = usados[m.visita]||0;
-      return lUsos<2 && vUsos<2;
-    });
-
-    const options = disponibles.map(m=>
-      `<option value="${m.id}" ${m.id===slot.matchId?'selected':''}>
-        ${tname(m.local)} vs ${tname(m.visita)} (J${m.jornada})
-      </option>`
-    ).join('');
-
-    const ll = slot.localId ? (S.matches.find(m=>m.id===slot.matchId)?.ll || tlogo(slot.localId)) : '';
-    const lv = slot.visitaId ? (S.matches.find(m=>m.id===slot.matchId)?.lv || tlogo(slot.visitaId)) : '';
-
-    return `<div style="display:flex;align-items:center;gap:8px;background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:var(--rs);padding:10px 12px;">
-      <input type="time" value="${slot.hora}" onchange="updateSlotHora(${idx},this.value)" style="padding:6px 8px;background:var(--dark);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:var(--neon);font-size:13px;font-weight:700;width:90px;flex-shrink:0">
-      ${ll?`<img src="${ll}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.opacity='.2'">`:
-           `<div style="width:28px;height:28px;border-radius:50%;background:var(--dark3);flex-shrink:0"></div>`}
-      <select onchange="updateSlotMatch(${idx},this.value)" style="flex:1;padding:7px 8px;background:var(--dark);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:var(--w);font-size:12px;min-width:0">
-        <option value="">-- Seleccionar partido --</option>
-        ${options}
-      </select>
-      ${lv?`<img src="${lv}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.opacity='.2'">`:
-           `<div style="width:28px;height:28px;border-radius:50%;background:var(--dark3);flex-shrink:0"></div>`}
-      <button onclick="removeSlot(${idx})" style="background:none;border:none;color:#f87171;font-size:16px;cursor:pointer;flex-shrink:0;padding:0 4px">✕</button>
-    </div>`;
-  }).join('');
-
-  updateRolPreview();
-}
-
-function updateSlotHora(idx, hora){
-  rolSlots[idx].hora = hora;
-  updateRolPreview();
-}
-
-function updateSlotMatch(idx, matchId){
-  rolSlots[idx].matchId = matchId;
-  if(matchId){
-    const m = S.matches.find(x=>x.id===matchId);
-    if(m){ rolSlots[idx].localId=m.local; rolSlots[idx].visitaId=m.visita; }
-  } else {
-    rolSlots[idx].localId=''; rolSlots[idx].visitaId='';
-  }
-  renderSlots();
-}
-
-function autoRol(){
-  // Auto-proponer 4 partidos pendientes sin repetir equipo
-  const vuelta = String(S.vuelta);
-  const pending = [...S.matches.filter(m=>m.vuelta===vuelta)];
-  rolSlots = [];
-  const usados = new Set();
-  const seleccionados = [];
-
-  for(let m of pending){
-    if(seleccionados.length>=4) break;
-    if(!usados.has(m.local) && !usados.has(m.visita)){
-      seleccionados.push(m);
-      usados.add(m.local);
-      usados.add(m.visita);
+    const filasP=tP.trim().split('\n'); const jugados=[],programados=[];
+    for(let i=1;i<filasP.length;i++){
+      const c=filasP[i].split(','); const estado=(c[6]||'').trim();
+      const local=carEqID[Number(c[2])]||'', visita=carEqID[Number(c[3])]||'';
+      const p={local,visita,gl:c[4]||'',gv:c[5]||'',fecha:(c[8]||'').trim()};
+      if(estado==='Jugado') jugados.push(p);
+      if(estado==='Programado') programados.push(p);
     }
-  }
 
-  seleccionados.forEach((m,i)=>{
-    rolSlots.push({
-      hora: HORARIOS_DEFAULT[i]||'09:00',
-      matchId: m.id,
-      localId: m.local,
-      visitaId: m.visita
+    let htmlRes='';
+    if(jugados.length){
+      const fu=jugados[jugados.length-1].fecha;
+      if(fu) htmlRes=`<div style="font-size:10px;color:#ffd700;text-align:center;margin-bottom:6px;">${fu}</div>`;
+      jugados.filter(p=>p.fecha===fu).slice(0,4).forEach(p=>{
+        htmlRes+=`<div class="mini-fila"><img src="${carLogos[p.local]||''}" onerror="this.style.display='none'"><span style="flex:1;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.local}</span><span class="mini-marcador">${p.gl}-${p.gv}</span><span style="flex:1;font-size:10px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.visita}</span><img src="${carLogos[p.visita]||''}" onerror="this.style.display='none'"></div>`;
+      });
+    }
+    document.getElementById('car-resultados').innerHTML=htmlRes||'<div class="car-cargando">Sin resultados</div>';
+
+    let htmlProx='';
+    if(programados.length){
+      const fp=programados[0].fecha;
+      if(fp) htmlProx=`<div style="font-size:10px;color:#ff5096;text-align:center;margin-bottom:6px;">${fp}</div>`;
+      programados.filter(p=>p.fecha===fp).slice(0,4).forEach(p=>{
+        htmlProx+=`<div class="mini-fila"><img src="${carLogos[p.local]||''}" onerror="this.style.display='none'"><span style="flex:1;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.local}</span><span class="mini-vs">VS</span><span style="flex:1;font-size:10px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.visita}</span><img src="${carLogos[p.visita]||''}" onerror="this.style.display='none'"></div>`;
+      });
+    }
+    document.getElementById('car-proxima').innerHTML=htmlProx||'<div class="car-cargando">Sin partidos programados</div>';
+
+    const jugadores=carParseCSV(tJ), eventos=carParseCSV(tEv), partic=carParseCSV(tPart);
+    const golMap={}, partMap={};
+    eventos.filter(e=>e.Tipo_Evento==='Gol').forEach(e=>{golMap[e.Jugador]=(golMap[e.Jugador]||0)+1;});
+    partic.filter(p=>p.Asistio==='TRUE').forEach(p=>{partMap[p.Jugador]=(partMap[p.Jugador]||0)+1;});
+
+    const jornadasJugadas = new Set();
+    filasP.slice(1).forEach(line => {
+      const c = line.split(',');
+      if ((c[6]||'').trim() === 'Jugado' && c[1]) jornadasJugadas.add(c[1].trim());
     });
-  });
+    const totalJornadas = jornadasJugadas.size || 1;
 
-  renderSlots();
-  document.getElementById('rol-preview-wrap').style.display='block';
+    const top3=jugadores.filter(j=>golMap[j.ID_Jugador]>0)
+      .map(j=>({nombre:j.Nombre||'',equipoID:Number(j.Equipo),numero:j.Numero||'-',goles:golMap[j.ID_Jugador]||0,partidosJugados:partMap[j.ID_Jugador]||0}))
+      .sort((a,b)=>b.goles-a.goles).slice(0,3);
+
+    let htmlGoles='';
+    if(top3.length){
+      const tg=['gold','silver','blue'], med=['🥇','🥈','🥉'];
+      const claves = ['piramide-1','piramide-2','piramide-3'];
+      htmlGoles = '<div class="piramide-wrap">';
+      top3.forEach((j,i)=>{
+        const pct = Math.min(100, Math.round((j.partidosJugados / totalJornadas) * 100));
+        htmlGoles += `
+          <div class="${claves[i]}">
+            <div class="fifa-mini-medal">${med[i]}</div>
+            <div class="fifa-mini ${tg[i]}">
+              <div class="mn-shimmer"></div>
+              <div class="mn-svg">${svgMini(tg[i],j.numero,carLogosID[j.equipoID]||'')}</div>
+              <div class="mn-nombre">${j.nombre}</div>
+              <div class="mn-sep"></div>
+              <div class="mn-stats">
+                <div class="mn-stat"><div class="mn-val">${j.goles}</div><div class="mn-lbl">GOLES</div></div>
+                <div class="mn-stat"><div class="mn-val">${pct}%</div><div class="mn-lbl">ASIST</div></div>
+              </div>
+            </div>
+          </div>`;
+      });
+      htmlGoles += '</div>';
+    } else { htmlGoles='<div class="car-cargando">Sin goles aún</div>'; }
+    document.getElementById('car-goles').innerHTML=htmlGoles;
+
+  } catch(e){ console.error(e); }
 }
 
-function updateRolPreview(){
-  const fecha = document.getElementById('rol-fecha').value;
-  const fechaStr = fecha ? new Date(fecha+'T12:00:00').toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'}) : 'Domingo pendiente';
-  const filled = rolSlots.filter(s=>s.matchId);
+// ===== CARRUSEL LOGIC =====
+const carCards=document.querySelectorAll('.card-sec'), carTotal=carCards.length;
+let carActivo=0;
 
-  if(!filled.length){
-    document.getElementById('rol-preview-wrap').style.display='none';
-    return;
-  }
-  document.getElementById('rol-preview-wrap').style.display='block';
-
-  let html = `<div style="text-align:center;font-size:13px;font-weight:700;color:var(--neon);margin-bottom:12px;text-transform:capitalize">📅 ${fechaStr}</div>`;
-  filled.forEach(slot=>{
-    const m = S.matches.find(x=>x.id===slot.matchId);
-    if(!m) return;
-    const ll = m.ll||tlogo(m.local);
-    const lv = m.lv||tlogo(m.visita);
-    html+=`<div style="display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--dark3);border-radius:var(--rs);margin-bottom:6px;border:1px solid rgba(255,255,255,.05)">
-      <span style="font-size:14px;font-weight:800;color:var(--neon);min-width:52px">${slot.hora}</span>
-      <img src="${ll}" style="width:30px;height:30px;border-radius:50%;object-fit:cover" onerror="this.style.opacity='.2'">
-      <span style="flex:1;font-size:12px;font-weight:600;color:var(--w)">${tname(m.local)}</span>
-      <span style="font-size:11px;color:var(--g500);font-weight:700">VS</span>
-      <span style="flex:1;font-size:12px;font-weight:600;color:var(--w);text-align:right">${tname(m.visita)}</span>
-      <img src="${lv}" style="width:30px;height:30px;border-radius:50%;object-fit:cover" onerror="this.style.opacity='.2'">
-    </div>`;
+function carActualizar(){
+  carCards.forEach((card,i)=>{
+    card.className=card.className.replace(/\b(c|l1|l2|r1|r2)\b/g,'').trim();
+    const diff=((i-carActivo)%carTotal+carTotal)%carTotal;
+    let cls='';
+    if(diff===0) cls='c';
+    else if(diff===1) cls='r1';
+    else if(diff===2) cls='r2';
+    else if(diff===carTotal-1) cls='l1';
+    else if(diff===carTotal-2) cls='l2';
+    if(cls) card.classList.add(cls);
   });
-  document.getElementById('rol-preview').innerHTML = html;
+  document.querySelectorAll('.car-dot').forEach((d,i)=>d.classList.toggle('on',i===carActivo));
 }
 
-async function publicarRol(){
-  const fecha = document.getElementById('rol-fecha').value;
-  const fechaStr = fecha ? new Date(fecha+'T12:00:00').toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'}) : 'Domingo';
-  const filled = rolSlots.filter(s=>s.matchId);
-  if(!filled.length) return;
+function carMover(dir){ carActivo=((carActivo+dir)%carTotal+carTotal)%carTotal; carActualizar(); }
 
-  const partidos = filled.map(slot=>{
-    const m = S.matches.find(x=>x.id===slot.matchId);
-    return {
-      hora: slot.hora,
-      local: tname(m.local),
-      visita: tname(m.visita),
-      ll: m.ll||tlogo(m.local),
-      lv: m.lv||tlogo(m.visita),
-      jornada: m.jornada,
-      vuelta: m.vuelta
-    };
+const carDotsEl=document.getElementById('car-dots');
+carCards.forEach((_,i)=>{
+  const d=document.createElement('div'); d.className='car-dot'+(i===0?' on':'');
+  d.onclick=()=>{carActivo=i;carActualizar();}; carDotsEl.appendChild(d);
+});
+
+carCards.forEach((card,i)=>{
+  card.addEventListener('click',e=>{
+    if(!card.classList.contains('c')){ e.preventDefault(); e.stopPropagation(); carActivo=i; carActualizar(); }
   });
+});
 
-  await fbPush('chat',{
-    type:'rol',
-    fecha: fechaStr,
-    fechaRaw: fecha,
-    partidos,
-    ts: Date.now(),
-    time: now()
-  });
+let carTx=0;
+document.getElementById('carrusel-wrap').addEventListener('touchstart',e=>{carTx=e.touches[0].clientX;});
+document.getElementById('carrusel-wrap').addEventListener('touchend',e=>{
+  const d=carTx-e.changedTouches[0].clientX; if(Math.abs(d)>50) carMover(d>0?1:-1);
+});
 
-  switchTab('chat');
-}
-
-// Render del rol en el chat
-function renderRol(msg){
-  const partidos = msg.partidos||[];
-  let html=`<div class="anuncio-card" style="border-color:rgba(57,255,20,0.4)">
-    <div class="anuncio-header">
-      <span class="anuncio-badge" style="background:var(--neon-dim);color:var(--neon);border-color:rgba(57,255,20,0.3)">📋 Rol del Domingo</span>
-    </div>
-    <div style="text-align:center;font-size:14px;font-weight:700;color:var(--neon);margin-bottom:10px;text-transform:capitalize">📅 ${esc(msg.fecha||'')}</div>`;
-
-  partidos.forEach(p=>{
-    html+=`<div style="display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--dark3);border-radius:var(--rs);margin-bottom:6px;border:1px solid rgba(255,255,255,.05)">
-      <span style="font-size:14px;font-weight:800;color:var(--neon);min-width:52px">${esc(p.hora)}</span>
-      <img src="${p.ll}" style="width:30px;height:30px;border-radius:50%;object-fit:cover" onerror="this.style.opacity='.2'">
-      <span style="flex:1;font-size:12px;font-weight:600;color:var(--w)">${esc(p.local)}</span>
-      <span style="font-size:11px;color:var(--g500);font-weight:700">VS</span>
-      <span style="flex:1;font-size:12px;font-weight:600;color:var(--w);text-align:right">${esc(p.visita)}</span>
-      <img src="${p.lv}" style="width:30px;height:30px;border-radius:50%;object-fit:cover" onerror="this.style.opacity='.2'">
-    </div>`;
-  });
-
-  html+=`<div class="anuncio-time">${msg.time||''} · Vuelta ${partidos[0]?.vuelta||1}</div></div>`;
-  return html;
-}
-
-
-function renderModPanel(){
-  const grid=document.getElementById('mod-team-select');
-  grid.innerHTML='';
-  Object.values(S.teams).sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(t=>{
-    const btn=document.createElement('button');
-    btn.className='mod-team-btn';
-    btn.innerHTML=`<img src="${t.logo}" onerror="this.style.opacity='.3'"><span>${t.nombre}</span>`;
-    btn.onclick=()=>{
-      S.modTeamSelected=t.id;
-      document.querySelectorAll('.mod-team-btn').forEach(b=>b.classList.remove('selected'));
-      btn.classList.add('selected');
-      renderModPreview();
-    };
-    grid.appendChild(btn);
-  });
-}
-
-function renderModPreview(){
-  const id=S.modTeamSelected;
-  if(!id){ document.getElementById('mod-preview').innerHTML='<div class="mod-preview-empty">Selecciona un equipo</div>'; return; }
-  const vuelta=String(S.vuelta);
-  const mine=S.matches.filter(m=>(m.local===id||m.visita===id)&&m.vuelta===vuelta);
-  let html='';
-  if(!mine.length){
-    html=`<div class="mod-preview-empty">No hay partidos pendientes en Vuelta ${vuelta}</div>`;
-    document.getElementById('btn-anunciar').disabled=true;
-  }else{
-    mine.forEach(m=>{
-      html+=`<div class="mod-match-row">
-        <img src="${m.ll||tlogo(m.local)}" onerror="this.style.opacity='.2'">
-        <div>
-          <div class="mod-match-name">${tname(m.local)} vs ${tname(m.visita)}</div>
-          <div class="mod-match-meta">Jornada ${m.jornada||'?'} · Vuelta ${vuelta}</div>
-        </div>
-        <img src="${m.lv||tlogo(m.visita)}" onerror="this.style.opacity='.2'">
-      </div>`;
-    });
-    document.getElementById('btn-anunciar').disabled=false;
-  }
-  document.getElementById('mod-preview').innerHTML=html;
-}
-
-function setVuelta(v){
-  S.vuelta=v;
-  document.getElementById('vbtn1').className='vbtn'+(v===1?' active':'');
-  document.getElementById('vbtn2').className='vbtn'+(v===2?' active':'');
-  if(S.modTeamSelected) renderModPreview();
-};
-
-async function publicarAnuncio(){
-  const id=S.modTeamSelected;
-  if(!id) return;
-  const vuelta=String(S.vuelta);
-  const mine=S.matches.filter(m=>(m.local===id||m.visita===id)&&m.vuelta===vuelta)
-    .map(m=>({local:tname(m.local),visita:tname(m.visita),jornada:m.jornada,vuelta:m.vuelta,ll:m.ll||tlogo(m.local),lv:m.lv||tlogo(m.visita)}));
-  if(!mine.length) return;
-  await fbPush('chat',{
-    type:'anuncio',
-    teamName: tname(id),
-    matches: mine,
-    ts:Date.now(), time:now()
-  });
-  document.getElementById('btn-anunciar').textContent='✅ Publicado';
-  setTimeout(()=>{ document.getElementById('btn-anunciar').innerHTML='📣 Publicar en el chat general'; },2000);
-  switchTab('chat');
-};
-
-async function limpiarChat(){
-  const confirmar = confirm('¿Seguro que quieres limpiar el chat?\n\nSe borrarán todos los mensajes anteriores y empezará sesión nueva.\n\nEsta acción no se puede deshacer.');
-  if(!confirmar) return;
-  const btn = document.getElementById('btn-limpiar');
-  btn.disabled=true;
-  btn.textContent='Limpiando...';
-  await fbDelete('chat');
-  lastMsgCount=0;
-  // Mensaje de bienvenida de nueva sesión
-  await fbPush('chat',{
-    type:'mod_msg',
-    senderName:'Moderador',
-    text:'🏁 Nueva sesión iniciada. ¡Buenas noches a todos! Coordinen sus partidos aquí.',
-    ts:Date.now(), time:now()
-  });
-  btn.disabled=false;
-  btn.innerHTML='🗑️ Limpiar chat — Nueva sesión';
-  switchTab('chat');
-}
-
-
-function switchTab(tab){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t=>{t.style.display='none';t.classList.remove('active');});
-  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-  const el=document.getElementById('tab-'+tab);
-  el.style.display='flex'; el.classList.add('active');
-  if(tab==='chat'){ setTimeout(()=>{ const c=document.getElementById('chat-messages'); c.scrollTop=c.scrollHeight; },100); }
-};
-
-function tname(id){ return (S.teams[id]||{}).nombre||'Equipo '+id; }
-function tlogo(id){ return (S.teams[id]||{}).logo||''; }
-function now(){ return new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}); }
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-// Limpiar online al cerrar
-window.addEventListener('beforeunload',()=>{ if(S.onlineKey) fbDelete('online/'+S.onlineKey); });
-
-init();
+setInterval(()=>carMover(1),5000);
+carActualizar();
+cargarCarrusel();
 </script>
 </body>
 </html>

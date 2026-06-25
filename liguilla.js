@@ -45,14 +45,14 @@ function esPD(val) {
 function crearEquipo(nombre, url, color) {
     const nom = esPD(nombre) ? "Por Definir" : nombre.trim();
     const logo = (url && url.trim().startsWith("http"))
-        ? `<img src="${url.trim()}" style="width:52px;height:52px;object-fit:contain;border-radius:50%;flex-shrink:0;filter:drop-shadow(0 0 6px ${color.border});" onerror="this.style.display='none'">`
-        : `<div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">⚽</div>`;
-    return `<div style="display:flex;align-items:center;gap:10px;margin:5px 0;">
+        ? `<img src="${url.trim()}" style="width:48px;height:48px;object-fit:contain;border-radius:50%;flex-shrink:0;filter:drop-shadow(0 0 6px ${color.border});" onerror="this.style.display='none'">`
+        : `<div style="width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">⚽</div>`;
+    return `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
         ${logo}
-        <div style="border:2px solid ${color.border};border-radius:25px;padding:7px 16px;
-            box-shadow:0 0 10px ${color.glow};background:transparent;flex:1;min-width:0;">
-            <span style="color:#fff;font-weight:800;font-size:13px;letter-spacing:0.5px;
-                text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;">
+        <div style="border:2px solid ${color.border};border-radius:25px;padding:6px 14px;
+            box-shadow:0 0 10px ${color.glow};background:transparent;flex:1;">
+            <span style="color:#fff;font-weight:800;font-size:12px;letter-spacing:0.5px;
+                text-transform:uppercase;white-space:nowrap;display:block;">
                 ${nom}</span>
         </div>
     </div>`;
@@ -62,7 +62,7 @@ function crearVS(p) {
     const esJ = (p.estado||"").trim().toLowerCase() === "jugado";
     const gl = (p.golesLocal||"0").trim();
     const gv = (p.golesVisita||"0").trim();
-    return `<div style="text-align:center;padding:4px 0 4px 62px;font-weight:900;font-size:14px;
+    return `<div style="text-align:center;padding:3px 0 3px 56px;font-weight:900;font-size:13px;
         color:${esJ ? '#ffd700' : 'rgba(255,255,255,0.25)'};">
         ${esJ ? `${gl} - ${gv}` : "VS"}</div>`;
 }
@@ -70,10 +70,10 @@ function crearVS(p) {
 function crearCard(p, color, subtitulo) {
     const card = document.createElement("div");
     card.style.cssText = `background:rgba(0,0,0,0.3);border:2px solid ${color.border};
-        border-radius:14px;padding:12px 14px;box-shadow:0 0 16px ${color.glow};`;
+        border-radius:14px;padding:10px 12px;box-shadow:0 0 16px ${color.glow};width:100%;box-sizing:border-box;`;
     if (subtitulo) {
         const s = document.createElement("div");
-        s.style.cssText = "color:rgba(255,255,255,0.4);font-size:9px;letter-spacing:2px;text-align:center;margin-bottom:6px;font-weight:700;font-style:italic;";
+        s.style.cssText = "color:rgba(255,255,255,0.4);font-size:9px;letter-spacing:2px;text-align:center;margin-bottom:5px;font-weight:700;font-style:italic;";
         s.textContent = subtitulo;
         card.appendChild(s);
     }
@@ -83,19 +83,20 @@ function crearCard(p, color, subtitulo) {
     return card;
 }
 
-function crearCopa(ganador) {
+function crearCopa(ganador, urlGanador) {
     const hay = !esPD(ganador);
-    return `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;min-width:160px;">
-        <div style="font-size:clamp(70px,10vw,120px);line-height:1;filter:drop-shadow(0 0 20px rgba(255,215,0,0.9));">🏆</div>
-        ${hay
-            ? `<div style="display:flex;align-items:center;gap:8px;justify-content:center;">
-                <div style="width:40px;height:40px;border-radius:50%;border:2px solid #ffd700;overflow:hidden;flex-shrink:0;box-shadow:0 0 8px rgba(255,215,0,0.6);">
-                </div>
-               </div>
-               <div style="color:#ffd700;font-weight:900;font-size:clamp(13px,2vw,17px);letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 10px rgba(255,215,0,0.6);">${ganador.trim()}</div>`
-            : `<div style="color:rgba(255,255,255,0.35);font-weight:700;font-size:12px;letter-spacing:2px;">Por Definir</div>`
-        }
-        <div style="color:#fff;font-weight:900;font-size:clamp(20px,3.5vw,30px);letter-spacing:3px;text-shadow:0 0 10px rgba(255,255,255,0.3);">CAMPEÓN</div>
+    const logo = (hay && urlGanador && urlGanador.trim().startsWith("http"))
+        ? `<img src="${urlGanador.trim()}" style="width:54px;height:54px;object-fit:contain;border-radius:50%;border:2px solid #ffd700;box-shadow:0 0 12px rgba(255,215,0,0.8);" onerror="this.style.display='none'">`
+        : `<div style="width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px dashed rgba(255,215,0,0.4);display:flex;align-items:center;justify-content:center;font-size:22px;">⚽</div>`;
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;">
+        <div style="font-size:90px;line-height:1;filter:drop-shadow(0 0 22px rgba(255,215,0,0.9));">🏆</div>
+        ${logo}
+        <div style="color:${hay ? '#ffd700' : 'rgba(255,255,255,0.35)'};font-weight:900;
+            font-size:14px;letter-spacing:2px;text-transform:uppercase;
+            text-shadow:0 0 10px rgba(255,215,0,0.6);margin-top:2px;">
+            ${hay ? ganador.trim() : 'Por Definir'}</div>
+        <div style="color:#fff;font-weight:900;font-size:26px;letter-spacing:3px;
+            text-shadow:0 0 10px rgba(255,255,255,0.3);">CAMPEÓN</div>
     </div>`;
 }
 
@@ -107,130 +108,154 @@ function renderBracket(partidos, vista) {
     const semi    = partidos.filter(p => p.ronda.toLowerCase().trim() === "semifinal");
     const finalP  = partidos.filter(p => p.ronda.toLowerCase().trim() === "final");
 
-    // Opacidades según vista
     const opQ = (vista === "Semifinal" || vista === "Final") ? 0.15 : 1;
     const opS = (vista === "Final") ? 0.15 : 1;
-    const opF = 1;
-
-    // Usamos SVG para las líneas conectoras — control total
-    // Layout con posicionamiento absoluto dentro de un contenedor relativo
 
     const wrapper = document.createElement("div");
     wrapper.style.cssText = "overflow-x:auto;padding:10px 0 30px;";
 
-    // Contenedor con grid de 4 columnas: cuartos | conn | semis | conn | final+copa
-    const grid = document.createElement("div");
-    grid.style.cssText = `
-        display:grid;
-        grid-template-columns:260px 40px 240px 40px 1fr;
-        align-items:stretch;
-        min-width:760px;
-        gap:0;
-    `;
+    // Layout principal con posición absoluta para controlar centrado exacto
+    // Usamos un contenedor con altura fija para poder posicionar todo
+    const outer = document.createElement("div");
+    outer.style.cssText = "position:relative;min-width:900px;min-height:600px;";
 
-    // ===== CUARTOS =====
+    // Cada card de cuartos tiene aprox 160px de alto
+    // Con gap de 10px entre cards y padding de 8px top
+    // Total colQ height: 8(pad) + 22(tit) + 4(mb) + 4*(160+10) = 34 + 680 = ~714px
+    // Pero usamos flexbox con position:absolute para las semis
+
+    // ===== CUARTOS (posición absoluta izquierda) =====
     const colQ = document.createElement("div");
-    colQ.style.cssText = `display:flex;flex-direction:column;gap:10px;padding:10px;opacity:${opQ};transition:opacity 0.4s;`;
+    colQ.style.cssText = `position:absolute;left:0;top:0;width:270px;display:flex;flex-direction:column;gap:10px;padding:8px;opacity:${opQ};transition:opacity 0.4s;`;
     const titQ = document.createElement("div");
-    titQ.style.cssText = "color:#ffd700;font-weight:900;font-size:11px;letter-spacing:3px;text-align:center;margin-bottom:6px;";
+    titQ.style.cssText = "color:#ffd700;font-weight:900;font-size:11px;letter-spacing:3px;text-align:center;margin-bottom:4px;";
     titQ.textContent = "CUARTOS DE FINAL";
     colQ.appendChild(titQ);
     cuartos.forEach((p, i) => colQ.appendChild(crearCard(p, coloresCuartos[i%4])));
+    outer.appendChild(colQ);
 
-    // ===== CONECTOR Q→S con SVG =====
-    // El SVG dibuja 2 brackets: uno para Q0+Q1→S1, otro para Q2+Q3→S2
-    const connQS = document.createElement("div");
-    connQS.style.cssText = `position:relative;opacity:${opQ};transition:opacity 0.4s;`;
-    connQS.innerHTML = `<svg width="40" height="100%" style="position:absolute;top:0;left:0;width:100%;height:100%;" preserveAspectRatio="none">
-        <!-- Línea superior par 1: de 25% hacia el centro -->
-        <line x1="0" y1="25%" x2="20" y2="25%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
-        <!-- Línea vertical par 1 -->
-        <line x1="20" y1="25%" x2="20" y2="50%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
-        <!-- Línea inferior par 1 -->
-        <line x1="0" y1="50%" x2="20" y2="50%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
-        <!-- Horizontal hacia semi 1 -->
-        <line x1="20" y1="37.5%" x2="40" y2="37.5%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
-
-        <!-- Línea superior par 2 -->
-        <line x1="0" y1="75%" x2="20" y2="75%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
-        <!-- Línea vertical par 2 -->
-        <line x1="20" y1="75%" x2="20" y2="100%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
-        <!-- Línea inferior par 2 -->
-        <line x1="0" y1="100%" x2="20" y2="100%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
-        <!-- Horizontal hacia semi 2 -->
-        <line x1="20" y1="87.5%" x2="40" y2="87.5%" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
-    </svg>`;
-
-    // ===== SEMIS =====
-    const colS = document.createElement("div");
-    colS.style.cssText = `display:flex;flex-direction:column;padding:10px;opacity:${opS};transition:opacity 0.4s;`;
-    const titS = document.createElement("div");
-    titS.style.cssText = "color:#ffd700;font-weight:900;font-size:11px;letter-spacing:3px;text-align:center;margin-bottom:6px;font-style:italic;";
-    titS.textContent = "SEMIFINALES";
-    colS.appendChild(titS);
-
-    // Semi 1 en el primer cuarto del espacio (centrado entre Q0 y Q1)
-    const wrapS1 = document.createElement("div");
-    wrapS1.style.cssText = "flex:1;display:flex;align-items:center;justify-content:center;padding:5px 0;";
-    if (semi[0]) wrapS1.appendChild(crearCard(semi[0], colorSemi, "SEMIFINAL 1"));
-    colS.appendChild(wrapS1);
-
-    // Espacio entre semis
-    const spacer = document.createElement("div");
-    spacer.style.cssText = "flex:1;";
-    colS.appendChild(spacer);
-
-    // Semi 2 en el segundo cuarto
-    const wrapS2 = document.createElement("div");
-    wrapS2.style.cssText = "flex:1;display:flex;align-items:center;justify-content:center;padding:5px 0;";
-    if (semi[1]) wrapS2.appendChild(crearCard(semi[1], colorSemi, "SEMIFINAL 2"));
-    colS.appendChild(wrapS2);
-
-    // ===== CONECTOR S→F con SVG =====
-    const connSF = document.createElement("div");
-    connSF.style.cssText = `position:relative;opacity:${opS};transition:opacity 0.4s;`;
-    connSF.innerHTML = `<svg width="40" height="100%" style="position:absolute;top:0;left:0;width:100%;height:100%;" preserveAspectRatio="none">
-        <!-- Línea desde semi 1 -->
-        <line x1="0" y1="30%" x2="20" y2="30%" stroke="rgba(255,152,0,0.5)" stroke-width="2"/>
-        <!-- Línea vertical uniendo semis -->
-        <line x1="20" y1="30%" x2="20" y2="70%" stroke="rgba(255,152,0,0.5)" stroke-width="2"/>
-        <!-- Línea desde semi 2 -->
-        <line x1="0" y1="70%" x2="20" y2="70%" stroke="rgba(255,152,0,0.5)" stroke-width="2"/>
-        <!-- Horizontal hacia final -->
-        <line x1="20" y1="50%" x2="40" y2="50%" stroke="rgba(255,152,0,0.5)" stroke-width="2"/>
-    </svg>`;
-
-    // ===== FINAL + COPA =====
-    const colF = document.createElement("div");
-    colF.style.cssText = `display:flex;flex-direction:row;align-items:center;justify-content:center;padding:10px;gap:20px;opacity:${opF};transition:opacity 0.4s;`;
-
-    const f = finalP[0];
-    if (f) {
-        const wFinal = document.createElement("div");
-        wFinal.style.cssText = "display:flex;flex-direction:column;align-items:center;gap:8px;";
-        const titF = document.createElement("div");
-        titF.style.cssText = "color:#fff;font-weight:900;font-size:clamp(13px,2vw,18px);letter-spacing:4px;font-style:italic;text-align:center;";
-        titF.textContent = "FINAL";
-        wFinal.appendChild(titF);
-        wFinal.appendChild(crearCard(f, colorFinal));
-        colF.appendChild(wFinal);
-
-        colF.innerHTML += `<div style="width:20px;height:2px;background:rgba(255,152,0,0.5);flex-shrink:0;"></div>`;
-
-        const wCopa = document.createElement("div");
-        wCopa.innerHTML = crearCopa(f.ganador);
-        colF.appendChild(wCopa);
-    }
-
-    // Ensamblar grid
-    grid.appendChild(colQ);
-    grid.appendChild(connQS);
-    grid.appendChild(colS);
-    grid.appendChild(connSF);
-    grid.appendChild(colF);
-
-    wrapper.appendChild(grid);
+    // Para calcular posición de semis necesitamos saber la altura de las cards
+    // Usamos requestAnimationFrame para obtener medidas reales después del render
+    wrapper.appendChild(outer);
     contenedor.appendChild(wrapper);
+
+    // Posicionamos después del render
+    requestAnimationFrame(() => {
+        const cards = colQ.querySelectorAll("div[style*='border-radius:14px']");
+        if (cards.length < 4) return;
+
+        const colQRect = colQ.getBoundingClientRect();
+        const c0 = cards[0].getBoundingClientRect();
+        const c1 = cards[1].getBoundingClientRect();
+        const c2 = cards[2].getBoundingClientRect();
+        const c3 = cards[3].getBoundingClientRect();
+
+        // Centro entre card0 y card1 (relativo a colQ)
+        const midS1 = ((c0.top + c0.bottom)/2 + (c1.top + c1.bottom)/2) / 2 - colQRect.top;
+        // Centro entre card2 y card3
+        const midS2 = ((c2.top + c2.bottom)/2 + (c3.top + c3.bottom)/2) / 2 - colQRect.top;
+        // Centro entre Semi1 y Semi2 (para Final)
+        const midF = (midS1 + midS2) / 2;
+
+        const totalH = Math.max(c3.bottom - colQRect.top + 20, 600);
+        outer.style.minHeight = totalH + "px";
+
+        const leftS = 278; // después de cuartos + conector
+        const leftF = 278 + 260 + 36; // después de semis + conector
+        const leftCopa = leftF + 260 + 20; // después de final
+
+        // ===== TÍTULO SEMIS =====
+        const titS = document.createElement("div");
+        titS.style.cssText = `position:absolute;left:${leftS}px;top:8px;width:255px;color:#ffd700;font-weight:900;font-size:11px;letter-spacing:3px;text-align:center;font-style:italic;opacity:${opS};transition:opacity 0.4s;`;
+        titS.textContent = "SEMIFINALES";
+        outer.appendChild(titS);
+
+        // ===== SEMI 1 =====
+        if (semi[0]) {
+            const cardS1 = crearCard(semi[0], colorSemi, "SEMIFINAL 1");
+            const s1H = 160; // altura estimada
+            cardS1.style.cssText += `position:absolute;left:${leftS}px;top:${midS1 - s1H/2}px;width:255px;opacity:${opS};transition:opacity 0.4s;`;
+            outer.appendChild(cardS1);
+        }
+
+        // ===== SEMI 2 =====
+        if (semi[1]) {
+            const cardS2 = crearCard(semi[1], colorSemi, "SEMIFINAL 2");
+            const s2H = 160;
+            cardS2.style.cssText += `position:absolute;left:${leftS}px;top:${midS2 - s2H/2}px;width:255px;opacity:${opS};transition:opacity 0.4s;`;
+            outer.appendChild(cardS2);
+        }
+
+        // ===== LÍNEAS CONECTOR Q→S (SVG) =====
+        const svgQS = document.createElementNS("http://www.w3.org/2000/svg","svg");
+        svgQS.style.cssText = `position:absolute;left:270px;top:0;width:36px;height:${totalH}px;opacity:${opQ};transition:opacity 0.4s;overflow:visible;`;
+        svgQS.setAttribute("xmlns","http://www.w3.org/2000/svg");
+
+        const midC0 = (c0.top + c0.bottom)/2 - colQRect.top;
+        const midC1 = (c1.top + c1.bottom)/2 - colQRect.top;
+        const midC2 = (c2.top + c2.bottom)/2 - colQRect.top;
+        const midC3 = (c3.top + c3.bottom)/2 - colQRect.top;
+
+        const linesQS = [
+            // Par superior → semi1
+            `<line x1="0" y1="${midC0}" x2="20" y2="${midC0}" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`,
+            `<line x1="20" y1="${midC0}" x2="20" y2="${midS1}" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`,
+            `<line x1="0" y1="${midC1}" x2="20" y2="${midC1}" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`,
+            `<line x1="20" y1="${midC1}" x2="20" y2="${midS1}" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`,
+            `<line x1="20" y1="${midS1}" x2="36" y2="${midS1}" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`,
+            // Par inferior → semi2
+            `<line x1="0" y1="${midC2}" x2="20" y2="${midC2}" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`,
+            `<line x1="20" y1="${midC2}" x2="20" y2="${midS2}" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`,
+            `<line x1="0" y1="${midC3}" x2="20" y2="${midC3}" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`,
+            `<line x1="20" y1="${midC3}" x2="20" y2="${midS2}" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`,
+            `<line x1="20" y1="${midS2}" x2="36" y2="${midS2}" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>`,
+        ];
+        svgQS.innerHTML = linesQS.join("");
+        outer.appendChild(svgQS);
+
+        // ===== LÍNEAS CONECTOR S→F (SVG) =====
+        const svgSF = document.createElementNS("http://www.w3.org/2000/svg","svg");
+        svgSF.style.cssText = `position:absolute;left:${leftS+255}px;top:0;width:36px;height:${totalH}px;opacity:${opS};transition:opacity 0.4s;overflow:visible;`;
+
+        const linesSF = [
+            `<line x1="0" y1="${midS1}" x2="20" y2="${midS1}" stroke="rgba(255,152,0,0.5)" stroke-width="2"/>`,
+            `<line x1="20" y1="${midS1}" x2="20" y2="${midF}" stroke="rgba(255,152,0,0.5)" stroke-width="2"/>`,
+            `<line x1="0" y1="${midS2}" x2="20" y2="${midS2}" stroke="rgba(255,152,0,0.5)" stroke-width="2"/>`,
+            `<line x1="20" y1="${midS2}" x2="20" y2="${midF}" stroke="rgba(255,152,0,0.5)" stroke-width="2"/>`,
+            `<line x1="20" y1="${midF}" x2="36" y2="${midF}" stroke="rgba(255,152,0,0.5)" stroke-width="2"/>`,
+        ];
+        svgSF.innerHTML = linesSF.join("");
+        outer.appendChild(svgSF);
+
+        // ===== FINAL =====
+        const titF = document.createElement("div");
+        titF.style.cssText = `position:absolute;left:${leftF}px;top:${midF - 110}px;width:255px;color:#fff;font-weight:900;font-size:18px;letter-spacing:4px;font-style:italic;text-align:center;`;
+        titF.textContent = "FINAL";
+        outer.appendChild(titF);
+
+        if (finalP[0]) {
+            const f = finalP[0];
+            const cardF = crearCard(f, colorFinal);
+            const fH = 160;
+            cardF.style.cssText += `position:absolute;left:${leftF}px;top:${midF - fH/2}px;width:255px;`;
+            outer.appendChild(cardF);
+
+            // Línea final → copa
+            const svgFC = document.createElementNS("http://www.w3.org/2000/svg","svg");
+            svgFC.style.cssText = `position:absolute;left:${leftF+255}px;top:0;width:20px;height:${totalH}px;overflow:visible;`;
+            svgFC.innerHTML = `<line x1="0" y1="${midF}" x2="20" y2="${midF}" stroke="rgba(255,152,0,0.5)" stroke-width="2"/>`;
+            outer.appendChild(svgFC);
+
+            // Copa centrada verticalmente
+            const urlGanador = !esPD(f.ganador) ? (f.urlLocal||"") : "";
+            const copaDiv = document.createElement("div");
+            copaDiv.style.cssText = `position:absolute;left:${leftCopa}px;top:0;height:${totalH}px;display:flex;align-items:center;justify-content:center;padding:10px;`;
+            copaDiv.innerHTML = crearCopa(f.ganador, urlGanador);
+            outer.appendChild(copaDiv);
+        }
+
+        outer.style.minWidth = (leftCopa + 200) + "px";
+    });
 }
 
 cargarLiguilla();

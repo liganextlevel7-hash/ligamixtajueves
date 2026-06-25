@@ -1,1 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Level 7 — Torneo Dominical EN VIVO</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--verde:#1a5c2a;--verde2:#2d8a45;--rojo:#e03030;--bg:#0f1a13;--bg2:#1a2a1e;--bg3:#243028;--border:#2d4035;--text:#e8f0ea;--text2:#8aab91;--yellow:#f9a825;--red:#ef5350;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;}
+.app{max-width:700px;margin:0 auto;padding:14px;}
+.header{background:linear-gradient(135deg,var(--verde),var(--verde2));border-radius:14px;padding:18px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;inset:-20px;background:repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0,rgba(255,255,255,.03) 10px,transparent 10px,transparent 20px);}
+.header h1{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;letter-spacing:2px;position:relative;color:#fff;}
+.header p{font-size:12px;opacity:.8;margin-top:3px;position:relative;color:#fff;}
+.live-badge{display:inline-flex;align-items:center;gap:6px;background:var(--rojo);color:white;font-size:11px;font-weight:600;padding:3px 12px;border-radius:20px;margin-bottom:8px;position:relative;}
+.live-dot{width:7px;height:7px;background:white;border-radius:50%;animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+.tabs{display:flex;gap:8px;margin-bottom:12px;}
+.tab{flex:1;border:1px solid var(--border);background:var(--bg2);color:var(--text2);border-radius:10px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.tab.active{background:var(--verde);color:#fff;border-color:var(--verde);}
+.tab:hover:not(.active){background:var(--bg3);}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
+.section h3{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+.partido-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;margin-bottom:7px;}
+.partido-item:hover{border-color:var(--verde2);background:#1e3024;}
+.plogo{width:32px;height:32px;object-fit:contain;border-radius:4px;background:#1a2a1e;padding:2px;}
+.partido-info{flex:1;}
+.partido-info strong{font-size:13px;color:var(--text);}
+.partido-info small{font-size:11px;color:var(--text2);display:block;margin-top:2px;}
+.badge{font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;background:#1e3a20;color:#5dba6a;}
+.scoreboard{display:grid;grid-template-columns:1fr 100px 1fr;gap:10px;align-items:center;margin-bottom:12px;}
+.team-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center;}
+.tlogo-box{width:56px;height:56px;margin:0 auto 7px;display:flex;align-items:center;justify-content:center;background:#1a2a1e;border-radius:8px;padding:4px;}
+.tlogo-box img{width:100%;height:100%;object-fit:contain;display:block;}
+.team-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--text);}
+.score-box{background:linear-gradient(180deg,var(--verde),#0f3018);border-radius:14px;padding:12px 6px;text-align:center;border:1px solid var(--verde);}
+.score-nums{display:flex;align-items:center;justify-content:center;gap:5px;}
+.score-num{font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:700;color:#fff;line-height:1;}
+.score-sep{font-size:22px;color:rgba(255,255,255,.4);}
+.score-time{font-size:11px;color:rgba(255,255,255,.6);margin-top:4px;}
+.match-btns{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.mbtn{border:1px solid var(--border);background:var(--bg2);color:var(--text2);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.mbtn:hover{background:var(--bg3);}
+.mbtn.active{background:var(--verde);color:#fff;border-color:var(--verde);}
+.status-pill{font-size:11px;padding:4px 12px;border-radius:20px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+.actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.act-col{display:flex;flex-direction:column;gap:8px;}
+.act-title{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--text);padding-bottom:6px;border-bottom:1px solid var(--border);}
+.act-logo{width:26px;height:26px;object-fit:contain;background:#1a2a1e;border-radius:4px;padding:2px;display:block;}
+.act-row{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+.act-row span{font-size:12px;color:var(--text2);}
+.btn-pair{display:flex;gap:4px;}
+.btn{border:1px solid var(--border);background:var(--bg3);color:var(--text);border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn:active{transform:scale(.97);}
+.btn-goal{background:#1e3a20;border-color:#4caf50;color:#7dd87d;}
+.btn-yellow{background:#2a2010;border-color:var(--yellow);color:var(--yellow);}
+.btn-red{background:#2a1010;border-color:var(--red);color:var(--red);}
+.psel{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text2);border-radius:7px;padding:6px 8px;font-size:12px;margin-top:3px;}
+.min-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.min-row label{font-size:12px;color:var(--text2);}
+.min-input{width:80px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:6px 8px;font-size:13px;font-weight:600;}
+.yb{display:inline-block;width:11px;height:15px;background:var(--yellow);border-radius:2px;vertical-align:middle;margin-right:3px;}
+.rb{display:inline-block;width:11px;height:15px;background:var(--red);border-radius:2px;vertical-align:middle;margin-right:3px;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px;}
+.stat-mini{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--text);}
+.stat-lbl{font-size:10px;color:var(--text2);margin-top:2px;}
+.events-list{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;}
+.event-item{display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--bg3);border-radius:8px;font-size:12px;border-left:3px solid var(--border);}
+.event-item.goal{border-left-color:#4caf50;}
+.event-item.yellow{border-left-color:var(--yellow);}
+.event-item.red{border-left-color:var(--red);}
+.event-min{font-size:11px;color:var(--text2);min-width:28px;font-weight:600;}
+.event-icon{font-size:15px;}
+.event-text{color:var(--text);flex:1;}
+.event-team{font-size:11px;color:var(--text2);}
+.no-events{text-align:center;color:var(--text2);font-size:13px;padding:22px;}
+.hidden{display:none!important;}
+.partido-activo-bar{background:var(--bg3);border:1px solid var(--verde);border-radius:10px;padding:10px 14px;text-align:center;font-size:13px;font-weight:600;color:var(--verde2);margin-bottom:12px;}
+.save-btn{border:1px solid var(--verde);background:#1e3a20;color:#7dd87d;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;margin-right:8px;}
+.danger-btn{border:1px solid #5a2020;background:#2a1010;color:#ef9090;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;}
+.saved-ok{color:#5dba6a;font-size:12px;margin-top:8px;text-align:center;display:none;}
+.historial-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;}
+.historial-item h4{color:var(--text);font-size:14px;margin-bottom:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;}
+.historial-item p{color:var(--text2);font-size:12px;}
+.del-btn{float:right;background:#2a1010;border:1px solid #5a2020;color:#ef9090;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;}
+.empty-hist{text-align:center;color:var(--text2);padding:24px;font-size:13px;line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="app">
 
+<div class="header">
+  <div class="live-badge"><span class="live-dot"></span> EN VIVO</div>
+  <h1>NEXT LEVEL 7</h1>
+  <p>Torneo Dominical — Puebla</p>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('partidos')">📋 Partidos</button>
+  <button class="tab" onclick="showTab('live')">🎙️ Transmisión</button>
+  <button class="tab" onclick="showTab('historial')">💾 Historial</button>
+</div>
+
+<div id="tab-partidos">
+  <div class="section">
+    <h3>Partidos programados — toca para transmitir</h3>
+    <div id="lista-partidos"></div>
+  </div>
+</div>
+
+<div id="tab-live" class="hidden">
+  <div class="partido-activo-bar" id="partido-activo-bar">Ningún partido seleccionado — ve a Partidos</div>
+
+  <div class="scoreboard">
+    <div class="team-card">
+      <div class="tlogo-box"><img id="logo-local" src="" alt="local"></div>
+      <div class="team-name" id="name-local">Local</div>
+    </div>
+    <div class="score-box">
+      <div class="score-nums">
+        <span class="score-num" id="score-local">0</span>
+        <span class="score-sep">-</span>
+        <span class="score-num" id="score-visita">0</span>
+      </div>
+      <div class="score-time" id="match-time">0'</div>
+    </div>
+    <div class="team-card">
+      <div class="tlogo-box"><img id="logo-visita" src="" alt="visita"></div>
+      <div class="team-name" id="name-visita">Visita</div>
+    </div>
+  </div>
+
+  <div class="match-btns">
+    <button class="mbtn" id="btn-inicio" onclick="setStatus('inicio')">▶ Iniciar</button>
+    <button class="mbtn" id="btn-medio" onclick="setStatus('medio')">⏸ Medio tiempo</button>
+    <button class="mbtn" id="btn-fin" onclick="setStatus('fin')">🏁 Fin</button>
+    <span id="status-pill" class="status-pill">Sin iniciar</span>
+  </div>
+
+  <div class="section">
+    <h3>Registrar evento</h3>
+    <div class="min-row">
+      <label>Minuto:</label>
+      <input type="number" class="min-input" id="inp-minuto" placeholder="ej: 23" min="0" max="120">
+    </div>
+    <div class="actions-grid">
+      <div class="act-col">
+        <div class="act-title"><img id="act-logo-local" class="act-logo" src="" alt=""><span id="act-name-local">Local</span></div>
+        <div class="act-row"><span>⚽ Gol</span><div class="btn-pair"><button class="btn btn-goal" onclick="addEvent('goal','local')">+1</button><button class="btn" style="font-size:11px;" onclick="removeGoal('local')">↩</button></div></div>
+        <select class="psel" id="sel-gol-local"><option value="">— Jugador —</option></select>
+        <div class="act-row" style="margin-top:4px;"><span><span class="yb"></span>Amarilla</span><button class="btn btn-yellow" onclick="addEvent('yellow','local')">+1</button></div>
+        <select class="psel" id="sel-yellow-local"><option value="">— Jugador —</option></select>
+        <div class="act-row" style="margin-top:4px;"><span><span class="rb"></span>Roja</span><button class="btn btn-red" onclick="addEvent('red','local')">+1</button></div>
+        <select class="psel" id="sel-red-local"><option value="">— Jugador —</option></select>
+      </div>
+      <div class="act-col">
+        <div class="act-title"><img id="act-logo-visita" class="act-logo" src="" alt=""><span id="act-name-visita">Visita</span></div>
+        <div class="act-row"><span>⚽ Gol</span><div class="btn-pair"><button class="btn btn-goal" onclick="addEvent('goal','visita')">+1</button><button class="btn" style="font-size:11px;" onclick="removeGoal('visita')">↩</button></div></div>
+        <select class="psel" id="sel-gol-visita"><option value="">— Jugador —</option></select>
+        <div class="act-row" style="margin-top:4px;"><span><span class="yb"></span>Amarilla</span><button class="btn btn-yellow" onclick="addEvent('yellow','visita')">+1</button></div>
+        <select class="psel" id="sel-yellow-visita"><option value="">— Jugador —</option></select>
+        <div class="act-row" style="margin-top:4px;"><span><span class="rb"></span>Roja</span><button class="btn btn-red" onclick="addEvent('red','visita')">+1</button></div>
+        <select class="psel" id="sel-red-visita"><option value="">— Jugador —</option></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-mini"><div class="stat-num" id="st-yl">0</div><div class="stat-lbl"><span class="yb"></span>Local</div></div>
+    <div class="stat-mini"><div class="stat-num" id="st-rl">0</div><div class="stat-lbl"><span class="rb"></span>Local</div></div>
+    <div class="stat-mini"><div class="stat-num" id="st-yv">0</div><div class="stat-lbl"><span class="yb"></span>Visita</div></div>
+    <div class="stat-mini"><div class="stat-num" id="st-rv">0</div><div class="stat-lbl"><span class="rb"></span>Visita</div></div>
+  </div>
+
+  <div class="section">
+    <h3>Bitácora del partido</h3>
+    <div class="events-list" id="events-list"><div class="no-events">Los eventos aparecerán aquí durante el partido</div></div>
+  </div>
+
+  <div style="text-align:center;margin-top:10px;padding-bottom:20px;">
+    <button class="save-btn" onclick="guardarPartido()">💾 Guardar partido</button>
+    <button class="danger-btn" onclick="resetLive()">🗑 Reiniciar</button>
+    <div class="saved-ok" id="saved-ok">✅ Partido guardado correctamente</div>
+  </div>
+</div>
+
+<div id="tab-historial" class="hidden">
+  <div class="section">
+    <h3>Partidos guardados</h3>
+    <div id="lista-historial"></div>
+  </div>
+</div>
+
+</div>
+<script>
+var equipos={1:{n:"Soldados Del Amor",l:"https://i.imgur.com/gBvmM4v.png"},2:{n:"Cuervos F.C",l:"https://i.imgur.com/fGQAhE5.png"},3:{n:"Unión 8",l:"https://i.imgur.com/Qrx4JSj.png"},4:{n:"La Garra",l:"https://i.imgur.com/8BWFWBW.png"},5:{n:"Pumas KAP",l:"https://i.imgur.com/5TAVBS7.png"},6:{n:"Los Chipotles",l:"https://i.imgur.com/KTMLCv9.png"},7:{n:"Deportivo CT",l:"https://i.imgur.com/hqOAa7J.png"},8:{n:"Gusanitos",l:"https://i.imgur.com/5TARJkD.png"},9:{n:"Bacachitos",l:"https://i.imgur.com/ddKmNL6.png"},10:{n:"Descansa",l:""}};
+var jugadores=[{id:1,nombre:"Alberto Gonzalez",equipo:1,numero:1,apodo:"Patron"},{id:2,nombre:"Luis Huerta",equipo:1,numero:2,apodo:"Wapo"},{id:3,nombre:"Senen Huerta",equipo:1,numero:3,apodo:"Senen"},{id:4,nombre:"Bocho",equipo:1,numero:4,apodo:"Bocho"},{id:5,nombre:"Gerardo Villaseñor",equipo:1,numero:14,apodo:"Thanos"},{id:6,nombre:"Enrique Eumaña",equipo:1,numero:6,apodo:"Kike"},{id:7,nombre:"Hugo Flores",equipo:1,numero:7,apodo:"Hugo"},{id:8,nombre:"Ricardo Carmona",equipo:1,numero:8,apodo:"Ricardo"},{id:9,nombre:"Ulises Hule",equipo:1,numero:9,apodo:"Huke"},{id:10,nombre:"Gabriel Eumaña",equipo:1,numero:10,apodo:""},{id:11,nombre:"Penales",equipo:1,numero:11,apodo:""},{id:12,nombre:"Sinai",equipo:1,numero:12,apodo:""},{id:13,nombre:"Uriel Aguilar",equipo:2,numero:1,apodo:"Uriel"},{id:14,nombre:"Isaac Maximiliano Huerta",equipo:2,numero:9,apodo:"Max"},{id:15,nombre:"Luis Alberto Gonzalez",equipo:2,numero:20,apodo:"Wicho"},{id:16,nombre:"Marco Andre Huerta",equipo:2,numero:10,apodo:"Marco"},{id:17,nombre:"Juan Pablo Gonzalez",equipo:2,numero:19,apodo:"Pablo"},{id:18,nombre:"Cesar Santiago Huerta",equipo:2,numero:8,apodo:"Santi"},{id:19,nombre:"Eduardo Jimenez",equipo:2,numero:11,apodo:"Lalo"},{id:20,nombre:"Brandon Adonai Reyes",equipo:2,numero:4,apodo:"Brandon"},{id:21,nombre:"Angel Isack Tlatapatl",equipo:2,numero:21,apodo:"Angel"},{id:22,nombre:"Paulo Adrian Torres",equipo:2,numero:6,apodo:"Paulo"},{id:23,nombre:"Fernando Mateos",equipo:2,numero:0,apodo:"Fer"},{id:109,nombre:"Cristian Rojaano",equipo:2,numero:69,apodo:""},{id:110,nombre:"Luis Morales",equipo:2,numero:0,apodo:""},{id:25,nombre:"Jorge A. Robles",equipo:3,numero:7,apodo:""},{id:26,nombre:"Jorge R. Robles",equipo:3,numero:29,apodo:""},{id:27,nombre:"Martin Robles",equipo:3,numero:5,apodo:""},{id:28,nombre:"Alfredo Huerta",equipo:3,numero:13,apodo:""},{id:29,nombre:"Erick Perez",equipo:3,numero:11,apodo:""},{id:30,nombre:"Jaime Castellanos",equipo:3,numero:0,apodo:""},{id:31,nombre:"Erick Zavaleta",equipo:3,numero:0,apodo:""},{id:32,nombre:"Erick Jonathan Robles",equipo:3,numero:0,apodo:""},{id:33,nombre:"Pedro Cortez",equipo:3,numero:0,apodo:""},{id:34,nombre:"Andres Aguirre",equipo:3,numero:14,apodo:""},{id:35,nombre:"Omar Robles",equipo:3,numero:0,apodo:""},{id:36,nombre:"Diego Perez",equipo:3,numero:12,apodo:""},{id:37,nombre:"Fernando Perez",equipo:4,numero:1,apodo:""},{id:38,nombre:"Erick",equipo:4,numero:2,apodo:""},{id:39,nombre:"Oscar Montes",equipo:4,numero:3,apodo:""},{id:40,nombre:"Maurio Xicotencalt",equipo:4,numero:4,apodo:""},{id:41,nombre:"Ricardo Muñoz",equipo:4,numero:5,apodo:""},{id:50,nombre:"Luis Hugo Ramirez",equipo:5,numero:14,apodo:""},{id:51,nombre:"Miguel Martinez",equipo:5,numero:10,apodo:""},{id:52,nombre:"Luis Ramirez Ramirez",equipo:5,numero:42,apodo:""},{id:53,nombre:"Ricardo Ramirez Perez",equipo:5,numero:27,apodo:""},{id:54,nombre:"Luis Hernandez",equipo:5,numero:15,apodo:""},{id:55,nombre:"Diego Salinas",equipo:5,numero:9,apodo:""},{id:56,nombre:"Rogelio Sainos",equipo:5,numero:38,apodo:""},{id:57,nombre:"Francisco Ramirez",equipo:5,numero:0,apodo:""},{id:58,nombre:"Maximiliano Ramirez",equipo:5,numero:4,apodo:""},{id:59,nombre:"Omar Martinez",equipo:5,numero:75,apodo:""},{id:60,nombre:"Raul Turbin",equipo:5,numero:0,apodo:""},{id:111,nombre:"Gael Turbin Tapia",equipo:5,numero:0,apodo:""},{id:112,nombre:"Carlos Tapia Tovar",equipo:5,numero:0,apodo:""},{id:61,nombre:"Jeor Berty Guerra",equipo:6,numero:4,apodo:""},{id:62,nombre:"Enrique Zermeño",equipo:6,numero:11,apodo:""},{id:63,nombre:"Felipe Castillo",equipo:6,numero:17,apodo:""},{id:64,nombre:"Hector Millan",equipo:6,numero:9,apodo:""},{id:65,nombre:"Brayan Luna",equipo:6,numero:28,apodo:""},{id:66,nombre:"Abraham Cabrera",equipo:6,numero:27,apodo:""},{id:67,nombre:"David Gonzalez",equipo:6,numero:7,apodo:""},{id:68,nombre:"Oswaldo M.",equipo:6,numero:101,apodo:""},{id:69,nombre:"Miguel Angel Perez",equipo:6,numero:1,apodo:"Tabla2"},{id:70,nombre:"Jorge O",equipo:6,numero:10,apodo:""},{id:74,nombre:"Fernando",equipo:7,numero:2,apodo:""},{id:75,nombre:"Alex",equipo:7,numero:3,apodo:""},{id:76,nombre:"Leonardo",equipo:7,numero:4,apodo:""},{id:86,nombre:"Roberto",equipo:8,numero:2,apodo:""}];
+var partidos=[{id:15,local:8,visita:7},{id:17,local:3,visita:1},{id:18,local:4,visita:9},{id:19,local:5,visita:8},{id:20,local:6,visita:7},{id:22,local:4,visita:7},{id:23,local:9,visita:5},{id:16,local:2,visita:10}];
+var live={sL:0,sV:0,yL:0,rL:0,yV:0,rV:0,events:[],min:0,status:'sin',pid:null,eidL:null,eidV:null,nL:'',nV:'',logoL:'',logoV:''};
+function showTab(t){['partidos','live','historial'].forEach(function(id){document.getElementById('tab-'+id).classList.toggle('hidden',id!==t);});document.querySelectorAll('.tab').forEach(function(b,i){b.classList.toggle('active',['partidos','live','historial'][i]===t);});if(t==='historial')renderHistorial();}
+function renderPartidos(){var html='';partidos.forEach(function(p){var eL=equipos[p.local]||{n:'Eq.'+p.local,l:''};var eV=equipos[p.visita]||{n:'Eq.'+p.visita,l:''};html+='<div class="partido-item" onclick="selectPartido('+p.id+')"><img class="plogo" src="'+eL.l+'" alt="'+eL.n+'"><div class="partido-info"><strong>'+eL.n+' vs '+eV.n+'</strong><small>Toca para transmitir</small></div><img class="plogo" src="'+eV.l+'" alt="'+eV.n+'"><span class="badge">📅 Programado</span></div>';});document.getElementById('lista-partidos').innerHTML=html;}
+function selectPartido(pid){var p=partidos.find(function(x){return x.id===pid;});if(!p)return;var eL=equipos[p.local]||{n:'Eq.'+p.local,l:''};var eV=equipos[p.visita]||{n:'Eq.'+p.visita,l:''};live={sL:0,sV:0,yL:0,rL:0,yV:0,rV:0,events:[],min:0,status:'sin',pid:pid,eidL:p.local,eidV:p.visita,nL:eL.n,nV:eV.n,logoL:eL.l,logoV:eV.l};setLogoSrc('logo-local',eL.l);setLogoSrc('logo-visita',eV.l);setLogoSrc('act-logo-local',eL.l);setLogoSrc('act-logo-visita',eV.l);document.getElementById('name-local').textContent=eL.n;document.getElementById('name-visita').textContent=eV.n;document.getElementById('act-name-local').textContent=eL.n;document.getElementById('act-name-visita').textContent=eV.n;document.getElementById('partido-activo-bar').textContent='Transmitiendo: '+eL.n+' vs '+eV.n;fillPlayerSelects(p.local,p.visita);['btn-inicio','btn-medio','btn-fin'].forEach(function(id){document.getElementById(id).classList.remove('active');});document.getElementById('status-pill').textContent='Sin iniciar';document.getElementById('match-time').textContent="0'";document.getElementById('saved-ok').style.display='none';renderLive();showTab('live');}
+function setLogoSrc(id,src){var el=document.getElementById(id);if(src){el.src=src;el.style.display='block';}else{el.style.display='none';}}
+function fillPlayerSelects(eidL,eidV){var jL=jugadores.filter(function(j){return j.equipo===eidL;});var jV=jugadores.filter(function(j){return j.equipo===eidV;});function opts(list){return '<option value="">— Jugador —</option>'+list.map(function(j){var lbl='#'+j.numero+' '+(j.apodo?j.apodo:j.nombre);return '<option value="'+j.id+'">'+lbl+'</option>';}).join('');}['sel-gol-local','sel-yellow-local','sel-red-local'].forEach(function(id){document.getElementById(id).innerHTML=opts(jL);});['sel-gol-visita','sel-yellow-visita','sel-red-visita'].forEach(function(id){document.getElementById(id).innerHTML=opts(jV);});}
+function getMin(){var v=document.getElementById('inp-minuto').value;return v?parseInt(v):live.min;}
+function getPlayer(side,type){var sel=document.getElementById('sel-'+type+'-'+side);if(!sel||!sel.value)return '';var j=jugadores.find(function(x){return x.id===parseInt(sel.value);});return j?(j.apodo||j.nombre):'';}
+function addEvent(type,side){var min=getMin();var name=side==='local'?live.nL:live.nV;var player=getPlayer(side,type==='goal'?'gol':type);live.events.unshift({type:type,side:side,minute:min,teamName:name,player:player});if(type==='goal'){if(side==='local')live.sL++;else live.sV++;}if(type==='yellow'){if(side==='local')live.yL++;else live.yV++;}if(type==='red'){if(side==='local')live.rL++;else live.rV++;}live.min=min;renderLive();}
+function removeGoal(side){if(side==='local'&&live.sL>0){live.sL--;live.events.unshift({type:'undo',side:side,minute:getMin(),teamName:live.nL,player:''});}else if(side==='visita'&&live.sV>0){live.sV--;live.events.unshift({type:'undo',side:side,minute:getMin(),teamName:live.nV,player:''});}renderLive();}
+function setStatus(s){var labels={inicio:'En juego ▶',medio:'Medio tiempo ⏸',fin:'Finalizado 🏁'};live.status=s;document.getElementById('status-pill').textContent=labels[s];['btn-inicio','btn-medio','btn-fin'].forEach(function(id){document.getElementById(id).classList.remove('active');});document.getElementById('btn-'+s).classList.add('active');if(s==='inicio'&&live.min===0){live.min=1;document.getElementById('match-time').textContent="1'";}if(s==='medio')document.getElementById('match-time').textContent="45'";if(s==='fin')document.getElementById('match-time').textContent="90'";}
+function renderLive(){document.getElementById('score-local').textContent=live.sL;document.getElementById('score-visita').textContent=live.sV;if(live.min>0)document.getElementById('match-time').textContent=live.min+"'";document.getElementById('st-yl').textContent=live.yL;document.getElementById('st-rl').textContent=live.rL;document.getElementById('st-yv').textContent=live.yV;document.getElementById('st-rv').textContent=live.rV;var list=document.getElementById('events-list');if(live.events.length===0){list.innerHTML='<div class="no-events">Los eventos aparecerán aquí durante el partido</div>';return;}var icons={goal:'⚽',yellow:'🟨',red:'🟥',undo:'↩️'};var labels={goal:'Gol',yellow:'Tarjeta amarilla',red:'Tarjeta roja',undo:'Gol anulado'};list.innerHTML=live.events.map(function(e){return '<div class="event-item '+e.type+'"><span class="event-min">'+e.minute+"'</span><span class='event-icon'>"+icons[e.type]+'</span><span class="event-text">'+labels[e.type]+(e.player?' — '+e.player:'')+'</span><span class="event-team">'+e.teamName+'</span></div>';}).join('');}
+function guardarPartido(){if(!live.pid){alert('Primero selecciona un partido.');return;}var hist=JSON.parse(localStorage.getItem('nl7_hist')||'[]');hist.unshift({id:Date.now(),fecha:new Date().toLocaleDateString('es-MX'),nL:live.nL,nV:live.nV,logoL:live.logoL,logoV:live.logoV,sL:live.sL,sV:live.sV,yL:live.yL,rL:live.rL,yV:live.yV,rV:live.rV,events:live.events.slice()});localStorage.setItem('nl7_hist',JSON.stringify(hist));var ok=document.getElementById('saved-ok');ok.style.display='block';setTimeout(function(){ok.style.display='none';},3000);}
+function renderHistorial(){var hist=JSON.parse(localStorage.getItem('nl7_hist')||'[]');var cont=document.getElementById('lista-historial');if(hist.length===0){cont.innerHTML='<div class="empty-hist">No hay partidos guardados aún.<br><br>Transmite un partido y presiona<br>💾 Guardar partido al terminar.</div>';return;}var icons={goal:'⚽',yellow:'🟨',red:'🟥',undo:'↩️'};var labels={goal:'Gol',yellow:'Amarilla',red:'Roja',undo:'Anulado'};cont.innerHTML=hist.map(function(r){var evHtml=r.events.map(function(e){return '<span>'+e.minute+"' "+icons[e.type]+' '+(e.player||e.teamName)+'</span>';}).join(' · ');return '<div class="historial-item"><button class="del-btn" onclick="borrarPartido('+r.id+')">🗑 Borrar</button><h4>'+r.nL+' '+r.sL+' - '+r.sV+' '+r.nV+'</h4><p>📅 '+r.fecha+' &nbsp;|&nbsp; 🟨 L:'+r.yL+' V:'+r.yV+' &nbsp;|&nbsp; 🟥 L:'+r.rL+' V:'+r.rV+'</p>'+(r.events.length?'<div style="margin-top:7px;font-size:11px;color:var(--text2);line-height:2;">'+evHtml+'</div>':'')+'</div>';}).join('');}
+function borrarPartido(id){if(!confirm('¿Borrar este partido?'))return;var hist=JSON.parse(localStorage.getItem('nl7_hist')||'[]');localStorage.setItem('nl7_hist',JSON.stringify(hist.filter(function(r){return r.id!==id;})));renderHistorial();}
+function resetLive(){if(!confirm('¿Reiniciar? Los datos no guardados se perderán.'))return;live.sL=0;live.sV=0;live.yL=0;live.rL=0;live.yV=0;live.rV=0;live.events=[];live.min=0;live.status='sin';['btn-inicio','btn-medio','btn-fin'].forEach(function(id){document.getElementById(id).classList.remove('active');});document.getElementById('status-pill').textContent='Sin iniciar';document.getElementById('match-time').textContent="0'";renderLive();}
+renderPartidos();
+</script>
+</body>
+</html>

@@ -413,13 +413,7 @@ async function fbDelete(path){
   await fetch(`${FIREBASE_URL}/${path}.json`, {method:'DELETE'});
 }
 
-// Escuchar cambios en tiempo real via SSE
-function fbListen(path, cb){
-  const es = new EventSource(`${FIREBASE_URL}/${path}.json`);
-  es.addEventListener('put', e => { try{ cb(JSON.parse(e.data)); }catch(ex){} });
-  es.addEventListener('patch', e => { try{ cb(JSON.parse(e.data)); }catch(ex){} });
-  return es;
-}
+
 
 // ════════════════════════════════
 //  GOOGLE SHEETS
@@ -615,6 +609,7 @@ async function enterApp(){
 };
 
 async function logout(){
+  if(pollInterval){ clearInterval(pollInterval); pollInterval=null; lastMsgCount=0; }
   if(S.onlineKey) await fbDelete('online/'+S.onlineKey);
   S.capName=''; S.teamId=null; S.isMod=false; S.onlineKey=null;
   isMod=false; selectedTeamId=null;
@@ -634,29 +629,33 @@ async function logout(){
 };
 
 // ════════════════════════════════
-//  LISTENERS FIREBASE (tiempo real)
+//  POLLING (tiempo real cada 2s)
 // ════════════════════════════════
+let pollInterval=null;
+let lastMsgCount=0;
+
 function startListeners(){
-  // Chat
-  fbListen('chat', data=>{
-    if(!data||!data.data) return;
-    renderMessages(data.data);
-  });
-  // Online
-  fbListen('online', data=>{
-    renderOnline(data?.data||data);
-  });
-  // Cargar inicial
-  loadInitialMessages();
-  loadOnline();
+  // Carga inicial
+  pollChat();
+  pollOnline();
+  // Polling cada 2 segundos
+  pollInterval=setInterval(()=>{
+    pollChat();
+    pollOnline();
+  },2000);
 }
 
-async function loadInitialMessages(){
+async function pollChat(){
   const data=await fbGet('chat');
-  if(data) renderMessages(data);
+  const count=data?Object.keys(data).length:0;
+  // Solo re-renderizar si hay mensajes nuevos
+  if(count!==lastMsgCount){
+    lastMsgCount=count;
+    renderMessages(data);
+  }
 }
 
-async function loadOnline(){
+async function pollOnline(){
   const data=await fbGet('online');
   renderOnline(data);
 }

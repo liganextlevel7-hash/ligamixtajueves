@@ -348,21 +348,35 @@ function cargarJugadoresPorEquipo(){
      return eqField.toString().trim() === idV.toString().trim() || eqField.toString().trim() === nombreV.toString().trim();
   });
   
-  // DETECTOR MAESTRO DE NÚMEROS (Blindado contra cualquier nombre de columna)
+  // DETECTOR ULTRA AGRESIVO DE NÚMEROS / DORSALES
   function obtenerTextoEstructurado(jugadorObj) {
      var keys = Object.keys(jugadorObj);
-     var num = "0";
+     var num = "";
      var nom = jugadorObj.Nombre || jugadorObj.nombre || "Jugador";
      
+     // 1. Busca cualquier columna relacionada a números, playeras o dorsales
      for(var i=0; i<keys.length; i++) {
         var k = keys[i].toLowerCase().trim();
-        if(k === 'número' || k === 'numero' || k === 'num' || k === '#' || k === 'no' || k.startsWith('num')) {
+        if(k==='dorsal' || k==='playera' || k==='número' || k==='numero' || k==='num' || k==='#' || k==='no' || k.startsWith('num')) {
            if(jugadorObj[keys[i]]) {
               num = jugadorObj[keys[i]].toString().trim();
               break;
            }
         }
      }
+     
+     // 2. Si no la encuentra, extrae cualquier valor numérico suelto dentro del objeto
+     if(!num){
+       for(var i=0; i<keys.length; i++){
+         var val = (jugadorObj[keys[i]] || '').toString().trim();
+         if(val && !isNaN(val) && keys[i].toLowerCase() !== 'id_equipo'){
+           num = val;
+           break;
+         }
+       }
+     }
+     
+     if(!num) num = "0"; // Respaldo definitivo
      return `# ${num} - ${nom}`;
   }
 
@@ -412,7 +426,12 @@ function setStatus(st){
 function addEvent(type, team){
   if(!liveState) return;
   var selectId = 'sel-' + type + '-' + team;
-  var pName = document.getElementById(selectId).value || 'Jugador Sin Número';
+  var pName = document.getElementById(selectId).value;
+  
+  // SI NO HAY JUGADOR SELECCIONADO, ASIGNA UN VALOR "ANÓNIMO" PARA QUE LA FUNCIÓN NUNCA SE DETENGA
+  if(!pName || pName.trim() === ""){
+     pName = "Jugador de Equipo";
+  }
   
   var min = 0;
   if(liveState.inicioTimestamp) {
@@ -426,7 +445,6 @@ function addEvent(type, team){
   var evs = liveState.events || [];
   evs.push(newEv);
   
-  // SOLUCIÓN TOTAL: VALORES BASE GARANTIZADOS COMO ENTEROS SIEMPRE
   var sL = parseInt(liveState.scoreLocal || 0) || 0;
   var sV = parseInt(liveState.scoreVisita || 0) || 0;
   var yL = parseInt(liveState.yellowLocal || 0) || 0;

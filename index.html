@@ -397,7 +397,7 @@ cargarCarrusel();
     }
     var publico = document.getElementById('envivo-publico');
     var offline = document.getElementById('envivo-offline');
-    if(estado === 'si' || estado === 'sí'){
+    if(estado === 'si' || estado === 'sí' || estado === 'true' || estado === '1'){
       publico.style.display='block';
       offline.style.display='none';
     } else {

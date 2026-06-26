@@ -162,20 +162,20 @@ var db = firebase.database();
       <div class="actions-grid">
         <div class="act-col">
           <div class="act-title"><img id="act-logo-local" class="act-logo" src=""><span id="act-name-local">Local</span></div>
-          <div class="act-row"><span>⚽ Gol</span><div class="bpair"><button class="btn btn-goal" onclick="addEvent('goal','local')">+1</button></div></div>
+          <div class="act-row"><span>⚽ Gol Local</span><div class="bpair"><button class="btn btn-goal" onclick="addEvent('goal','local')">+1 Gol</button></div></div>
           <select class="psel" id="sel-gol-local"><option value="">— Seleccionar Jugador —</option></select>
-          <div class="act-row" style="margin-top:4px"><span><span class="yb"></span>Amarilla</span><button class="btn btn-yellow" onclick="addEvent('yellow','local')">+1</button></div>
+          <div class="act-row" style="margin-top:4px"><span><span class="yb"></span>Amarilla</span><button class="btn btn-yellow" onclick="addEvent('yellow','local')">+1 Tarjeta</button></div>
           <select class="psel" id="sel-yellow-local"><option value="">— Seleccionar Jugador —</option></select>
-          <div class="act-row" style="margin-top:4px"><span><span class="rb"></span>Roja</span><button class="btn btn-red" onclick="addEvent('red','local')">+1</button></div>
+          <div class="act-row" style="margin-top:4px"><span><span class="rb"></span>Roja</span><button class="btn btn-red" onclick="addEvent('red','local')">+1 Tarjeta</button></div>
           <select class="psel" id="sel-red-local"><option value="">— Seleccionar Jugador —</option></select>
         </div>
         <div class="act-col">
           <div class="act-title"><img id="act-logo-visita" class="act-logo" src=""><span id="act-name-visita">Visita</span></div>
-          <div class="act-row"><span>⚽ Gol</span><div class="bpair"><button class="btn btn-goal" onclick="addEvent('goal','visita')">+1</button></div></div>
+          <div class="act-row"><span>⚽ Gol Visita</span><div class="bpair"><button class="btn btn-goal" onclick="addEvent('goal','visita')">+1 Gol</button></div></div>
           <select class="psel" id="sel-gol-visita"><option value="">— Seleccionar Jugador —</option></select>
-          <div class="act-row" style="margin-top:4px"><span><span class="yb"></span>Amarilla</span><button class="btn btn-yellow" onclick="addEvent('yellow','visita')">+1</button></div>
+          <div class="act-row" style="margin-top:4px"><span><span class="yb"></span>Amarilla</span><button class="btn btn-yellow" onclick="addEvent('yellow','visita')">+1 Tarjeta</button></div>
           <select class="psel" id="sel-yellow-visita"><option value="">— Seleccionar Jugador —</option></select>
-          <div class="act-row" style="margin-top:4px"><span><span class="rb"></span>Roja</span><button class="btn btn-red" onclick="addEvent('red','visita')">+1</button></div>
+          <div class="act-row" style="margin-top:4px"><span><span class="rb"></span>Roja</span><button class="btn btn-red" onclick="addEvent('red','visita')">+1 Tarjeta</button></div>
           <select class="psel" id="sel-red-visita"><option value="">— Seleccionar Jugador —</option></select>
         </div>
       </div>
@@ -270,8 +270,8 @@ function inicializarAdmin(){
                Equipo_Local: liveState.idLocal || liveState.nombreLocal,
                Equipo_Visita: liveState.idVisita || liveState.nombreVisita
             };
-            cargarJugadoresPorEquipo();
          }
+         cargarJugadoresPorEquipo();
          actualizarUI();
       } else {
          document.getElementById('active-bar').textContent = "Ningún partido seleccionado";
@@ -340,42 +340,60 @@ function cargarJugadoresPorEquipo(){
   var nombreV = DB.equipos[idV]?.nombre || idV;
   
   var jL = DB.jugadores.filter(j => {
-     var eqField = j.ID_Equipo || j.id_equipo || j.Equipo || j.equipo;
-     return eqField === idL || eqField === nombreL;
+     var eqField = j.ID_Equipo || j.id_equipo || j.Equipo || j.equipo || '';
+     return eqField.toString().trim() === idL.toString().trim() || eqField.toString().trim() === nombreL.toString().trim();
   });
   var jV = DB.jugadores.filter(j => {
-     var eqField = j.ID_Equipo || j.id_equipo || j.Equipo || j.equipo;
-     return eqField === idV || eqField === nombreV;
+     var eqField = j.ID_Equipo || j.id_equipo || j.Equipo || j.equipo || '';
+     return eqField.toString().trim() === idV.toString().trim() || eqField.toString().trim() === nombreV.toString().trim();
   });
   
+  // DETECTOR MAESTRO DE NÚMEROS (Blindado contra cualquier nombre de columna)
+  function obtenerTextoEstructurado(jugadorObj) {
+     var keys = Object.keys(jugadorObj);
+     var num = "0";
+     var nom = jugadorObj.Nombre || jugadorObj.nombre || "Jugador";
+     
+     for(var i=0; i<keys.length; i++) {
+        var k = keys[i].toLowerCase().trim();
+        if(k === 'número' || k === 'numero' || k === 'num' || k === '#' || k === 'no' || k.startsWith('num')) {
+           if(jugadorObj[keys[i]]) {
+              num = jugadorObj[keys[i]].toString().trim();
+              break;
+           }
+        }
+     }
+     return `# ${num} - ${nom}`;
+  }
+
   var idsL = ['sel-gol-local','sel-yellow-local','sel-red-local'];
   idsL.forEach(id => {
     var s = document.getElementById(id);
-    s.innerHTML = '<option value="">— Seleccionar Jugador —</option>';
-    jL.forEach(j => { 
-      var n = j.Nombre || j.nombre; 
-      var num = j.Número || j.numero || j.Num || j['#'] || '';
-      var disp = num ? `Nº ${num} - ${n}` : n;
-      s.innerHTML += `<option value="${disp}">${disp}</option>`; 
-    });
+    if(s) {
+      s.innerHTML = '<option value="">— Seleccionar Jugador —</option>';
+      jL.forEach(j => { 
+        var textoFinal = obtenerTextoEstructurado(j);
+        s.innerHTML += `<option value="${textoFinal}">${textoFinal}</option>`; 
+      });
+    }
   });
   
   var idsV = ['sel-gol-visita','sel-yellow-visita','sel-red-visita'];
   idsV.forEach(id => {
     var s = document.getElementById(id);
-    s.innerHTML = '<option value="">— Seleccionar Jugador —</option>';
-    jV.forEach(j => { 
-      var n = j.Nombre || j.nombre; 
-      var num = j.Número || j.numero || j.Num || j['#'] || '';
-      var disp = num ? `Nº ${num} - ${n}` : n;
-      s.innerHTML += `<option value="${disp}">${disp}</option>`; 
-    });
+    if(s) {
+      s.innerHTML = '<option value="">— Seleccionar Jugador —</option>';
+      jV.forEach(j => { 
+        var textoFinal = obtenerTextoEstructurado(j);
+        s.innerHTML += `<option value="${textoFinal}">${textoFinal}</option>`; 
+      });
+    }
   });
 
-  document.getElementById('act-name-local').textContent = nombreL;
-  document.getElementById('act-logo-local').src = DB.equipos[idL]?.logo || '';
-  document.getElementById('act-name-visita').textContent = nombreV;
-  document.getElementById('act-logo-visita').src = DB.equipos[idV]?.logo || '';
+  if(document.getElementById('act-name-local')) document.getElementById('act-name-local').textContent = nombreL;
+  if(document.getElementById('act-logo-local')) document.getElementById('act-logo-local').src = DB.equipos[idL]?.logo || '';
+  if(document.getElementById('act-name-visita')) document.getElementById('act-name-visita').textContent = nombreV;
+  if(document.getElementById('act-logo-visita')) document.getElementById('act-logo-visita').src = DB.equipos[idV]?.logo || '';
 }
 
 function setStatus(st){
@@ -394,7 +412,7 @@ function setStatus(st){
 function addEvent(type, team){
   if(!liveState) return;
   var selectId = 'sel-' + type + '-' + team;
-  var pName = document.getElementById(selectId).value || 'Jugador';
+  var pName = document.getElementById(selectId).value || 'Jugador Sin Número';
   
   var min = 0;
   if(liveState.inicioTimestamp) {
@@ -408,17 +426,17 @@ function addEvent(type, team){
   var evs = liveState.events || [];
   evs.push(newEv);
   
-  // CORRECCIÓN MATEMÁTICA PURA PARA GOLES Y TARJETAS
-  var sL = parseInt(liveState.scoreLocal) || 0;
-  var sV = parseInt(liveState.scoreVisita) || 0;
-  var yL = parseInt(liveState.yellowLocal) || 0;
-  var rL = parseInt(liveState.redLocal) || 0;
-  var yV = parseInt(liveState.yellowVisita) || 0;
-  var rV = parseInt(liveState.redVisita) || 0;
+  // SOLUCIÓN TOTAL: VALORES BASE GARANTIZADOS COMO ENTEROS SIEMPRE
+  var sL = parseInt(liveState.scoreLocal || 0) || 0;
+  var sV = parseInt(liveState.scoreVisita || 0) || 0;
+  var yL = parseInt(liveState.yellowLocal || 0) || 0;
+  var rL = parseInt(liveState.redLocal || 0) || 0;
+  var yV = parseInt(liveState.yellowVisita || 0) || 0;
+  var rV = parseInt(liveState.redVisita || 0) || 0;
 
-  if(type === 'goal') { if(team === 'local') sL++; else sV++; }
-  if(type === 'yellow') { if(team === 'local') yL++; else yV++; }
-  if(type === 'red') { if(team === 'local') rL++; else rV++; }
+  if(type === 'goal') { if(team === 'local') sL = sL + 1; else sV = sV + 1; }
+  if(type === 'yellow') { if(team === 'local') yL = yL + 1; else yV = yV + 1; }
+  if(type === 'red') { if(team === 'local') rL = rL + 1; else rV = rV + 1; }
 
   var updates = { 
      events: evs,
@@ -460,12 +478,12 @@ function actualizarUI(){
   document.getElementById('logo-visita').src = d.logoVisita || '';
   document.getElementById('name-local').textContent = d.nombreLocal || 'Local';
   document.getElementById('name-visita').textContent = d.nombreVisita || 'Visita';
-  document.getElementById('score-local').textContent = d.scoreLocal || 0;
-  document.getElementById('score-visita').textContent = d.scoreVisita || 0;
-  document.getElementById('st-yl').textContent = d.yellowLocal || 0;
-  document.getElementById('st-rl').textContent = d.redLocal || 0;
-  document.getElementById('st-yv').textContent = d.yellowVisita || 0;
-  document.getElementById('st-rv').textContent = d.redVisita || 0;
+  document.getElementById('score-local').textContent = d.scoreLocal ?? 0;
+  document.getElementById('score-visita').textContent = d.scoreVisita ?? 0;
+  document.getElementById('st-yl').textContent = d.yellowLocal ?? 0;
+  document.getElementById('st-rl').textContent = d.redLocal ?? 0;
+  document.getElementById('st-yv').textContent = d.yellowVisita ?? 0;
+  document.getElementById('st-rv').textContent = d.redVisita ?? 0;
   
   var labels = {inicio:'En juego ▶', medio:'Medio tiempo ⏸', fin:'Finalizado 🏁', sin:'Sin iniciar'};
   document.getElementById('spill').textContent = labels[d.status] || 'Sin iniciar';

@@ -216,7 +216,14 @@
         <div style="font-size:11px;color:rgba(255,255,255,0.6);text-align:center;line-height:1.7;font-family:Arial,sans-serif;">Sigue el partido en tiempo real.<br>Marcador, goles y tarjetas<br>al instante. ⚽🟨🟥</div>
 
       </div>
-      <a href="nextlevelenvivo.html" class="car-btn" style="position:absolute;bottom:14px;left:18px;right:18px;width:auto;z-index:5;background:rgba(255,215,0,0.15);color:#ffd700;border:1px solid #ffd700;">VER EN VIVO</a>
+      <!-- Botones dinamicos -->
+      <div id="envivo-publico" style="position:absolute;bottom:14px;left:18px;right:18px;z-index:5;display:none;flex-direction:column;gap:6px;">
+        <a href="nextlevelenvivo.html" class="car-btn" style="background:rgba(224,48,48,0.2);color:#ff6060;border:1px solid #e03030;">🔴 VER TRANSMISIÓN EN VIVO</a>
+      </div>
+      <div id="envivo-offline" style="position:absolute;bottom:14px;left:18px;right:18px;z-index:5;">
+        <div class="car-btn" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.3);border:1px solid rgba(255,255,255,0.1);cursor:default;">Sin transmisión activa</div>
+      </div>
+      <a href="nextlevelenvivo.html" id="envivo-admin-btn" style="position:absolute;top:14px;right:14px;z-index:6;background:rgba(255,215,0,0.15);color:#ffd700;border:1px solid #ffd700;border-radius:20px;padding:4px 12px;font-size:10px;font-weight:700;text-decoration:none;display:none;">⚙️ ADMIN</a>
     </div>
   </div>
   <!-- ===== FIN CARD EN VIVO ===== -->
@@ -377,6 +384,31 @@ document.getElementById('carrusel-wrap').addEventListener('touchend',e=>{ const 
 setInterval(()=>carMover(1),5000);
 carActualizar();
 cargarCarrusel();
+
+// Verificar estado de transmision
+(function checkTransmision(){
+  var SHEET_ID = '1BhDkqSWYzkahtaG19_uO28no5FQbQkDeomjZoMWBYfE';
+  var GID_CONFIG = '200886667';
+  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid='+GID_CONFIG;
+  fetch(url).then(function(r){return r.text();}).then(function(t){
+    var lines = t.trim().split('\n');
+    var estado = '';
+    if(lines.length > 1){
+      estado = lines[1].replace(/"/g,'').trim().toLowerCase();
+    }
+    var publico = document.getElementById('envivo-publico');
+    var offline = document.getElementById('envivo-offline');
+    if(estado === 'si' || estado === 'sí'){
+      publico.style.display='flex';
+      offline.style.display='none';
+    } else {
+      publico.style.display='none';
+      offline.style.display='block';
+    }
+  }).catch(function(){ 
+    document.getElementById('envivo-offline').style.display='block';
+  });
+})();
 </script>
 </body>
 </html>

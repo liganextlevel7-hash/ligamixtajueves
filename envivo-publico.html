@@ -73,20 +73,17 @@ body{background:#0f1a13;color:#e8f0ea;font-family:Arial,sans-serif;min-height:10
     <p>Torneo Dominical — Puebla</p>
   </div>
 
-  <!-- Sin transmision -->
   <div id="vista-offline" class="offline">
     <div style="font-size:50px;margin-bottom:16px;">📡</div>
     <h2>Sin transmisión activa</h2>
     <p>Cuando comience el partido<br>podrás seguirlo aquí<br>en tiempo real.</p>
   </div>
 
-  <!-- Lista de encuentros -->
   <div id="vista-seleccion" style="display:none;">
     <p style="font-size:12px;color:#8aab91;margin-bottom:10px;text-align:center;">Encuentros del día — toca el que está EN VIVO</p>
     <div id="lista-encuentros"></div>
   </div>
 
-  <!-- Marcador en vivo -->
   <div id="vista-live" style="display:none;">
     <button class="back-btn" onclick="volverSeleccion()">← Ver todos los encuentros</button>
     <div style="text-align:center;margin-bottom:10px;">
@@ -126,8 +123,6 @@ body{background:#0f1a13;color:#e8f0ea;font-family:Arial,sans-serif;min-height:10
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-// Config
-var SHEET_ID = '1BhDkqSWYzkahtaG19_uO28no5FQbQkDeomjZoMWBYfE';
 var GID_PARTIDOS = '1362473459';
 var GID_EQUIPOS = '1894947293';
 
@@ -152,7 +147,6 @@ var icons={goal:'⚽',yellow:'🟨',red:'🟥',undo:'↩️'};
 var labels={goal:'Gol',yellow:'Tarjeta amarilla',red:'Tarjeta roja',undo:'Gol anulado'};
 var statusLabels={inicio:'En juego ▶',medio:'Medio tiempo ⏸',fin:'Finalizado 🏁',sin:'Sin iniciar'};
 
-// CSV helpers
 function csvUrl(gid){ return 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid='+gid+'&single=true&output=csv'; }
 
 function parseCSV(text){
@@ -168,7 +162,6 @@ function parseCSV(text){
   });
 }
 
-// Cargar partidos programados del dia
 function cargarPartidos(){
   Promise.all([
     fetch(csvUrl(GID_EQUIPOS)).then(function(r){return r.text();}),
@@ -177,8 +170,6 @@ function cargarPartidos(){
     var eqs = parseCSV(results[0]);
     eqs.forEach(function(e){ if(e.ID_Equipo) equipos[e.ID_Equipo]={nombre:e.Nombre,logo:e.URL}; });
     var pts = parseCSV(results[1]);
-    // Filtrar solo programados de hoy
-    var hoy = new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
     partidos = pts.filter(function(p){
       var est=(p.Estado||'').toLowerCase();
       return est==='programado'||est==='pendiente';
@@ -209,6 +200,7 @@ function volverSeleccion(){
   stopTimer('0:00');
   document.getElementById('vista-live').style.display='none';
   document.getElementById('vista-seleccion').style.display='block';
+  renderSeleccion();
 }
 
 function verEnVivo(){
@@ -234,7 +226,8 @@ function actualizarMarcador(d){
 
   if(d.status==='inicio'){
     var segs=(d.minuto||0)*60;
-    if(d.inicioTimestamp) segs=(d.segundosAlIniciar||0)+Math.floor((Date.now()-d.inicioTimestamp)/1000);
+    if(d.inicioTimestamp) segs=Math.floor((Date.now()-d.inicioTimestamp)/1000);
+    if(segs < 0) segs = 0;
     startTimer(segs);
   } else if(d.status==='medio'){stopTimer('20:00');}
   else if(d.status==='fin'){stopTimer('FIN');}
@@ -250,12 +243,11 @@ function actualizarMarcador(d){
 
 function renderSeleccion(){
   var html='';
-  var hayLive = datosFirebase && datosFirebase.activo;
+  var hayLive = datosFirebase && datosFirebase.activo === true && datosFirebase.status !== 'fin';
 
-  // Partido EN VIVO
   if(hayLive){
     var d=datosFirebase;
-    html+='<div class="encuentro-card transmitiendo">'
+    html+='<div class="encuentro-card transmitiendo" onclick="verEnVivo()">'
       +'<div style="text-align:center;margin-bottom:8px;"><span class="estado-badge estado-live"><span class="live-dot" style="width:7px;height:7px;background:#ff6060;border-radius:50%;display:inline-block;animation:blink 1.2s infinite;"></span> TRANSMITIENDO</span></div>'
       +'<div class="encuentro-logos">'
       +'<img src="'+(d.logoLocal||'')+'" onerror="this.style.opacity=0">'
@@ -263,11 +255,10 @@ function renderSeleccion(){
       +'<img src="'+(d.logoVisita||'')+'" onerror="this.style.opacity=0">'
       +'</div>'
       +'<div class="encuentro-names"><span>'+(d.nombreLocal||'Local')+'</span><span>'+(d.nombreVisita||'Visita')+'</span></div>'
-      +'<div class="ver-btn" onclick="verEnVivo()">🔴 Ver en vivo →</div>'
+      +'<div class="ver-btn">🔴 Ver en vivo →</div>'
       +'</div>';
   }
 
-  // Partidos por transmitir
   var porTransmitir = partidos.filter(function(p){
     if(!hayLive) return true;
     var eL=equipos[p.Equipo_Local]||{};
@@ -298,10 +289,9 @@ function renderSeleccion(){
   document.getElementById('lista-encuentros').innerHTML=html;
 }
 
-// Escuchar Firebase
 db.ref('transmision').on('value', function(snap){
   datosFirebase=snap.val();
-  var hayLive=datosFirebase&&datosFirebase.activo;
+  var hayLive = datosFirebase && datosFirebase.activo === true && datosFirebase.status !== 'fin';
 
   if(!hayLive && !partidos.length){
     document.getElementById('vista-offline').style.display='block';
@@ -311,19 +301,18 @@ db.ref('transmision').on('value', function(snap){
   }
 
   document.getElementById('vista-offline').style.display='none';
+  
+  if(viendoLive && !hayLive) {
+     viendoLive = false;
+  }
+
   document.getElementById('vista-seleccion').style.display=viendoLive?'none':'block';
   document.getElementById('vista-live').style.display=viendoLive?'block':'none';
 
   if(viendoLive && hayLive) actualizarMarcador(datosFirebase);
   if(!viendoLive) renderSeleccion();
-
-  // Si termino el partido y estaban viendo, volver a seleccion
-  if(viendoLive && datosFirebase && datosFirebase.status==='fin'){
-    setTimeout(function(){ volverSeleccion(); }, 3000);
-  }
 });
 
-// Cargar partidos
 cargarPartidos();
 </script>
 </body>

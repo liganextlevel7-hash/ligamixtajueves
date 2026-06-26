@@ -14,6 +14,23 @@ body{background:#0f1a13;color:#e8f0ea;font-family:Arial,sans-serif;min-height:10
 .live-badge{display:inline-flex;align-items:center;gap:6px;background:#e03030;color:white;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:8px;}
 .live-dot{width:7px;height:7px;background:white;border-radius:50%;animation:blink 1.2s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+
+/* SELECCION */
+.encuentro-card{background:#1a2a1e;border:1px solid #2d4035;border-radius:12px;padding:14px;margin-bottom:10px;transition:all .2s;}
+.encuentro-card.transmitiendo{border-color:#e03030;cursor:pointer;}
+.encuentro-card.transmitiendo:hover{background:#1e2a1e;}
+.encuentro-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.encuentro-logos{display:flex;align-items:center;gap:10px;flex:1;justify-content:center;}
+.encuentro-logos img{width:38px;height:38px;object-fit:contain;background:#0f1a13;border-radius:6px;padding:2px;}
+.encuentro-score{font-size:20px;font-weight:900;color:#fff;padding:0 8px;}
+.encuentro-names{display:flex;justify-content:space-between;font-size:11px;color:#8aab91;margin-bottom:8px;}
+.estado-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;}
+.estado-live{background:rgba(224,48,48,0.2);color:#ff6060;border:1px solid #e03030;}
+.estado-espera{background:rgba(255,215,0,0.1);color:#ffd700;border:1px solid rgba(255,215,0,0.3);}
+.estado-fin{background:rgba(255,255,255,0.05);color:#8aab91;border:1px solid #2d4035;}
+.ver-btn{display:block;width:100%;text-align:center;background:rgba(224,48,48,0.15);color:#ff6060;border:1px solid #e03030;border-radius:8px;padding:8px;font-size:12px;font-weight:700;margin-top:10px;cursor:pointer;}
+
+/* MARCADOR */
 .scoreboard{display:grid;grid-template-columns:1fr 100px 1fr;gap:10px;align-items:center;margin-bottom:12px;}
 .team-card{background:#1a2a1e;border:1px solid #2d4035;border-radius:12px;padding:12px 8px;text-align:center;}
 .tlogo-box{width:56px;height:56px;margin:0 auto 7px;display:flex;align-items:center;justify-content:center;background:#0f1a13;border-radius:8px;padding:4px;}
@@ -42,6 +59,7 @@ body{background:#0f1a13;color:#e8f0ea;font-family:Arial,sans-serif;min-height:10
 .ev-team{font-size:11px;color:#8aab91;}
 .no-ev{text-align:center;color:#8aab91;font-size:13px;padding:22px;}
 .spill{display:inline-block;font-size:11px;padding:4px 12px;border-radius:20px;background:#243028;color:#8aab91;border:1px solid #2d4035;margin-bottom:10px;}
+.back-btn{border:1px solid #2d4035;background:#1a2a1e;color:#8aab91;border-radius:8px;padding:7px 14px;font-size:12px;cursor:pointer;margin-bottom:12px;display:block;}
 .offline{text-align:center;padding:60px 20px;}
 .offline h2{font-size:20px;color:#8aab91;margin-bottom:10px;}
 .offline p{font-size:13px;color:#8aab91;line-height:1.8;}
@@ -55,13 +73,22 @@ body{background:#0f1a13;color:#e8f0ea;font-family:Arial,sans-serif;min-height:10
     <p>Torneo Dominical — Puebla</p>
   </div>
 
+  <!-- Sin transmision -->
   <div id="vista-offline" class="offline">
     <div style="font-size:50px;margin-bottom:16px;">📡</div>
     <h2>Sin transmisión activa</h2>
     <p>Cuando comience el partido<br>podrás seguirlo aquí<br>en tiempo real.</p>
   </div>
 
+  <!-- Lista de encuentros -->
+  <div id="vista-seleccion" style="display:none;">
+    <p style="font-size:12px;color:#8aab91;margin-bottom:10px;text-align:center;">Encuentros del día — toca el que está EN VIVO</p>
+    <div id="lista-encuentros"></div>
+  </div>
+
+  <!-- Marcador en vivo -->
   <div id="vista-live" style="display:none;">
+    <button class="back-btn" onclick="volverSeleccion()">← Ver todos los encuentros</button>
     <div style="text-align:center;margin-bottom:10px;">
       <span class="spill" id="spill">En juego ▶</span>
     </div>
@@ -99,6 +126,11 @@ body{background:#0f1a13;color:#e8f0ea;font-family:Arial,sans-serif;min-height:10
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
+// Config
+var SHEET_ID = '1BhDkqSWYzkahtaG19_uO28no5FQbQkDeomjZoMWBYfE';
+var GID_PARTIDOS = '1362473459';
+var GID_EQUIPOS = '1894947293';
+
 firebase.initializeApp({
   apiKey: "AIzaSyCDStSLESm2UbqcIRpqrnHGfTsZJUtCVwc",
   authDomain: "liga-next-level-7.firebaseapp.com",
@@ -109,16 +141,57 @@ firebase.initializeApp({
   appId: "1:463941548215:web:0d9eb7e517cbc33352b532"
 });
 var db = firebase.database();
+
 var localTimer = null;
+var viendoLive = false;
+var datosFirebase = null;
+var partidos = [];
+var equipos = {};
+
 var icons={goal:'⚽',yellow:'🟨',red:'🟥',undo:'↩️'};
 var labels={goal:'Gol',yellow:'Tarjeta amarilla',red:'Tarjeta roja',undo:'Gol anulado'};
 var statusLabels={inicio:'En juego ▶',medio:'Medio tiempo ⏸',fin:'Finalizado 🏁',sin:'Sin iniciar'};
 
+// CSV helpers
+function csvUrl(gid){ return 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid='+gid+'&single=true&output=csv'; }
+
+function parseCSV(text){
+  var lines=text.trim().split('\n');
+  var headers=lines[0].split(',').map(function(h){return h.trim().replace(/^"|"$/g,'');});
+  return lines.slice(1).filter(function(l){return l.trim();}).map(function(line){
+    var vals=[],cur='',inQ=false;
+    for(var i=0;i<line.length;i++){var c=line[i];if(c==='"')inQ=!inQ;else if(c===','&&!inQ){vals.push(cur.trim());cur='';}else cur+=c;}
+    vals.push(cur.trim());
+    var obj={};
+    headers.forEach(function(h,i){obj[h]=(vals[i]||'').replace(/^"|"$/g,'').trim();});
+    return obj;
+  });
+}
+
+// Cargar partidos programados del dia
+function cargarPartidos(){
+  Promise.all([
+    fetch(csvUrl(GID_EQUIPOS)).then(function(r){return r.text();}),
+    fetch(csvUrl(GID_PARTIDOS)).then(function(r){return r.text();})
+  ]).then(function(results){
+    var eqs = parseCSV(results[0]);
+    eqs.forEach(function(e){ if(e.ID_Equipo) equipos[e.ID_Equipo]={nombre:e.Nombre,logo:e.URL}; });
+    var pts = parseCSV(results[1]);
+    // Filtrar solo programados de hoy
+    var hoy = new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
+    partidos = pts.filter(function(p){
+      var est=(p.Estado||'').toLowerCase();
+      return est==='programado'||est==='pendiente';
+    });
+    renderSeleccion();
+  }).catch(function(){ renderSeleccion(); });
+}
+
 function startTimer(seg){
   if(localTimer) clearInterval(localTimer);
-  var s = seg;
+  var s=seg;
   function tick(){
-    var m=Math.floor(s/60), sc=s%60;
+    var m=Math.floor(s/60),sc=s%60;
     document.getElementById('match-time').textContent=m+':'+(sc<10?'0':'')+sc;
     s++;
   }
@@ -128,53 +201,130 @@ function startTimer(seg){
 
 function stopTimer(txt){
   if(localTimer){clearInterval(localTimer);localTimer=null;}
-  document.getElementById('match-time').textContent=txt||'0:00';
+  if(document.getElementById('match-time')) document.getElementById('match-time').textContent=txt||'0:00';
 }
 
-db.ref('transmision').on('value', function(snap){
-  var d = snap.val();
+function volverSeleccion(){
+  viendoLive=false;
+  stopTimer('0:00');
+  document.getElementById('vista-live').style.display='none';
+  document.getElementById('vista-seleccion').style.display='block';
+}
 
-  if(!d || !d.activo){
+function verEnVivo(){
+  if(!datosFirebase||!datosFirebase.activo) return;
+  viendoLive=true;
+  document.getElementById('vista-seleccion').style.display='none';
+  document.getElementById('vista-live').style.display='block';
+  actualizarMarcador(datosFirebase);
+}
+
+function actualizarMarcador(d){
+  document.getElementById('logo-local').src=d.logoLocal||'';
+  document.getElementById('logo-visita').src=d.logoVisita||'';
+  document.getElementById('name-local').textContent=d.nombreLocal||'Local';
+  document.getElementById('name-visita').textContent=d.nombreVisita||'Visita';
+  document.getElementById('score-local').textContent=d.scoreLocal||0;
+  document.getElementById('score-visita').textContent=d.scoreVisita||0;
+  document.getElementById('spill').textContent=statusLabels[d.status]||'En juego';
+  document.getElementById('st-yl').textContent=d.yellowLocal||0;
+  document.getElementById('st-rl').textContent=d.redLocal||0;
+  document.getElementById('st-yv').textContent=d.yellowVisita||0;
+  document.getElementById('st-rv').textContent=d.redVisita||0;
+
+  if(d.status==='inicio'){
+    var segs=(d.minuto||0)*60;
+    if(d.inicioTimestamp) segs=(d.segundosAlIniciar||0)+Math.floor((Date.now()-d.inicioTimestamp)/1000);
+    startTimer(segs);
+  } else if(d.status==='medio'){stopTimer('20:00');}
+  else if(d.status==='fin'){stopTimer('FIN');}
+  else{stopTimer('0:00');}
+
+  var evs=d.events||[];
+  var list=document.getElementById('events-list');
+  if(!evs.length){list.innerHTML='<div class="no-ev">Esperando eventos...</div>';return;}
+  list.innerHTML=evs.map(function(e){
+    return '<div class="ev '+(e.type||'')+'"><span class="ev-min">'+(e.minute||0)+"'</span><span>"+(icons[e.type]||'')+'</span><span class="ev-txt">'+(labels[e.type]||e.type)+(e.player?' — '+e.player:'')+'</span><span class="ev-team">'+(e.teamName||'')+'</span></div>';
+  }).join('');
+}
+
+function renderSeleccion(){
+  var html='';
+  var hayLive = datosFirebase && datosFirebase.activo;
+
+  // Partido EN VIVO
+  if(hayLive){
+    var d=datosFirebase;
+    html+='<div class="encuentro-card transmitiendo">'
+      +'<div style="text-align:center;margin-bottom:8px;"><span class="estado-badge estado-live"><span class="live-dot" style="width:7px;height:7px;background:#ff6060;border-radius:50%;display:inline-block;animation:blink 1.2s infinite;"></span> TRANSMITIENDO</span></div>'
+      +'<div class="encuentro-logos">'
+      +'<img src="'+(d.logoLocal||'')+'" onerror="this.style.opacity=0">'
+      +'<span class="encuentro-score">'+(d.scoreLocal||0)+' - '+(d.scoreVisita||0)+'</span>'
+      +'<img src="'+(d.logoVisita||'')+'" onerror="this.style.opacity=0">'
+      +'</div>'
+      +'<div class="encuentro-names"><span>'+(d.nombreLocal||'Local')+'</span><span>'+(d.nombreVisita||'Visita')+'</span></div>'
+      +'<div class="ver-btn" onclick="verEnVivo()">🔴 Ver en vivo →</div>'
+      +'</div>';
+  }
+
+  // Partidos por transmitir
+  var porTransmitir = partidos.filter(function(p){
+    if(!hayLive) return true;
+    var eL=equipos[p.Equipo_Local]||{};
+    var eV=equipos[p.Equipo_Visita]||{};
+    return !(eL.nombre===datosFirebase.nombreLocal && eV.nombre===datosFirebase.nombreVisita);
+  });
+
+  if(porTransmitir.length){
+    porTransmitir.forEach(function(p){
+      var eL=equipos[p.Equipo_Local]||{nombre:'Equipo',logo:''};
+      var eV=equipos[p.Equipo_Visita]||{nombre:'Equipo',logo:''};
+      html+='<div class="encuentro-card">'
+        +'<div style="text-align:center;margin-bottom:8px;"><span class="estado-badge estado-espera">⏳ Por transmitir</span></div>'
+        +'<div class="encuentro-logos">'
+        +'<img src="'+eL.logo+'" onerror="this.style.opacity=0">'
+        +'<span class="encuentro-score" style="color:#8aab91;">VS</span>'
+        +'<img src="'+eV.logo+'" onerror="this.style.opacity=0">'
+        +'</div>'
+        +'<div class="encuentro-names"><span>'+eL.nombre+'</span><span>'+eV.nombre+'</span></div>'
+        +'</div>';
+    });
+  }
+
+  if(!html){
+    html='<div style="text-align:center;color:#8aab91;padding:20px;font-size:13px;">No hay partidos programados para hoy</div>';
+  }
+
+  document.getElementById('lista-encuentros').innerHTML=html;
+}
+
+// Escuchar Firebase
+db.ref('transmision').on('value', function(snap){
+  datosFirebase=snap.val();
+  var hayLive=datosFirebase&&datosFirebase.activo;
+
+  if(!hayLive && !partidos.length){
     document.getElementById('vista-offline').style.display='block';
+    document.getElementById('vista-seleccion').style.display='none';
     document.getElementById('vista-live').style.display='none';
-    stopTimer('0:00');
     return;
   }
 
   document.getElementById('vista-offline').style.display='none';
-  document.getElementById('vista-live').style.display='block';
+  document.getElementById('vista-seleccion').style.display=viendoLive?'none':'block';
+  document.getElementById('vista-live').style.display=viendoLive?'block':'none';
 
-  document.getElementById('logo-local').src = d.logoLocal||'';
-  document.getElementById('logo-visita').src = d.logoVisita||'';
-  document.getElementById('name-local').textContent = d.nombreLocal||'Local';
-  document.getElementById('name-visita').textContent = d.nombreVisita||'Visita';
-  document.getElementById('score-local').textContent = d.scoreLocal||0;
-  document.getElementById('score-visita').textContent = d.scoreVisita||0;
-  document.getElementById('spill').textContent = statusLabels[d.status]||'En juego';
-  document.getElementById('st-yl').textContent = d.yellowLocal||0;
-  document.getElementById('st-rl').textContent = d.redLocal||0;
-  document.getElementById('st-yv').textContent = d.yellowVisita||0;
-  document.getElementById('st-rv').textContent = d.redVisita||0;
+  if(viendoLive && hayLive) actualizarMarcador(datosFirebase);
+  if(!viendoLive) renderSeleccion();
 
-  if(d.status==='inicio'){
-    var segs = (d.minuto||0)*60;
-    if(d.inicioTimestamp) segs = (d.segundosAlIniciar||0) + Math.floor((Date.now()-d.inicioTimestamp)/1000);
-    startTimer(segs);
-  } else if(d.status==='medio'){
-    stopTimer('20:00');
-  } else if(d.status==='fin'){
-    stopTimer('FIN');
-  } else {
-    stopTimer('0:00');
+  // Si termino el partido y estaban viendo, volver a seleccion
+  if(viendoLive && datosFirebase && datosFirebase.status==='fin'){
+    setTimeout(function(){ volverSeleccion(); }, 3000);
   }
-
-  var evs = d.events||[];
-  var list = document.getElementById('events-list');
-  if(!evs.length){list.innerHTML='<div class="no-ev">Esperando eventos...</div>';return;}
-  list.innerHTML = evs.map(function(e){
-    return '<div class="ev '+(e.type||'')+'"><span class="ev-min">'+(e.minute||0)+"'</span><span>"+(icons[e.type]||'')+'</span><span class="ev-txt">'+(labels[e.type]||e.type)+(e.player?' — '+e.player:'')+'</span><span class="ev-team">'+(e.teamName||'')+'</span></div>';
-  }).join('');
 });
+
+// Cargar partidos
+cargarPartidos();
 </script>
 </body>
 </html>

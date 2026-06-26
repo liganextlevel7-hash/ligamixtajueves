@@ -14,8 +14,6 @@ body{background:#0f1a13;color:#e8f0ea;font-family:Arial,sans-serif;min-height:10
 .live-badge{display:inline-flex;align-items:center;gap:6px;background:#e03030;color:white;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:8px;}
 .live-dot{width:7px;height:7px;background:white;border-radius:50%;animation:blink 1.2s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
-
-/* SELECCION */
 .encuentro-card{background:#1a2a1e;border:1px solid #2d4035;border-radius:12px;padding:14px;margin-bottom:10px;transition:all .2s;}
 .encuentro-card.transmitiendo{border-color:#e03030;cursor:pointer;}
 .encuentro-card.transmitiendo:hover{background:#1e2a1e;}
@@ -27,10 +25,7 @@ body{background:#0f1a13;color:#e8f0ea;font-family:Arial,sans-serif;min-height:10
 .estado-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;}
 .estado-live{background:rgba(224,48,48,0.2);color:#ff6060;border:1px solid #e03030;}
 .estado-espera{background:rgba(255,215,0,0.1);color:#ffd700;border:1px solid rgba(255,215,0,0.3);}
-.estado-fin{background:rgba(255,255,255,0.05);color:#8aab91;border:1px solid #2d4035;}
 .ver-btn{display:block;width:100%;text-align:center;background:rgba(224,48,48,0.15);color:#ff6060;border:1px solid #e03030;border-radius:8px;padding:8px;font-size:12px;font-weight:700;margin-top:10px;cursor:pointer;}
-
-/* MARCADOR */
 .scoreboard{display:grid;grid-template-columns:1fr 100px 1fr;gap:10px;align-items:center;margin-bottom:12px;}
 .team-card{background:#1a2a1e;border:1px solid #2d4035;border-radius:12px;padding:12px 8px;text-align:center;}
 .tlogo-box{width:56px;height:56px;margin:0 auto 7px;display:flex;align-items:center;justify-content:center;background:#0f1a13;border-radius:8px;padding:4px;}
@@ -80,7 +75,7 @@ body{background:#0f1a13;color:#e8f0ea;font-family:Arial,sans-serif;min-height:10
   </div>
 
   <div id="vista-seleccion" style="display:none;">
-    <p style="font-size:12px;color:#8aab91;margin-bottom:10px;text-align:center;">Encuentros del día — toca el que está EN VIVO</p>
+    <p style="font-size:12px;color:#8aab91;margin-bottom:10px;text-align:center;">Encuentros Programados — Toca el que está EN VIVO</p>
     <div id="lista-encuentros"></div>
   </div>
 
@@ -170,9 +165,10 @@ function cargarPartidos(){
     var eqs = parseCSV(results[0]);
     eqs.forEach(function(e){ if(e.ID_Equipo) equipos[e.ID_Equipo]={nombre:e.Nombre,logo:e.URL}; });
     var pts = parseCSV(results[1]);
+    
+    // FILTRO ESTRICTO: Solo partidos cuyo Estado sea exactamente 'programado'
     partidos = pts.filter(function(p){
-      var est=(p.Estado||'').toLowerCase();
-      return est==='programado'||est==='pendiente';
+      return (p.Estado||'').toLowerCase() === 'programado';
     });
     renderSeleccion();
   }).catch(function(){ renderSeleccion(); });
@@ -268,10 +264,10 @@ function renderSeleccion(){
 
   if(porTransmitir.length){
     porTransmitir.forEach(function(p){
-      var eL=equipos[p.Equipo_Local]||{nombre:'Equipo',logo:''};
-      var eV=equipos[p.Equipo_Visita]||{nombre:'Equipo',logo:''};
+      var eL=equipos[p.Equipo_Local]||{nombre:p.Equipo_Local,logo:''};
+      var eV=equipos[p.Equipo_Visita]||{nombre:p.Equipo_Visita,logo:''};
       html+='<div class="encuentro-card">'
-        +'<div style="text-align:center;margin-bottom:8px;"><span class="estado-badge estado-espera">⏳ Por transmitir</span></div>'
+        +'<div style="text-align:center;margin-bottom:8px;"><span class="estado-badge estado-espera">⏳ Programado</span></div>'
         +'<div class="encuentro-logos">'
         +'<img src="'+eL.logo+'" onerror="this.style.opacity=0">'
         +'<span class="encuentro-score" style="color:#8aab91;">VS</span>'
@@ -283,7 +279,7 @@ function renderSeleccion(){
   }
 
   if(!html){
-    html='<div style="text-align:center;color:#8aab91;padding:20px;font-size:13px;">No hay partidos programados para hoy</div>';
+    html='<div style="text-align:center;color:#8aab91;padding:20px;font-size:13px;">No hay partidos programados libres para hoy</div>';
   }
 
   document.getElementById('lista-encuentros').innerHTML=html;
@@ -301,10 +297,7 @@ db.ref('transmision').on('value', function(snap){
   }
 
   document.getElementById('vista-offline').style.display='none';
-  
-  if(viendoLive && !hayLive) {
-     viendoLive = false;
-  }
+  if(viendoLive && !hayLive) viendoLive = false;
 
   document.getElementById('vista-seleccion').style.display=viendoLive?'none':'block';
   document.getElementById('vista-live').style.display=viendoLive?'block':'none';

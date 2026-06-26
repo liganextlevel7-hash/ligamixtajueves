@@ -71,10 +71,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-hei
 .no-ev{text-align:center;color:var(--text2);font-size:13px;padding:22px;}
 .hidden{display:none!important;}
 .active-bar{background:var(--bg3);border:1px solid var(--verde);border-radius:10px;padding:10px 14px;text-align:center;font-size:13px;font-weight:700;color:var(--verde2);margin-bottom:12px;}
-.save-btn{border:1px solid var(--verde);background:#1e3a20;color:#7dd87d;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;margin-right:8px;}
 .danger-btn{border:1px solid #5a2020;background:#2a1010;color:#ef9090;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;}
-.saved-ok{color:#5dba6a;font-size:12px;margin-top:8px;text-align:center;display:none;}
-.empty{text-align:center;color:var(--text2);padding:24px;font-size:13px;line-height:1.8;}
 .loading{text-align:center;color:var(--text2);padding:20px;font-size:13px;}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -202,13 +199,12 @@ var db = firebase.database();
 </div>
 
 <script>
-var SHEET_ID = '1BhDkqSWYzkahtaG19_uO28no5FQbQkDeomjZoMWBYfE';
 var GID_EQUIPOS   = '1894947293';
 var GID_JUGADORES = '1940220650';
 var GID_PARTIDOS  = '1362473459';
 
 var DB = { equipos:{}, jugadores:[], partidos:[] };
-var partidoActual = null;
+var partidoSeleccionado = null;
 var liveState = null;
 var localTimer = null;
 
@@ -249,9 +245,10 @@ function inicializarAdmin(){
     
     DB.jugadores = parseCSV(results[1]);
     var pts = parseCSV(results[2]);
+    
+    // FILTRO ESTRICTO: Solo partidos cuyo Estado sea exactamente 'programado'
     DB.partidos = pts.filter(p => {
-      var est = (p.Estado||'').toLowerCase();
-      return est==='programado' || est==='pendiente';
+      return (p.Estado||'').toLowerCase() === 'programado';
     });
     
     renderPartidosTab();
@@ -260,6 +257,13 @@ function inicializarAdmin(){
       liveState = snap.val();
       if(liveState && liveState.activo) {
          document.getElementById('active-bar').textContent = "Transmitiendo: " + liveState.nombreLocal + " vs " + liveState.nombreVisita;
+         if(!partidoSeleccionado){
+            partidoSeleccionado = {
+               Equipo_Local: liveState.idLocal || liveState.nombreLocal,
+               Equipo_Visita: liveState.idVisita || liveState.nombreVisita
+            };
+            cargarJugadoresPorEquipo();
+         }
          actualizarUI();
       } else {
          document.getElementById('active-bar').textContent = "Ningún partido seleccionado";
@@ -272,7 +276,7 @@ function inicializarAdmin(){
 function renderPartidosTab(){
   var html = '';
   if(!DB.partidos.length){
-    document.getElementById('lista-partidos').innerHTML = '<div class="empty">No hay partidos pendientes hoy</div>';
+    document.getElementById('lista-partidos').innerHTML = '<div class="empty">No hay partidos programados libres hoy</div>';
     return;
   }
   DB.partidos.forEach((p, idx) => {
@@ -281,26 +285,26 @@ function renderPartidosTab(){
     html += `<div class="partido-item" onclick="seleccionarPartido(${idx})">
       <img class="plogo" src="${el.logo}" onerror="this.style.opacity=0">
       <div class="pinfo"><strong>${el.nombre} vs ${ev.nombre}</strong><small>Hora: ${p.Hora || '--:--'}</small></div>
-      <span class="pbadge">Tocar</span>
+      <span class="pbadge">Transmitir</span>
     </div>`;
   });
   document.getElementById('lista-partidos').innerHTML = html;
 }
 
 function seleccionarPartido(idx){
-  var p = DB.partidos[idx];
-  var el = DB.equipos[p.Equipo_Local] || {nombre: p.Equipo_Local, logo:''};
-  var ev = DB.equipos[p.Equipo_Visita] || {nombre: p.Equipo_Visita, logo:''};
+  partidoSeleccionado = DB.partidos[idx];
+  var el = DB.equipos[partidoSeleccionado.Equipo_Local] || {nombre: partidoSeleccionado.Equipo_Local, logo:''};
+  var ev = DB.equipos[partidoSeleccionado.Equipo_Visita] || {nombre: partidoSeleccionado.Equipo_Visita, logo:''};
   
-  partidoActual = {
+  var inicializacionDura = {
     activo: true,
     status: 'sin',
     nombreLocal: el.nombre,
     nombreVisita: ev.nombre,
     logoLocal: el.logo,
     logoVisita: ev.logo,
-    idLocal: p.Equipo_Local,
-    idVisita: p.Equipo_Visita,
+    idLocal: partidoSeleccionado.Equipo_Local,
+    idVisita: partidoSeleccionado.Equipo_Visita,
     scoreLocal: 0, scoreVisita: 0,
     yellowLocal: 0, redLocal: 0,
     yellowVisita: 0, redVisita: 0,
@@ -309,18 +313,22 @@ function seleccionarPartido(idx){
     events: []
   };
   
-  db.ref('transmision').set(partidoActual).then(() => {
-     llenarSelects(p.Equipo_Local, p.Equipo_Visita);
+  db.ref('transmision').set(inicializacionDura).then(() => {
+     cargarJugadoresPorEquipo();
      showTab('live');
   });
 }
 
-function llenarSelects(idL, idV){
-  var jL = DB.jugadores.filter(j => j.ID_Equipo === idL);
-  var jV = DB.jugadores.filter(j => j.ID_Equipo === idV);
+function cargarJugadoresPorEquipo(){
+  if(!partidoSeleccionado) return;
+  var idL = partidoSeleccionado.Equipo_Local;
+  var idV = partidoSeleccionado.Equipo_Visita;
   
-  var ids = ['sel-gol-local','sel-yellow-local','sel-red-local'];
-  ids.forEach(id => {
+  var jL = DB.jugadores.filter(j => j.ID_Equipo === idL || DB.equipos[idL]?.nombre === j.ID_Equipo);
+  var jV = DB.jugadores.filter(j => j.ID_Equipo === idV || DB.equipos[idV]?.nombre === j.ID_Equipo);
+  
+  var idsL = ['sel-gol-local','sel-yellow-local','sel-red-local'];
+  idsL.forEach(id => {
     var s = document.getElementById(id);
     s.innerHTML = '<option value="">— Seleccionar Jugador —</option>';
     jL.forEach(j => s.innerHTML += `<option value="${j.Nombre}">${j.Nombre}</option>`);
@@ -332,6 +340,11 @@ function llenarSelects(idL, idV){
     s.innerHTML = '<option value="">— Seleccionar Jugador —</option>';
     jV.forEach(j => s.innerHTML += `<option value="${j.Nombre}">${j.Nombre}</option>`);
   });
+
+  document.getElementById('act-name-local').textContent = DB.equipos[idL]?.nombre || idL;
+  document.getElementById('act-logo-local').src = DB.equipos[idL]?.logo || '';
+  document.getElementById('act-name-visita').textContent = DB.equipos[idV]?.nombre || idV;
+  document.getElementById('act-logo-visita').src = DB.equipos[idV]?.logo || '';
 }
 
 function setStatus(st){
@@ -424,6 +437,7 @@ function actualizarUI(){
 function resetLive(){
   if(confirm("¿Seguro que quieres borrar la transmisión activa? Esto la quitará de la vista pública.")){
     db.ref('transmision').remove().then(() => {
+      partidoSeleccionado = null;
       liveState = null;
       stopTimer();
       showTab('partidos');

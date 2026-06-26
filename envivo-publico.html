@@ -173,7 +173,6 @@ function cargarPartidos(){
     });
     var pts = parseCSV(results[1]);
     
-    // FILTRO ESTRICTO: Solo partidos programados
     partidos = pts.filter(function(p){
       var est = (p.Estado || p.estado || '').toLowerCase();
       return est === 'programado';

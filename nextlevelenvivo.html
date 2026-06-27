@@ -163,6 +163,7 @@ var db = firebase.database();
       <span id="spill" class="spill">Sin iniciar</span>
     </div>
 
+    <!-- SECCIÓN DE ASISTENCIA -->
     <div class="section" id="seccion-asistencia">
       <h3>Asistencia de Jugadores (Desmarca al que NO llegó)</h3>
       <div class="asistencia-box">
@@ -242,6 +243,7 @@ var partidoSeleccionado = null;
 var liveState = null;
 var localTimer = null;
 
+// REEMPLAZAR ESTA URL CON LA DE TU HOJA NORMAL/REAL CUANDO HAGAS LA NUEVA IMPLEMENTACIÓN
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyA7BShK_4c49DAUiHpfXyfEGOToulPoVjzEXGKrSaVjQCJgUixODSM2qtzPFk5HRbG/exec";
 
 function csvUrl(gid){ return 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid='+gid+'&single=true&output=csv'; }
@@ -368,14 +370,13 @@ function seleccionarPartido(idx){
     events: []
   };
   
-  document.getElementById('seccion-asistencia').classList.remove('hidden'); // Reinicia visualización
+  document.getElementById('seccion-asistencia').classList.remove('hidden');
   db.ref('transmision').set(inicializacionDura).then(() => {
      cargarJugadoresPorEquipo();
      showTab('live');
   });
 }
 
-// CORREGIDA: Se arregló el error ortográfico de la función interna
 function cargarJugadoresPorEquipo(){
   if(!partidoSeleccionado) return;
   var idL = liveState?.idLocal || partidoSeleccionado.Equipo_Local || partidoSeleccionado.equipo_local;
@@ -559,7 +560,6 @@ function addEvent(type, team){
   });
 }
 
-// NUEVA FUNCIÓN: Envía de inmediato la asistencia a Google Sheets al arrancar y oculta la visualización
 function enviarSoloAsistencia() {
   if(!liveState) return;
   
@@ -600,13 +600,14 @@ function enviarSoloAsistencia() {
     })
   }).then(() => {
      alert("¡Asistencia guardada con éxito en Google Sheets!");
-     document.getElementById('seccion-asistencia').classList.add('hidden'); // Oculta los checkboxes
+     document.getElementById('seccion-asistencia').classList.add('hidden');
   }).catch(err => {
      console.error(err);
      alert("Error al enviar la asistencia.");
   });
 }
 
+// FUNCIÓN CORREGIDA TRADUCIENDO EVENTOS A ESPAÑOL ("Amarilla" y "Roja")
 function guardarPartidoFirebase(){
   if(!liveState) return;
   if(confirm("¿Deseas guardar los eventos (Goles y Tarjetas) finales de este partido en Google Sheets?")){
@@ -624,15 +625,22 @@ function guardarPartidoFirebase(){
          });
          var idJugadorReal = jugadorEncontrado ? (jugadorEncontrado.ID_Jugador || jugadorEncontrado.id_jugador || jugadorEncontrado.ID || jugadorEncontrado.id) : "ANONIMO";
 
+         // Mapeo corregido a Español para coincidir con tu reporte visual
+         var eventoEspañol = 'Gol';
+         if (e.type === 'yellow') {
+            eventoEspañol = 'Amarilla';
+         } else if (e.type === 'red') {
+            eventoEspañol = 'Roja';
+         }
+
          listaEventos.push({
             idPartido: idPartidoActual,
             idJugador: idJugadorReal,
-            tipoEvento: e.type === 'goal' ? 'Gol' : (e.type === 'yellow' ? 'Yellow' : 'Red'),
+            tipoEvento: eventoEspañol,
             minuto: e.minute
          });
       });
 
-      // Envía los eventos directo
       db.ref('historial_partidos/' + key).set(liveState).then(() => {
          return fetch(SCRIPT_URL, {
            method: 'POST',
@@ -719,7 +727,8 @@ function actualizarUI(){
   } else {
     evs.forEach(e => {
       var badge = e.type==='goal'?'⚽':(e.type==='yellow'?'🟨':'🟥');
-      evHtml += `<div class="ev ${e.type}"><span class="ev-min">${e.minute}'</span> ${badge} <span class="ev-txt"><strong>${e.player}</strong> (${e.type==='goal'?'Gol':(e.type==='yellow'?'Amarilla':'Roja')})</span><span class="ev-team">${e.teamName}</span></div>`;
+      var nombreTipo = e.type==='goal'?'Gol':(e.type==='yellow'?'Amarilla':'Roja');
+      evHtml += `<div class="ev ${e.type}"><span class="ev-min">${e.minute}'</span> ${badge} <span class="ev-txt"><strong>${e.player}</strong> (${nombreTipo})</span><span class="ev-team">${e.teamName}</span></div>`;
     });
     document.getElementById('events-list').innerHTML = evHtml;
   }

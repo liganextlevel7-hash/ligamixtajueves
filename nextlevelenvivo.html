@@ -54,8 +54,8 @@ body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-hei
 .btn-yellow{background:#2a2010;border-color:var(--yellow);color:var(--yellow);}
 .btn-red{background:#2a1010;border-color:var(--red);color:var(--red);}
 .psel{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text2);border-radius:7px;padding:6px 8px;font-size:12px;margin-top:3px;}
-.yb{display:inline-block;width:11px;height:15px;background:var(--yellow);border-radius:2px;vertical-align:middle;margin-right:3px;}
-.rb{display:inline-block;width:11px;height:15px;background:var(--red);border-radius:2px;vertical-align:middle;margin-right:3px;}
+.yb {display:inline-block;width:11px;height:15px;background:var(--yellow);border-radius:2px;vertical-align:middle;margin-right:3px;}
+.rb {display:inline-block;width:11px;height:15px;background:var(--red);border-radius:2px;vertical-align:middle;margin-right:3px;}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px;}
 .stat-mini{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;}
 .stat-num{font-size:22px;font-weight:900;color:var(--text);}
@@ -163,7 +163,7 @@ var db = firebase.database();
         <div class="act-col">
           <div class="act-title"><img id="act-logo-local" class="act-logo" src=""><span id="act-name-local">Local</span></div>
           <div class="act-row"><span>⚽ Gol Local</span><div class="bpair"><button class="btn btn-goal" onclick="addEvent('goal','local')">+1 Gol</button></div></div>
-          <select class="psel" id="sel-gol-local"><option value="">— Seleccionar Jugador —</option></select>
+          <select class="psel" id="sel-goal-local"><option value="">— Seleccionar Jugador —</option></select>
           <div class="act-row" style="margin-top:4px"><span><span class="yb"></span>Amarilla</span><button class="btn btn-yellow" onclick="addEvent('yellow','local')">+1 Tarjeta</button></div>
           <select class="psel" id="sel-yellow-local"><option value="">— Seleccionar Jugador —</option></select>
           <div class="act-row" style="margin-top:4px"><span><span class="rb"></span>Roja</span><button class="btn btn-red" onclick="addEvent('red','local')">+1 Tarjeta</button></div>
@@ -172,7 +172,7 @@ var db = firebase.database();
         <div class="act-col">
           <div class="act-title"><img id="act-logo-visita" class="act-logo" src=""><span id="act-name-visita">Visita</span></div>
           <div class="act-row"><span>⚽ Gol Visita</span><div class="bpair"><button class="btn btn-goal" onclick="addEvent('goal','visita')">+1 Gol</button></div></div>
-          <select class="psel" id="sel-gol-visita"><option value="">— Seleccionar Jugador —</option></select>
+          <select class="psel" id="sel-goal-visita"><option value="">— Seleccionar Jugador —</option></select>
           <div class="act-row" style="margin-top:4px"><span><span class="yb"></span>Amarilla</span><button class="btn btn-yellow" onclick="addEvent('yellow','visita')">+1 Tarjeta</button></div>
           <select class="psel" id="sel-yellow-visita"><option value="">— Seleccionar Jugador —</option></select>
           <div class="act-row" style="margin-top:4px"><span><span class="rb"></span>Roja</span><button class="btn btn-red" onclick="addEvent('red','visita')">+1 Tarjeta</button></div>
@@ -389,7 +389,7 @@ function cargarJugadoresPorEquipo(){
      return `# ${num} - ${nom}`;
   }
 
-  var idsL = ['sel-gol-local','sel-yellow-local','sel-red-local'];
+  var idsL = ['sel-goal-local','sel-yellow-local','sel-red-local'];
   idsL.forEach(id => {
     var s = document.getElementById(id);
     if(s && s.children.length <= 1) {
@@ -401,7 +401,7 @@ function cargarJugadoresPorEquipo(){
     }
   });
   
-  var idsV = ['sel-gol-visita','sel-yellow-visita','sel-red-visita'];
+  var idsV = ['sel-goal-visita','sel-yellow-visita','sel-red-visita'];
   idsV.forEach(id => {
     var s = document.getElementById(id);
     if(s && s.children.length <= 1) {
@@ -438,10 +438,17 @@ function cambiarMetodoFin() {
   db.ref('transmision').update({ metodoFin: met });
 }
 
+// CORRECCIÓN COMPLETA Y PROTECCIÓN CONTRA EL NULL
 function addEvent(type, team){
   if(!liveState) return;
   var selectId = 'sel-' + type + '-' + team;
-  var pName = document.getElementById(selectId).value;
+  var selectElem = document.getElementById(selectId);
+  var pName = "Jugador Anónimo"; // Valor por defecto seguro
+  
+  // SOLUCIÓN AL ERROR EN LA LÍNEA 444: Validamos la existencia antes de pedir el value
+  if(selectElem && selectElem.value) {
+      pName = selectElem.value;
+  }
   
   if(!pName || pName.trim() === ""){
      pName = "Jugador Anónimo";
@@ -479,7 +486,7 @@ function addEvent(type, team){
 
   // Guardamos la bitácora de forma paralela
   db.ref('transmision').update({ events: evs }).then(function() {
-     document.getElementById(selectId).value = "";
+     if(selectElem) selectElem.value = "";
   });
 }
 

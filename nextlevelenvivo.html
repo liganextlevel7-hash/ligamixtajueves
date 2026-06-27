@@ -74,7 +74,6 @@ body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-hei
 .save-btn{border:1px solid #1a5c2a;background:#1e3a20;color:#7dd87d;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;margin-right:10px;}
 .danger-btn{border:1px solid #5a2020;background:#2a1010;color:#ef9090;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;}
 .loading{text-align:center;color:var(--text2);padding:20px;font-size:13px;}
-/* Nuevos estilos para la lista de control de asistencia de jugadores */
 .asistencia-box {display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
 .asistencia-col {background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px;max-height:250px;overflow-y:auto;}
 .asistencia-title {font-size:11px;color:var(--text2);font-weight:bold;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:4px;}
@@ -163,7 +162,6 @@ var db = firebase.database();
       <span id="spill" class="spill">Sin iniciar</span>
     </div>
 
-    <!-- NUEVA SECCIÓN DE ASISTENCIA MANUAL EN VIVO -->
     <div class="section">
       <h3>Asistencia de Jugadores (Desmarca al que NO llegó)</h3>
       <div class="asistencia-box">
@@ -237,7 +235,7 @@ var GID_EQUIPOS   = '1894947293';
 var GID_JUGADORES = '1940220650';
 var GID_PARTIDOS  = '1362473459';
 
-var DB = { equipos:{}, jugadores:[], partidos:[] };
+var DB = { equipos:{}, jugadores:[], partidos:[], rawPartidos:[] };
 var partidoSeleccionado = null;
 var liveState = null;
 var localTimer = null;
@@ -284,9 +282,9 @@ function inicializarAdmin(){
     });
     
     DB.jugadores = parseCSV(results[1]);
-    var pts = parseCSV(results[2]);
+    DB.rawPartidos = parseCSV(results[2]);
     
-    DB.partidos = pts.filter(p => {
+    DB.partidos = DB.rawPartidos.filter(p => {
       var est = (p.Estado || p.estado || '').toLowerCase();
       return est === 'programado';
     });
@@ -298,9 +296,10 @@ function inicializarAdmin(){
       if(liveState && liveState.activo) {
          document.getElementById('active-bar').textContent = "Transmitiendo: " + liveState.nombreLocal + " vs " + liveState.nombreVisita;
          if(!partidoSeleccionado){
-            partidoSeleccionado = {
-               Equipo_Local: liveState.idLocal || liveState.nombreLocal,
-               Equipo_Visita: liveState.idVisita || liveState.nombreVisita
+            partidoSeleccionado = DB.rawPartidos.find(p => (p.ID_Partido || p.id_partido || '') === liveState.idPartidoReal) || {
+               ID_Partido: liveState.idPartidoReal,
+               Jornada: liveState.jornadaReal,
+               Fecha: liveState.fechaReal
             };
          }
          cargarJugadoresPorEquipo();
@@ -326,7 +325,7 @@ function renderPartidosTab(){
     var ev = DB.equipos[idV] || {nombre: idV, logo:''};
     html += `<div class="partido-item" onclick="seleccionarPartido(${idx})">
       <img class="plogo" src="${el.logo}" onerror="this.style.opacity=0">
-      <div class="pinfo"><strong>${el.nombre} vs ${ev.nombre}</strong><small>Hora: ${p.Hora || p.hora || '--:--'}</small></div>
+      <div class="pinfo"><strong>${el.nombre} vs ${ev.nombre}</strong><small>Jornada: ${p.Jornada || p.jornada || '-'} | Hora: ${p.Hora || p.hora || '--:--'}</small></div>
       <span class="pbadge">Transmitir</span>
     </div>`;
   });
@@ -337,6 +336,10 @@ function seleccionarPartido(idx){
   partidoSeleccionado = DB.partidos[idx];
   var idL = partidoSeleccionado.Equipo_Local || partidoSeleccionado.equipo_local;
   var idV = partidoSeleccionado.Equipo_Visita || partidoSeleccionado.equipo_visita;
+  var idReal = partidoSeleccionado.ID_Partido || partidoSeleccionado.id_partido || (idL + "_" + idV);
+  var jReal = partidoSeleccionado.Jornada || partidoSeleccionado.jornada || "1";
+  var fReal = partidoSeleccionado.Fecha || partidoSeleccionado.fecha || "";
+  
   var el = DB.equipos[idL] || {nombre: idL, logo:''};
   var ev = DB.equipos[idV] || {nombre: idV, logo:''};
   
@@ -349,6 +352,9 @@ function seleccionarPartido(idx){
     logoVisita: ev.logo,
     idLocal: idL,
     idVisita: idV,
+    idPartidoReal: idReal,
+    jornadaReal: jReal,
+    fechaReal: fReal,
     scoreLocal: 0, scoreVisita: 0,
     yellowLocal: 0, redLocal: 0,
     yellowVisita: 0, redVisita: 0,
@@ -366,8 +372,8 @@ function seleccionarPartido(idx){
 
 function cargarJugadoresPorEquipo(){
   if(!partidoSeleccionado) return;
-  var idL = partidoSeleccionado.Equipo_Local || partidoSeleccionado.equipo_local;
-  var idV = partidoSeleccionado.Equipo_Visita || partidoSeleccionado.equipo_visita;
+  var idL = liveState?.idLocal || partidoSeleccionado.Equipo_Local || partidoSeleccionado.equipo_local;
+  var idV = liveState?.idVisita || partidoSeleccionado.Equipo_Visita || partidoSeleccionado.equipo_visita;
   
   var nombreL = DB.equipos[idL]?.nombre || idL;
   var nombreV = DB.equipos[idV]?.nombre || idV;
@@ -395,22 +401,19 @@ function cargarJugadoresPorEquipo(){
            }
         }
      }
-     
      if(!num){
        for(var i=0; i<keys.length; i++){
          var val = (jugadorObj[keys[i]] || '').toString().trim();
-         if(val && !isNaN(val) && keys[i].toLowerCase() !== 'id_equipo'){
+         if(val && !isNaN(val) && keys[i].toLowerCase() !== 'id_equipo' && keys[i].toLowerCase() !== 'id_jugador'){
            num = val;
            break;
          }
        }
      }
-     
      if(!num) num = "0";
      return `# ${num} - ${nom}`;
   }
 
-  // Renderizar selectores de Goles/Tarjetas y armar listas de Asistencias con Checkbox
   var idsL = ['sel-goal-local','sel-yellow-local','sel-red-local'];
   var htmlAsistLocal = '';
   
@@ -425,12 +428,11 @@ function cargarJugadoresPorEquipo(){
     }
   });
 
-  // Generamos Checkboxes para el Equipo Local
   var divAsistL = document.getElementById('lista-asist-local');
   if(divAsistL && divAsistL.children.length === 0) {
      jL.forEach(j => {
         var jId = j.ID_Jugador || j.id_jugador || j.ID || j.id;
-        var textoFinal = obtenerTextoEstructurado(j);
+        var textoFinal = obtenerTextoEstructured(j);
         htmlAsistLocal += `<div class="check-item">
            <input type="checkbox" id="chk_${jId}" checked>
            <label for="chk_${jId}">${textoFinal}</label>
@@ -453,7 +455,6 @@ function cargarJugadoresPorEquipo(){
     }
   });
 
-  // Generamos Checkboxes para el Equipo Visita
   var divAsistV = document.getElementById('lista-asist-visita');
   if(divAsistV && divAsistV.children.length === 0) {
      jV.forEach(j => {
@@ -503,12 +504,10 @@ function addEvent(type, team){
   if(selectElem && selectElem.value) {
       pName = selectElem.value;
   }
-  
   if(!pName || pName.trim() === ""){
      pName = "Jugador Anónimo";
   }
   
-  // Blindaje automático: Si un jugador mete gol o tarjeta, forzamos que su asistencia esté en TRUE
   var nombreLimpio = pName.split(' - ')[1] || pName;
   var jugadorEncontrado = DB.jugadores.find(function(j) {
      var nomJ = (j.Nombre || j.nombre || '').toLowerCase().trim();
@@ -517,7 +516,7 @@ function addEvent(type, team){
   if(jugadorEncontrado) {
      var jId = jugadorEncontrado.ID_Jugador || jugadorEncontrado.id_jugador || jugadorEncontrado.ID || jugadorEncontrado.id;
      var checkObj = document.getElementById('chk_' + jId);
-     if(checkObj) checkObj.checked = true; // Auto-asistencia si hace evento
+     if(checkObj) checkObj.checked = true;
   }
   
   var min = 0;
@@ -557,8 +556,7 @@ function addEvent(type, team){
 function guardarPartidoFirebase(){
   if(!liveState) return;
   if(confirm("¿Deseas guardar el historial completo de este encuentro y actualizar Google Sheets con la asistencia real?")){
-      var key = liveState.idLocal + "_" + liveState.idVisita + "_" + Date.now();
-      
+      var key = liveState.idPartidoReal + "_" + Date.now();
       db.ref('historial_partidos/' + key).set(liveState).then(() => {
          alert("¡Datos del partido respaldados en Firebase con éxito!");
          enviarDatosAGoogleSheets();
@@ -569,18 +567,18 @@ function guardarPartidoFirebase(){
 function enviarDatosAGoogleSheets() {
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyA7BShK_4c49DAUiHpfXyfEGOToulPoVjzEXGKrSaVjQCJgUixODSM2qtzPFk5HRbG/exec";
   
-  var fechaPartido = "17/05/2026";
-  if(partidoSeleccionado && (partidoSeleccionado.Fecha || partidoSeleccionado.fecha)) {
-     fechaPartido = partidoSeleccionado.Fecha || partidoSeleccionado.fecha;
+  // LEER DE FORMA FIJA EL ID REAL Y LA JORNADA DESDE FIREBASE (TRAÍDOS DE TU HOJA DE GOOGLE SHEETS)
+  var idPartidoActual = liveState.idPartidoReal || (liveState.idLocal + "_" + liveState.idVisita);
+  var jornadaPartido  = liveState.jornadaReal || "1";
+  
+  var fechaPartido = "28/06/2026";
+  if(liveState.fechaReal) {
+     fechaPartido = liveState.fechaReal;
   } else {
      var d = new Date();
      fechaPartido = (d.getDate()<10?'0':'')+d.getDate() + "/" + ((d.getMonth()+1)<10?'0':'')+(d.getMonth()+1) + "/" + d.getFullYear();
   }
-  
-  var jornadaPartido = partidoSeleccionado?.Jornada || partidoSeleccionado?.jornada || "1";
-  var idPartidoActual = liveState.idLocal + "_" + liveState.idVisita;
 
-  // --- SOLUCIÓN DE ASISTENCIA REAL (SOLO MANDAR SI EL CHECKBOX ESTÁ MARCADO) ---
   var jugadoresAsistentes = [];
   DB.jugadores.forEach(function(j) {
      var jId = j.ID_Jugador || j.id_jugador || j.ID || j.id;
@@ -589,10 +587,7 @@ function enviarDatosAGoogleSheets() {
      var idV = liveState.idVisita.toString().trim();
      
      if(eqField === idL || eqField === idV) {
-        // Buscamos el elemento HTML del checkbox para ver si llegó o faltó
         var checkboxAsistencia = document.getElementById('chk_' + jId);
-        
-        // ¡Solo se agrega a Participaciones si la casilla está seleccionada!
         if(checkboxAsistencia && checkboxAsistencia.checked) {
             jugadoresAsistentes.push({
                idPartido: idPartidoActual,
@@ -636,7 +631,6 @@ function enviarDatosAGoogleSheets() {
     })
   }).then(() => {
      console.log("Asistencias enviadas a Google Sheets");
-     
      return fetch(SCRIPT_URL, {
        method: 'POST',
        mode: 'no-cors',
@@ -665,7 +659,6 @@ function startTimer(ts){
   tick();
   localTimer = setInterval(tick, 1000);
 }
-// Limpiamos los divs de asistencias al cerrar la transmisión para que se vuelvan a armar limpios en el próximo juego
 function stopTimer(){ if(localTimer){clearInterval(localTimer); localTimer=null;} }
 
 function actualizarUI(){

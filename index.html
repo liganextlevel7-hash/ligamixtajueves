@@ -23,35 +23,36 @@
 .balon-sombra { width: 20px; height: 5px; background: rgba(57,255,20,0.4); border-radius: 50%; margin: 0 auto; animation: sombraBalon 0.55s ease infinite alternate; }
 @keyframes sombraBalon { 0% { transform: scaleX(0.3); opacity: 0.1; } 100% { transform: scaleX(1); opacity: 0.5; } }
 .carrusel-seccion { max-width: 1100px; margin: 20px auto 30px; padding: 0 10px; position: relative; height: 480px; }
-.card-sec { position: absolute; top: 50%; left: 50%; width: 320px; border-radius: 22px; cursor: pointer; transition: all 0.6s cubic-bezier(0.25,0.46,0.45,0.94); transform: translate(-50%,-50%) scale(0.4); opacity: 0; pointer-events: none; overflow: hidden; border: 1px solid #39ff14; box-shadow: 0 0 10px #39ff14, 0 0 20px rgba(57,255,20,0.3); }
+.card-sec { position: absolute; top: 50%; left: 50%; width: 320px; border-radius: 22px; cursor: pointer; transition: all 0.6s cubic-bezier(0.25,0.46,0.45,0.94); transform: translate(-50%,-50%) scale(0.4); opacity: 0; pointer-events: none; overflow: hidden; border: 1px solid #39ff14; box-shadow: 0 0 10px #39ff14, 0 0 20px rgba(57,255,20,0.3); background:#000; }
 .card-sec.c  { transform:translate(-50%,-50%) scale(1); opacity:1; z-index:5; pointer-events:all; }
 .card-sec.l1 { transform:translate(calc(-50% - 240px),-50%) scale(0.75) rotateY(15deg); opacity:0.75; z-index:4; pointer-events:all; }
 .card-sec.r1 { transform:translate(calc(-50% + 240px),-50%) scale(0.75) rotateY(-15deg); opacity:0.75; z-index:4; pointer-events:all; }
 .card-sec.l2 { transform:translate(calc(-50% - 400px),-50%) scale(0.55) rotateY(22deg); opacity:0.3; z-index:3; pointer-events:all; }
 .card-sec.r2 { transform:translate(calc(-50% + 400px),-50%) scale(0.55) rotateY(-22deg); opacity:0.3; z-index:3; pointer-events:all; }
-.card-body { padding:22px 18px 18px; display:flex; flex-direction:column; gap:10px; min-height:440px; }
+.card-body { padding:22px 18px 18px; display:flex; flex-direction:column; gap:10px; min-height:440px; background:#000; }
 .card-titulo { font-size:15px; font-weight:900; letter-spacing:2px; text-transform:uppercase; text-align:center; }
 .card-contenido { flex:1; font-size:12px; font-family:Arial,sans-serif; }
 .car-btn { display:block; text-align:center; padding:10px; border-radius:20px; font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; text-decoration:none; cursor:pointer; border:none; width:100%; transition:filter 0.3s; touch-action:manipulation; }
 .car-btn:hover { filter:brightness(1.3); }
-.c-tabla .card-body { background:#0a0a0a; position:relative; overflow:hidden; }
+.c-tabla .card-body { background:#000; position:relative; overflow:hidden; }
 .c-tabla .card-titulo { color:#ffd700; position:relative; z-index:2; }
 .c-tabla .car-btn { background:rgba(255,215,0,0.15); color:#ffd700; border:1px solid #ffd700; position:relative; z-index:2; }
-.c-goles .card-body { background:#0a0a0a; position:relative; overflow:hidden; }
+.c-goles .card-body { background:#000; position:relative; overflow:hidden; }
 .c-goles .card-titulo { color:#ffd700; position:relative; z-index:2; }
 .c-goles .car-btn { background:rgba(255,215,0,0.15); color:#ffd700; border:1px solid #ffd700; position:relative; z-index:2; }
-.c-partidos .card-body { background:#0a0a0a; position:relative; overflow:hidden; }
+.c-partidos .card-body { background:#000; position:relative; overflow:hidden; }
 .c-partidos .card-titulo { color:#ffd700; position:relative; z-index:2; }
 .c-partidos .car-btn { background:rgba(255,215,0,0.15); color:#ffd700; border:1px solid #ffd700; position:relative; z-index:2; }
-.c-proxima .card-body { background:#0a0a0a; position:relative; overflow:hidden; }
+.c-proxima .card-body { background:#000; position:relative; overflow:hidden; }
 .c-proxima .card-titulo { color:#ffd700; position:relative; z-index:2; }
 .c-proxima .car-btn { background:rgba(255,215,0,0.15); color:#ffd700; border:1px solid #ffd700; position:relative; z-index:2; }
-.card-fondo-img { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0; opacity:0.45; }
-.card-overlay-color { position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; }
+.card-fondo-img { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0; opacity:0.35; }
+.card-overlay-color { position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; background:rgba(0,0,0,0.55); }
 .card-contenido, .card-contenido + .car-btn { position:relative; z-index:2; }
-.c-equipos .card-body { background:linear-gradient(rgba(10,20,30,0.88),rgba(10,25,40,0.92)), url('fondo-partidos.png'); background-size:cover; background-position:center; }
-.c-equipos .card-titulo { color:#ffd700; }
-.c-equipos .car-btn { background:rgba(255,215,0,0.15); color:#ffd700; border:1px solid #ffd700; }
+.c-equipos .card-body { background:#000; position:relative; overflow:hidden; padding:0 !important; }
+.c-equipos .card-titulo { color:#ffd700; position:absolute; top:14px; left:0; right:0; z-index:2; text-shadow:0 2px 6px rgba(0,0,0,0.8); }
+.c-equipos .car-btn { background:rgba(255,215,0,0.85); color:#000; border:1px solid #ffd700; position:absolute; bottom:14px; left:18px; right:18px; z-index:2; width:auto; }
+.c-equipos .liguilla-img { width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; z-index:0; opacity:0.55; }
 .c-liguilla .card-body { background:#000; padding:0 !important; }
 .c-liguilla .card-titulo { color:#ffd700; position:absolute; top:14px; left:0; right:0; z-index:2; text-shadow:0 2px 6px rgba(0,0,0,0.8); }
 .c-liguilla .car-btn { background:rgba(255,215,0,0.85); color:#000; border:1px solid #ffd700; position:absolute; bottom:14px; left:18px; right:18px; z-index:2; width:auto; }
@@ -142,7 +143,7 @@
   <div class="card-sec c-tabla" id="ccard-0">
     <div class="card-body">
       <img src="fondo-partidos.png" class="card-fondo-img" onerror="this.style.display='none'">
-      <div class="card-overlay-color" style="background:linear-gradient(rgba(10,30,10,0.55),rgba(15,30,15,0.65));"></div>
+      <div class="card-overlay-color"></div>
       <div class="card-titulo">🏆 Tabla General</div>
       <div class="card-contenido" id="car-tabla"><div class="car-cargando">Cargando...</div></div>
       <a href="tablaGeneral.html" class="car-btn">VER TABLA COMPLETA</a>
@@ -152,7 +153,7 @@
   <div class="card-sec c-goles" id="ccard-1">
     <div class="card-body" style="padding:14px 10px;">
       <img src="fondo-partidos.png" class="card-fondo-img" onerror="this.style.display='none'">
-      <div class="card-overlay-color" style="background:linear-gradient(rgba(30,20,0,0.55),rgba(35,25,0,0.65));"></div>
+      <div class="card-overlay-color"></div>
       <div class="card-titulo">⚽ Top Goleadores</div>
       <div class="card-contenido" id="car-goles" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:4px 0;"><div class="car-cargando">Cargando...</div></div>
       <a href="jugadores.html" class="car-btn">VER TODOS</a>
@@ -162,7 +163,7 @@
   <div class="card-sec c-partidos" id="ccard-2">
     <div class="card-body">
       <img src="fondo-partidos.png" class="card-fondo-img" onerror="this.style.display='none'">
-      <div class="card-overlay-color" style="background:linear-gradient(rgba(8,20,30,0.55),rgba(10,25,40,0.65));"></div>
+      <div class="card-overlay-color"></div>
       <div class="card-titulo">📊 Últimos Resultados</div>
       <div class="card-contenido" id="car-resultados"><div class="car-cargando">Cargando...</div></div>
       <a href="partidos.html" class="car-btn">VER PARTIDOS</a>
@@ -172,7 +173,7 @@
   <div class="card-sec c-proxima" id="ccard-3">
     <div class="card-body">
       <img src="fondo-partidos.png" class="card-fondo-img" onerror="this.style.display='none'">
-      <div class="card-overlay-color" style="background:linear-gradient(rgba(30,10,20,0.55),rgba(35,15,25,0.65));"></div>
+      <div class="card-overlay-color"></div>
       <div class="card-titulo">📅 Próxima Jornada</div>
       <div class="card-contenido" id="car-proxima"><div class="car-cargando">Cargando...</div></div>
       <a href="partidos.html" class="car-btn">VER JORNADA</a>
@@ -205,7 +206,7 @@
 
   <!-- ===== CARD: EN VIVO ===== -->
   <div class="card-sec c-envivo" id="ccard-7">
-    <div class="card-body" style="position:relative;padding:0 !important;background:#0a0a0a;min-height:440px;overflow:hidden;">
+    <div class="card-body" style="position:relative;padding:0 !important;background:#000;min-height:440px;overflow:hidden;">
       <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 30%,rgba(224,48,48,0.15) 0%,transparent 65%);pointer-events:none;z-index:0;"></div>
       <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;z-index:1;pointer-events:none;">
         <div style="display:inline-flex;align-items:center;gap:8px;background:#e03030;color:white;font-size:14px;font-weight:900;padding:6px 18px;border-radius:20px;letter-spacing:1px;">
@@ -223,14 +224,14 @@
       <div id="envivo-offline" style="position:absolute;bottom:14px;left:18px;right:18px;z-index:5;">
         <div class="car-btn" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.3);border:1px solid rgba(255,255,255,0.1);cursor:default;">Sin transmisión activa</div>
       </div>
-      <a href="envivo-publico.html" id="envivo-admin-btn" style="position:absolute;top:14px;right:14px;z-index:6;background:rgba(255,215,0,0.15);color:#ffd700;border:1px solid #ffd700;border-radius:20px;padding:4px 12px;font-size:10px;font-weight:700;text-decoration:none;display:none;">⚙️ ADMIN</a>
+      <a href="nextlevelenvivo.html" id="envivo-admin-btn" style="position:absolute;top:14px;right:14px;z-index:6;background:rgba(255,215,0,0.15);color:#ffd700;border:1px solid #ffd700;border-radius:20px;padding:4px 12px;font-size:10px;font-weight:700;text-decoration:none;display:inline-block;">⚙️ ADMIN</a>
     </div>
   </div>
   <!-- ===== FIN CARD EN VIVO ===== -->
 
   <!-- ===== CARD CHAT ===== -->
   <div class="card-sec c-chat" id="ccard-8">
-    <div class="card-body" style="position:relative;padding:0 !important;background:#0a0a0a;min-height:440px;overflow:hidden;">
+    <div class="card-body" style="position:relative;padding:0 !important;background:#000;min-height:440px;overflow:hidden;">
       <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 20%,rgba(57,255,20,0.07) 0%,transparent 65%);pointer-events:none;z-index:0;"></div>
       <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;padding:16px 14px 60px;pointer-events:none;z-index:1;gap:6px;overflow:hidden;">
         <div style="font-size:13px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-align:center;color:#39ff14;margin-bottom:4px;">💬 Chat Next Level 7</div>

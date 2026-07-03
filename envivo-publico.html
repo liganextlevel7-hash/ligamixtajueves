@@ -10,26 +10,28 @@ body{background:#0f1a13;color:#e8f0ea;font-family:Arial,sans-serif;min-height:10
 /* ANIMACIÓN GOL */
 #animacion-gol{display:none;position:fixed;inset:0;z-index:9999;background:#0a0f0a;align-items:center;justify-content:center;pointer-events:none;overflow:hidden;animation:bgIn .25s ease-out;}
 @keyframes bgIn{0%{background:rgba(10,15,10,0);}100%{background:#0a0f0a;}}
-.gol-destello{position:absolute;width:120vmax;height:120vmax;border-radius:50%;background:radial-gradient(circle,rgba(255,209,102,.35) 0%,rgba(76,175,80,.18) 35%,rgba(10,15,10,0) 68%);animation:destello 1.8s ease-out forwards;}
+.gol-destello{position:absolute;width:120vmax;height:120vmax;border-radius:50%;background:radial-gradient(circle,var(--c1,rgba(255,209,102,.35)) 0%,var(--c2,rgba(76,175,80,.18)) 35%,rgba(10,15,10,0) 68%);animation:destello 1.8s ease-out forwards;}
 @keyframes destello{0%{transform:scale(0);opacity:0;}30%{opacity:1;}100%{transform:scale(1);opacity:0;}}
-.gol-anillo{position:absolute;width:60px;height:60px;border-radius:50%;border:3px solid #ffd166;opacity:0;animation:anillo 1.4s ease-out forwards;}
-.gol-anillo.a2{animation-delay:.18s;border-color:#4caf50;}
-.gol-anillo.a3{animation-delay:.36s;border-color:#ffd166;}
+.gol-anillo{position:absolute;width:60px;height:60px;border-radius:50%;border:3px solid var(--ring1,#ffd166);opacity:0;animation:anillo 1.4s ease-out forwards;}
+.gol-anillo.a2{animation-delay:.18s;border-color:var(--ring2,#4caf50);}
+.gol-anillo.a3{animation-delay:.36s;border-color:var(--ring1,#ffd166);}
 @keyframes anillo{0%{width:60px;height:60px;opacity:.9;}100%{width:900px;height:900px;opacity:0;}}
 .gol-confeti{position:absolute;top:-5%;width:9px;height:16px;opacity:0;animation:caer linear forwards;}
 @keyframes caer{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(115vh) rotate(720deg);opacity:.9;}}
 #gol-contenido{position:relative;text-align:center;padding:0 24px;}
-#gol-balon{font-size:52px;display:block;margin-bottom:2px;animation:balonRebota .6s ease-out;filter:drop-shadow(0 0 18px rgba(255,209,102,.7));}
+#gol-balon{font-size:52px;display:block;margin-bottom:2px;animation:balonRebota .6s ease-out;filter:drop-shadow(0 0 18px var(--glow,rgba(255,209,102,.7)));}
 @keyframes balonRebota{0%{transform:translateY(-140px) rotate(-30deg);opacity:0;}55%{transform:translateY(10px) rotate(15deg);opacity:1;}75%{transform:translateY(-14px) rotate(-6deg);}100%{transform:translateY(0) rotate(0deg);}}
-#gol-texto{font-size:19vw;line-height:.9;font-weight:900;letter-spacing:2px;color:#fff;background:linear-gradient(180deg,#fff 0%,#ffe9a8 55%,#ffd166 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 46px rgba(255,209,102,.55);animation:golPop .55s cubic-bezier(.34,1.56,.64,1);}
-@media(min-width:440px){#gol-texto{font-size:82px;}}
+#gol-texto{font-size:15vw;line-height:.95;font-weight:900;letter-spacing:1px;color:#fff;background:linear-gradient(180deg,#fff 0%,var(--txt-mid,#ffe9a8) 55%,var(--txt-end,#ffd166) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 46px var(--glow,rgba(255,209,102,.55));animation:golPop .55s cubic-bezier(.34,1.56,.64,1);}
+@media(min-width:440px){#gol-texto{font-size:60px;}}
 @keyframes golPop{0%{transform:scale(0.2) rotate(-6deg);opacity:0;}55%{transform:scale(1.15) rotate(2deg);opacity:1;}80%{transform:scale(.95) rotate(-1deg);}100%{transform:scale(1) rotate(0deg);}}
+#gol-subtexto{font-size:12px;font-weight:800;letter-spacing:3px;color:var(--accent,#ffd166);text-transform:uppercase;margin-top:2px;opacity:0;animation:detalleIn .4s ease-out .15s forwards;}
 #gol-detalle{margin-top:10px;opacity:0;animation:detalleIn .5s ease-out .35s forwards;}
 #gol-jugador{font-size:17px;font-weight:800;color:#fff;letter-spacing:.5px;}
-#gol-equipo{font-size:12px;font-weight:700;color:#ffd166;text-transform:uppercase;letter-spacing:2px;margin-top:3px;}
+#gol-equipo{font-size:12px;font-weight:700;color:var(--accent,#ffd166);text-transform:uppercase;letter-spacing:2px;margin-top:3px;}
 #gol-marcador{margin-top:16px;display:inline-flex;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,209,102,.3);border-radius:12px;padding:8px 18px;opacity:0;animation:detalleIn .5s ease-out .5s forwards;font-size:13px;font-weight:700;color:#8aab91;letter-spacing:.3px;}
 #gol-marcador .gol-num{font-size:22px;font-weight:900;color:#ffd166;padding:0 8px;}
 @keyframes detalleIn{0%{opacity:0;transform:translateY(8px);}100%{opacity:1;transform:translateY(0);}}
+.inicio-btn{position:fixed;top:12px;left:12px;z-index:500;display:inline-flex;align-items:center;gap:5px;background:#000;color:#ffd166;border:1px solid #ffd166;border-radius:20px;padding:6px 13px;font-size:11px;font-weight:700;text-decoration:none;}
 .wrap{max-width:440px;margin:0 auto;padding:14px;}
 .header{background:linear-gradient(135deg,#1a5c2a,#2d8a45);border-radius:14px;padding:16px;text-align:center;margin-bottom:14px;}
 .header h1{font-size:22px;font-weight:900;letter-spacing:2px;color:#fff;}
@@ -85,10 +87,12 @@ body{background:#0f1a13;color:#e8f0ea;font-family:Arial,sans-serif;min-height:10
 </style>
 </head>
 <body>
+<a href="index.html" class="inicio-btn">← Inicio</a>
 <div id="animacion-gol">
   <div id="gol-contenido">
     <span id="gol-balon">⚽</span>
     <div id="gol-texto">¡GOOOL!</div>
+    <div id="gol-subtexto"></div>
     <div id="gol-detalle">
       <div id="gol-jugador"></div>
       <div id="gol-equipo"></div>
@@ -183,12 +187,51 @@ function actualizarMarcador(d){
   var evs=d.events||[]; var list=document.getElementById('events-list'); if(!evs.length){list.innerHTML='<div class="no-ev">Esperando eventos...</div>';return;}
   list.innerHTML=evs.map(function(e){ return '<div class="ev '+(e.type||'')+'"><span class="ev-min">'+(e.minute||0)+"'</span><span>"+(icons[e.type]||'')+'</span><span class="ev-txt">'+(labels[e.type]||e.type)+(e.player?' — '+e.player:'')+'</span><span class="ev-team">'+(e.teamName||'')+'</span></div>'; }).join('');
 }
-var golColores = ['#ffd166','#4caf50','#ffffff','#2d8a45'];
-function mostrarAnimacionGol(evento, d){
+// ===== SONIDO (generado con Web Audio API, no depende de archivos externos) =====
+var audioCtx = null;
+function habilitarAudio(){ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(audioCtx && audioCtx.state==='suspended'){ audioCtx.resume(); } }
+document.addEventListener('click', habilitarAudio, {once:true});
+document.addEventListener('touchstart', habilitarAudio, {once:true});
+function tono(freq, inicio, dur, tipo, vol){
+  if(!audioCtx) return;
+  var osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+  osc.type = tipo || 'sine'; osc.frequency.setValueAtTime(freq, audioCtx.currentTime + inicio);
+  gain.gain.setValueAtTime(0, audioCtx.currentTime + inicio);
+  gain.gain.linearRampToValueAtTime(vol||0.2, audioCtx.currentTime + inicio + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + inicio + dur);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(audioCtx.currentTime + inicio); osc.stop(audioCtx.currentTime + inicio + dur + 0.05);
+}
+function sonidoGol(){ tono(523,0,.16,'triangle',.22); tono(659,.13,.16,'triangle',.22); tono(784,.26,.28,'triangle',.25); }
+function sonidoAmarilla(){ tono(600,0,.22,'square',.15); }
+function sonidoRoja(){ tono(220,0,.3,'sawtooth',.18); tono(160,.22,.4,'sawtooth',.2); }
+
+// ===== CONFIGURACIÓN POR TIPO DE EVENTO =====
+var eventoConfig = {
+  goal:   { icono:'⚽', titulo:'¡GOOOL!', sub:'', confeti:true, colores:['#ffd166','#4caf50','#ffffff','#2d8a45'],
+            css:{c1:'rgba(255,209,102,.35)',c2:'rgba(76,175,80,.18)',ring1:'#ffd166',ring2:'#4caf50',txtMid:'#ffe9a8',txtEnd:'#ffd166',glow:'rgba(255,209,102,.55)',accent:'#ffd166'}, sonido:sonidoGol, mostrarMarcador:true },
+  yellow: { icono:'🟨', titulo:'TARJETA', sub:'AMONESTADO', confeti:false, colores:['#f9a825','#000000','#ffffff'],
+            css:{c1:'rgba(249,168,37,.4)',c2:'rgba(0,0,0,.3)',ring1:'#f9a825',ring2:'#ffe082',txtMid:'#ffe082',txtEnd:'#f9a825',glow:'rgba(249,168,37,.6)',accent:'#f9a825'}, sonido:sonidoAmarilla, mostrarMarcador:false },
+  red:    { icono:'🟥', titulo:'TARJETA', sub:'EXPULSADO', confeti:false, colores:['#ef5350','#000000','#ffffff'],
+            css:{c1:'rgba(239,83,80,.42)',c2:'rgba(0,0,0,.3)',ring1:'#ef5350',ring2:'#ff8a80',txtMid:'#ffab91',txtEnd:'#ef5350',glow:'rgba(239,83,80,.65)',accent:'#ef5350'}, sonido:sonidoRoja, mostrarMarcador:false }
+};
+
+function mostrarAnimacionEvento(tipo, evento, d){
+  var cfg = eventoConfig[tipo]; if(!cfg) return;
   var cont = document.getElementById('animacion-gol');
 
   // Limpiar cualquier destello/anillo/confeti de una animación anterior
   cont.querySelectorAll('.gol-destello,.gol-anillo,.gol-confeti').forEach(function(n){ n.remove(); });
+
+  // Aplicar paleta de color del tipo de evento
+  cont.style.setProperty('--c1', cfg.css.c1);
+  cont.style.setProperty('--c2', cfg.css.c2);
+  cont.style.setProperty('--ring1', cfg.css.ring1);
+  cont.style.setProperty('--ring2', cfg.css.ring2);
+  cont.style.setProperty('--txt-mid', cfg.css.txtMid);
+  cont.style.setProperty('--txt-end', cfg.css.txtEnd);
+  cont.style.setProperty('--glow', cfg.css.glow);
+  cont.style.setProperty('--accent', cfg.css.accent);
 
   // Destello radial
   var destello = document.createElement('div'); destello.className='gol-destello'; cont.appendChild(destello);
@@ -196,25 +239,43 @@ function mostrarAnimacionGol(evento, d){
   // Anillos de choque
   ['','a2','a3'].forEach(function(cls){ var an=document.createElement('div'); an.className='gol-anillo '+cls; cont.appendChild(an); });
 
-  // Confeti aleatorio
-  for(var i=0;i<38;i++){
-    var pieza = document.createElement('div');
-    pieza.className='gol-confeti';
-    pieza.style.left = (Math.random()*100)+'vw';
-    pieza.style.background = golColores[Math.floor(Math.random()*golColores.length)];
-    pieza.style.animationDuration = (1.8 + Math.random()*1.4)+'s';
-    pieza.style.animationDelay = (Math.random()*0.5)+'s';
-    pieza.style.borderRadius = Math.random()>0.5 ? '50%' : '2px';
-    cont.appendChild(pieza);
+  // Confeti (solo goles)
+  if(cfg.confeti){
+    for(var i=0;i<38;i++){
+      var pieza = document.createElement('div');
+      pieza.className='gol-confeti';
+      pieza.style.left = (Math.random()*100)+'vw';
+      pieza.style.background = cfg.colores[Math.floor(Math.random()*cfg.colores.length)];
+      pieza.style.animationDuration = (1.8 + Math.random()*1.4)+'s';
+      pieza.style.animationDelay = (Math.random()*0.5)+'s';
+      pieza.style.borderRadius = Math.random()>0.5 ? '50%' : '2px';
+      cont.appendChild(pieza);
+    }
   }
 
-  // Datos del anotador y marcador actualizado
+  // Textos
+  document.getElementById('gol-balon').textContent = cfg.icono;
+  document.getElementById('gol-texto').textContent = cfg.titulo;
+  document.getElementById('gol-subtexto').textContent = cfg.sub;
   document.getElementById('gol-jugador').textContent = evento.player || '';
   document.getElementById('gol-equipo').textContent = evento.teamName || '';
-  document.getElementById('gol-marcador-num').innerHTML = (d.nombreLocal||'Local')+' <span class="gol-num">'+(d.scoreLocal||0)+' - '+(d.scoreVisita||0)+'</span> '+(d.nombreVisita||'Visita');
+
+  // Marcador (solo goles)
+  var cajaMarcador = document.getElementById('gol-marcador');
+  if(cfg.mostrarMarcador){
+    cajaMarcador.style.display = 'inline-flex';
+    document.getElementById('gol-marcador-num').innerHTML = (d.nombreLocal||'Local')+' <span class="gol-num">'+(d.scoreLocal||0)+' - '+(d.scoreVisita||0)+'</span> '+(d.nombreVisita||'Visita');
+  } else {
+    cajaMarcador.style.display = 'none';
+  }
+
+  // Sonido
+  habilitarAudio();
+  if(cfg.sonido) cfg.sonido();
 
   cont.style.display = 'flex';
-  setTimeout(function(){ cont.style.display = 'none'; }, 3800);
+  var duracion = cfg.confeti ? 3800 : 2600;
+  setTimeout(function(){ cont.style.display = 'none'; }, duracion);
 }
 function renderSeleccion(){
   var html=''; var hayLive = datosFirebase && datosFirebase.activo === true;
@@ -231,11 +292,11 @@ db.ref('transmision').on('value', function(snap){
   datosFirebase=snap.val();
   var hayLive = datosFirebase && datosFirebase.activo === true;
   
-  // Lógica de Animación GOL
+  // Lógica de Animación de eventos (gol, amarilla, roja)
   if(hayLive && datosFirebase.events && datosFirebase.events.length > eventosPreviosCount) {
     var ultimo = datosFirebase.events[datosFirebase.events.length - 1];
-    if(ultimo.type === 'goal') {
-      mostrarAnimacionGol(ultimo, datosFirebase);
+    if(ultimo.type === 'goal' || ultimo.type === 'yellow' || ultimo.type === 'red') {
+      mostrarAnimacionEvento(ultimo.type, ultimo, datosFirebase);
     }
   }
   eventosPreviosCount = (datosFirebase && datosFirebase.events) ? datosFirebase.events.length : 0;

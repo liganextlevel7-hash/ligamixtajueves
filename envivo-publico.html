@@ -206,14 +206,30 @@ function sonidoGol(){ tono(523,0,.16,'triangle',.22); tono(659,.13,.16,'triangle
 function sonidoAmarilla(){ tono(600,0,.22,'square',.15); }
 function sonidoRoja(){ tono(220,0,.3,'sawtooth',.18); tono(160,.22,.4,'sawtooth',.2); }
 
+// ===== VOZ (anuncia el evento en español usando la voz integrada del navegador) =====
+var vocesDisponibles = [];
+function cargarVoces(){ if('speechSynthesis' in window) vocesDisponibles = speechSynthesis.getVoices(); }
+cargarVoces();
+if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged = cargarVoces; }
+function decir(texto){
+  if(!('speechSynthesis' in window) || !texto) return;
+  var utter = new SpeechSynthesisUtterance(texto);
+  var esVoice = vocesDisponibles.find(function(v){ return v.lang && v.lang.toLowerCase().indexOf('es') === 0; });
+  if(esVoice) utter.voice = esVoice;
+  utter.lang = esVoice ? esVoice.lang : 'es-MX';
+  utter.rate = 1.02; utter.pitch = 1.05; utter.volume = 1;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+}
+
 // ===== CONFIGURACIÓN POR TIPO DE EVENTO =====
 var eventoConfig = {
   goal:   { icono:'⚽', titulo:'¡GOOOL!', sub:'', confeti:true, colores:['#ffd166','#4caf50','#ffffff','#2d8a45'],
-            css:{c1:'rgba(255,209,102,.35)',c2:'rgba(76,175,80,.18)',ring1:'#ffd166',ring2:'#4caf50',txtMid:'#ffe9a8',txtEnd:'#ffd166',glow:'rgba(255,209,102,.55)',accent:'#ffd166'}, sonido:sonidoGol, mostrarMarcador:true },
+            css:{c1:'rgba(255,209,102,.35)',c2:'rgba(76,175,80,.18)',ring1:'#ffd166',ring2:'#4caf50',txtMid:'#ffe9a8',txtEnd:'#ffd166',glow:'rgba(255,209,102,.55)',accent:'#ffd166'}, sonido:sonidoGol, voz:'¡Goool!', mostrarMarcador:true },
   yellow: { icono:'🟨', titulo:'TARJETA', sub:'AMONESTADO', confeti:false, colores:['#f9a825','#000000','#ffffff'],
-            css:{c1:'rgba(249,168,37,.4)',c2:'rgba(0,0,0,.3)',ring1:'#f9a825',ring2:'#ffe082',txtMid:'#ffe082',txtEnd:'#f9a825',glow:'rgba(249,168,37,.6)',accent:'#f9a825'}, sonido:sonidoAmarilla, mostrarMarcador:false },
+            css:{c1:'rgba(249,168,37,.4)',c2:'rgba(0,0,0,.3)',ring1:'#f9a825',ring2:'#ffe082',txtMid:'#ffe082',txtEnd:'#f9a825',glow:'rgba(249,168,37,.6)',accent:'#f9a825'}, sonido:sonidoAmarilla, voz:'Tarjeta amarilla, amonestado', mostrarMarcador:false },
   red:    { icono:'🟥', titulo:'TARJETA', sub:'EXPULSADO', confeti:false, colores:['#ef5350','#000000','#ffffff'],
-            css:{c1:'rgba(239,83,80,.42)',c2:'rgba(0,0,0,.3)',ring1:'#ef5350',ring2:'#ff8a80',txtMid:'#ffab91',txtEnd:'#ef5350',glow:'rgba(239,83,80,.65)',accent:'#ef5350'}, sonido:sonidoRoja, mostrarMarcador:false }
+            css:{c1:'rgba(239,83,80,.42)',c2:'rgba(0,0,0,.3)',ring1:'#ef5350',ring2:'#ff8a80',txtMid:'#ffab91',txtEnd:'#ef5350',glow:'rgba(239,83,80,.65)',accent:'#ef5350'}, sonido:sonidoRoja, voz:'Tarjeta roja, expulsado', mostrarMarcador:false }
 };
 
 function mostrarAnimacionEvento(tipo, evento, d){
@@ -269,9 +285,10 @@ function mostrarAnimacionEvento(tipo, evento, d){
     cajaMarcador.style.display = 'none';
   }
 
-  // Sonido
+  // Sonido y voz
   habilitarAudio();
   if(cfg.sonido) cfg.sonido();
+  setTimeout(function(){ decir(cfg.voz); }, 350); // Pequeño retraso para que no se empalme con el tono
 
   cont.style.display = 'flex';
   var duracion = cfg.confeti ? 3800 : 2600;

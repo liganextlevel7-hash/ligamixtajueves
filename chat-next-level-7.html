@@ -1329,11 +1329,31 @@ function estimarJornada(localId, visitaId, idPartidoExcluir){
   return n;
 }
 
+function pad2(n){ return n<10 ? '0'+n : ''+n; }
+
+// Menús de Hora/Minutos (evita el bug de los inputs nativos type="time"
+// que en algunos navegadores exigen AM/PM y se quedan "vacíos" aunque se vean llenos)
+function buildHoraSelects(defaultH, defaultM){
+  let hOpts=''; for(let h=0;h<24;h++){ hOpts+=`<option value="${pad2(h)}" ${h===defaultH?'selected':''}>${pad2(h)}</option>`; }
+  let mOpts=''; for(let m=0;m<60;m+=5){ mOpts+=`<option value="${pad2(m)}" ${m===defaultM?'selected':''}>${pad2(m)}</option>`; }
+  return {hOpts,mOpts};
+}
+
 function seleccionarPartidoAProgramar(matchId){
   const m=S.matches.find(x=>x.id===matchId);
   if(!m) return;
   S.matchToProgram=m;
   const jest=estimarJornada(m.local,m.visita,m.id);
+  const {hOpts,mOpts}=buildHoraSelects(9,0);
+
+  // Fecha por defecto: próximo domingo (para que ya no llegue vacía)
+  const hoy=new Date();
+  const dia=hoy.getDay();
+  const diasHastaDom = dia===0 ? 7 : 7-dia;
+  const dom=new Date(hoy);
+  dom.setDate(hoy.getDate()+diasHastaDom);
+  const fechaDefault=dom.toISOString().split('T')[0];
+
   const form=document.getElementById('programar-form');
   form.style.display='block';
   form.innerHTML=`
@@ -1342,11 +1362,15 @@ function seleccionarPartidoAProgramar(matchId){
     <div style="display:flex;flex-direction:column;gap:10px">
       <div>
         <label>Fecha</label>
-        <input type="date" id="prog-fecha" class="msg-input" style="width:100%">
+        <input type="date" id="prog-fecha" class="msg-input" style="width:100%" value="${fechaDefault}">
       </div>
       <div>
         <label>Hora</label>
-        <input type="time" id="prog-hora" class="msg-input" style="width:100%">
+        <div style="display:flex;align-items:center;gap:8px">
+          <select id="prog-hora-h" class="msg-input" style="flex:1;text-align:center">${hOpts}</select>
+          <span style="color:var(--g400);font-weight:700">:</span>
+          <select id="prog-hora-m" class="msg-input" style="flex:1;text-align:center">${mOpts}</select>
+        </div>
       </div>
       <div>
         <label>Campo / Cancha</label>
@@ -1370,7 +1394,9 @@ async function guardarPartidoProgramado(){
   const m=S.matchToProgram;
   if(!m) return;
   const fecha=document.getElementById('prog-fecha').value;
-  const hora=document.getElementById('prog-hora').value;
+  const horaH=document.getElementById('prog-hora-h').value;
+  const horaM=document.getElementById('prog-hora-m').value;
+  const hora=(horaH&&horaM)?`${horaH}:${horaM}:00`:'';
   const cancha=document.getElementById('prog-cancha').value.trim();
   if(!fecha||!hora||!cancha){
     alert('Completa fecha, hora y campo antes de guardar.');

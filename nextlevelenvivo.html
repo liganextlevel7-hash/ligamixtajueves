@@ -16,6 +16,9 @@ body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-hei
 .live-badge{display:inline-flex;align-items:center;gap:6px;background:var(--rojo);color:white;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:8px;}
 .live-dot{width:7px;height:7px;background:white;border-radius:50%;animation:blink 1.2s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+.cambiar-cancha-wrap{text-align:center;margin-bottom:12px;}
+.cambiar-cancha-btn{background:none;border:1px solid var(--border);color:var(--text2);border-radius:20px;padding:6px 14px;font-size:11px;cursor:pointer;}
+.cambiar-cancha-btn:hover{color:var(--text);border-color:var(--verde2);}
 .tabs{display:flex;gap:8px;margin-bottom:12px;}
 .tab{flex:1;border:1px solid var(--border);background:var(--bg2);color:var(--text2);border-radius:10px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
 .tab.active{background:var(--verde);color:#fff;border-color:var(--verde);}
@@ -27,7 +30,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-hei
 .pinfo{flex:1;}
 .pinfo strong{font-size:13px;color:var(--text);display:block;}
 .pinfo small{font-size:11px;color:var(--text2);}
-.pbadge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#1e3a20;color:#5dba6a;}
+.pbadge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#1e3a20;color:#5dba6a;white-space:nowrap;}
 .scoreboard{display:grid;grid-template-columns:1fr 100px 1fr;gap:10px;align-items:center;margin-bottom:12px;}
 .team-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center;}
 .tlogo-box{width:56px;height:56px;margin:0 auto 7px;display:flex;align-items:center;justify-content:center;background:#1a2a1e;border-radius:8px;padding:4px;}
@@ -81,6 +84,19 @@ body{background:var(--bg);color:var(--text);font-family:Arial,sans-serif;min-hei
 .asistencia-title {font-size:11px;color:var(--text2);font-weight:bold;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:4px;}
 .check-item {display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 0;color:var(--text);}
 .check-item input {width:16px;height:16px;accent-color:var(--verde2);cursor:pointer;}
+
+/* ── SELECTOR DE CANCHA ── */
+#cancha-screen{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:9998;padding:20px;}
+.cancha-wrap{max-width:420px;width:100%;text-align:center;}
+.cancha-icono{font-size:40px;margin-bottom:10px;}
+.cancha-titulo{color:var(--text);font-size:20px;font-weight:900;letter-spacing:1px;margin-bottom:6px;}
+.cancha-sub{color:var(--text2);font-size:12px;margin-bottom:24px;line-height:1.5;}
+.cancha-opcion{background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;cursor:pointer;transition:all .2s;text-align:left;}
+.cancha-opcion:hover{border-color:var(--verde2);}
+.cancha-opcion.ocupada{border-color:var(--rojo);}
+.cancha-nombre{font-size:16px;font-weight:900;color:var(--text);margin-bottom:4px;}
+.cancha-status{font-size:12px;color:var(--text2);}
+.cancha-opcion.ocupada .cancha-status{color:#ef9090;}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -116,12 +132,34 @@ var db = firebase.database();
   </div>
 </div>
 
+<!-- ===== SELECTOR DE CANCHA (permite 2 transmisiones simultáneas) ===== -->
+<div id="cancha-screen">
+  <div class="cancha-wrap">
+    <div class="cancha-icono">🎙️</div>
+    <div class="cancha-titulo">¿Qué cancha vas a transmitir?</div>
+    <div class="cancha-sub">Puedes tener las 2 canchas transmitiendo al mismo tiempo, cada una por separado. Si una ya está en vivo, puedes entrar igual para ayudar a controlarla.</div>
+
+    <div class="cancha-opcion" id="cancha-btn-1" onclick="elegirCancha(1)">
+      <div class="cancha-nombre">🏟️ Cancha 1</div>
+      <div class="cancha-status" id="cancha-status-1">🟢 Libre</div>
+    </div>
+
+    <div class="cancha-opcion" id="cancha-btn-2" onclick="elegirCancha(2)">
+      <div class="cancha-nombre">🏟️ Cancha 2</div>
+      <div class="cancha-status" id="cancha-status-2">🟢 Libre</div>
+    </div>
+  </div>
+</div>
+
 <a href="index.html" class="inicio-btn">← Inicio</a>
 <div class="app" id="main-app" style="display:none;">
   <div class="header">
-    <div class="live-badge"><span class="live-dot"></span> PANEL CONTROL</div>
+    <div class="live-badge"><span class="live-dot"></span> PANEL CONTROL · CANCHA <span id="cancha-badge">-</span></div>
     <h1>⚽ NEXT LEVEL 7</h1>
     <p>Torneo Dominical — Puebla</p>
+  </div>
+  <div class="cambiar-cancha-wrap">
+    <button class="cambiar-cancha-btn" onclick="cambiarCancha()">🔁 Cambiar de cancha</button>
   </div>
 
   <div class="tabs">
@@ -244,6 +282,11 @@ var DB = { equipos:{}, jugadores:[], partidos:[], rawPartidos:[] };
 var partidoSeleccionado = null;
 var liveState = null;
 var localTimer = null;
+var datosCargados = false;
+
+// ── Cancha activa de esta sesión (1 o 2) y su ruta en Firebase ──
+var canchaActual = null;          // 1 o 2
+var CANCHA_PATH = null;           // 'transmision/cancha1' o 'transmision/cancha2'
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeetNFUe2aur35_Dd1NDZg1IY2_y_VGc5xX7b_pmV85PE69c_10Aw58vG8mFPO79K2/exec";
 
@@ -253,11 +296,69 @@ function checkPwd(){
   var p = document.getElementById('pwd-input').value;
   if(p === 'nl7admin'){
     document.getElementById('login-screen').style.display='none';
-    document.getElementById('main-app').style.display='block';
-    inicializarAdmin();
+    document.getElementById('cancha-screen').style.display='flex';
+    iniciarSelectorCancha();
   } else {
     document.getElementById('pwd-error').style.display='block';
   }
+}
+
+// ════════════════════════════════
+//  SELECTOR DE CANCHA
+// ════════════════════════════════
+function iniciarSelectorCancha(){
+  db.ref('transmision/cancha1').on('value', snap => actualizarBotonCancha(1, snap.val()));
+  db.ref('transmision/cancha2').on('value', snap => actualizarBotonCancha(2, snap.val()));
+}
+
+function actualizarBotonCancha(n, data){
+  var btn = document.getElementById('cancha-btn-'+n);
+  var status = document.getElementById('cancha-status-'+n);
+  if(!btn || !status) return;
+  if(data && data.activo){
+    status.textContent = '🔴 En vivo: ' + (data.nombreLocal||'') + ' vs ' + (data.nombreVisita||'');
+    btn.classList.add('ocupada');
+  } else {
+    status.textContent = '🟢 Libre';
+    btn.classList.remove('ocupada');
+  }
+}
+
+function elegirCancha(n){
+  canchaActual = n;
+  CANCHA_PATH = 'transmision/cancha' + n;
+
+  // Ya no necesitamos seguir escuchando ambas canchas del selector
+  db.ref('transmision/cancha1').off();
+  db.ref('transmision/cancha2').off();
+
+  document.getElementById('cancha-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  document.getElementById('cancha-badge').textContent = n;
+
+  // Al cambiar de cancha, reiniciamos lo que dependía de la anterior
+  liveState = null;
+  partidoSeleccionado = null;
+  stopTimer();
+
+  if(!datosCargados){
+    inicializarAdmin(); // primera vez: carga los CSV y luego conecta el listener de esta cancha
+  } else {
+    renderPartidosTab();
+    engancharListenerCancha();
+  }
+}
+
+function cambiarCancha(){
+  if(CANCHA_PATH) db.ref(CANCHA_PATH).off();
+  canchaActual = null;
+  CANCHA_PATH = null;
+  liveState = null;
+  partidoSeleccionado = null;
+  stopTimer();
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('cancha-screen').style.display='flex';
+  iniciarSelectorCancha();
 }
 
 function parseCSV(text){
@@ -296,30 +397,48 @@ function inicializarAdmin(){
       return est === 'programado';
     });
     
+    datosCargados = true;
     renderPartidosTab();
-    
-    db.ref('transmision').on('value', snap => {
-      liveState = snap.val();
-      if(liveState && liveState.activo) {
-         document.getElementById('active-bar').textContent = "Transmitiendo: " + liveState.nombreLocal + " vs " + liveState.nombreVisita;
-         if(!partidoSeleccionado){
-            partidoSeleccionado = DB.rawPartidos.find(p => (p.ID_Partido || p.id_partido || '') === liveState.idPartidoReal) || {
-               ID_Partido: liveState.idPartidoReal,
-               Jornada: liveState.jornadaReal,
-               Fecha: liveState.fechaReal
-            };
-         }
-         cargarJugadoresPorEquipo();
-         actualizarUI();
-      } else {
-         document.getElementById('active-bar').textContent = "Ningún partido seleccionado";
-         stopTimer();
-      }
-    });
+    engancharListenerCancha();
   });
 }
 
+// Conecta el listener en tiempo real de la cancha elegida (transmision/cancha1 o cancha2)
+function engancharListenerCancha(){
+  db.ref(CANCHA_PATH).on('value', snap => {
+    liveState = snap.val();
+    if(liveState && liveState.activo) {
+       document.getElementById('active-bar').textContent = "Transmitiendo: " + liveState.nombreLocal + " vs " + liveState.nombreVisita;
+       if(!partidoSeleccionado){
+          partidoSeleccionado = DB.rawPartidos.find(p => (p.ID_Partido || p.id_partido || '') === liveState.idPartidoReal) || {
+             ID_Partido: liveState.idPartidoReal,
+             Jornada: liveState.jornadaReal,
+             Fecha: liveState.fechaReal
+          };
+       }
+       cargarJugadoresPorEquipo();
+       actualizarUI();
+    } else {
+       document.getElementById('active-bar').textContent = "Ningún partido seleccionado";
+       stopTimer();
+    }
+  });
+}
+
+// Ruta de la OTRA cancha (para avisar si un partido ya se está transmitiendo ahí)
+function otraCanchaPath(){
+  return canchaActual === 1 ? 'transmision/cancha2' : 'transmision/cancha1';
+}
+
 function renderPartidosTab(){
+  db.ref(otraCanchaPath()).once('value').then(snap => {
+    var otro = snap.val();
+    var otroIdEnVivo = (otro && otro.activo) ? otro.idPartidoReal : null;
+    pintarListaPartidos(otroIdEnVivo);
+  }).catch(function(){ pintarListaPartidos(null); });
+}
+
+function pintarListaPartidos(otroIdEnVivo){
   var html = '';
   if(!DB.partidos.length){
     document.getElementById('lista-partidos').innerHTML = '<div class="loading">No hay partidos programados hoy</div>';
@@ -328,12 +447,17 @@ function renderPartidosTab(){
   DB.partidos.forEach((p, idx) => {
     var idL = p.Equipo_Local || p.equipo_local;
     var idV = p.Equipo_Visita || p.equipo_visita;
+    var idReal = p.ID_Partido || p.id_partido || '';
     var el = DB.equipos[idL] || {nombre: idL, logo:''};
     var ev = DB.equipos[idV] || {nombre: idV, logo:''};
+    var enVivoOtraCancha = otroIdEnVivo && idReal === otroIdEnVivo;
+    var badgeHtml = enVivoOtraCancha
+      ? '<span class="pbadge" style="background:#5a2020;color:#ef9090">🔴 En vivo (otra cancha)</span>'
+      : '<span class="pbadge">Transmitir</span>';
     html += `<div class="partido-item" onclick="seleccionarPartido(${idx})">
       <img class="plogo" src="${el.logo}" onerror="this.style.opacity=0">
       <div class="pinfo"><strong>${el.nombre} vs ${ev.nombre}</strong><small>Jornada: ${p.Jornada || p.jornada || '-'} | Hora: ${p.Hora || p.hora || '--:--'}</small></div>
-      <span class="pbadge">Transmitir</span>
+      ${badgeHtml}
     </div>`;
   });
   document.getElementById('lista-partidos').innerHTML = html;
@@ -372,7 +496,7 @@ function seleccionarPartido(idx){
   };
   
   document.getElementById('seccion-asistencia').classList.remove('hidden');
-  db.ref('transmision').set(inicializacionDura).then(() => {
+  db.ref(CANCHA_PATH).set(inicializacionDura).then(() => {
      cargarJugadoresPorEquipo();
      showTab('live');
   });
@@ -494,13 +618,13 @@ function setStatus(st){
         updates.minuto = Math.floor((Date.now() - liveState.inicioTimestamp) / 60000);
      }
   }
-  db.ref('transmision').update(updates);
+  db.ref(CANCHA_PATH).update(updates);
 }
 
 function cambiarMetodoFin() {
   if(!liveState) return;
   var met = document.getElementById('sel-metodo-fin').value;
-  db.ref('transmision').update({ metodoFin: met });
+  db.ref(CANCHA_PATH).update({ metodoFin: met });
 }
 
 function addEvent(type, team){
@@ -541,22 +665,22 @@ function addEvent(type, team){
   
   if (type === 'goal') {
      var caminoScore = team === 'local' ? 'scoreLocal' : 'scoreVisita';
-     db.ref('transmision/' + caminoScore).transaction(function(valorActual) {
+     db.ref(CANCHA_PATH + '/' + caminoScore).transaction(function(valorActual) {
         return (Number(valorActual) || 0) + 1;
      });
   } else if (type === 'yellow') {
      var caminoYel = team === 'local' ? 'yellowLocal' : 'yellowVisita';
-     db.ref('transmision/' + caminoYel).transaction(function(valorActual) {
+     db.ref(CANCHA_PATH + '/' + caminoYel).transaction(function(valorActual) {
         return (Number(valorActual) || 0) + 1;
      });
   } else if (type === 'red') {
      var caminoRed = team === 'local' ? 'redLocal' : 'redVisita';
-     db.ref('transmision/' + caminoRed).transaction(function(valorActual) {
+     db.ref(CANCHA_PATH + '/' + caminoRed).transaction(function(valorActual) {
         return (Number(valorActual) || 0) + 1;
      });
   }
 
-  db.ref('transmision').update({ events: evs }).then(function() {
+  db.ref(CANCHA_PATH).update({ events: evs }).then(function() {
      if(selectElem) selectElem.value = "";
   });
 }
@@ -611,7 +735,7 @@ function enviarSoloAsistencia() {
 function guardarPartidoFirebase(){
   if(!liveState) return;
   if(confirm("¿Deseas guardar los eventos (Goles y Tarjetas) finales de este partido en Google Sheets?")){
-      var key = liveState.idPartidoReal + "_" + Date.now();
+      var key = 'cancha' + canchaActual + '_' + liveState.idPartidoReal + "_" + Date.now();
       
       var idPartidoActual = liveState.idPartidoReal || (liveState.idLocal + "_" + liveState.idVisita);
       var listaEventos = [];
@@ -689,8 +813,8 @@ function showTab(tab) {
 }
 
 function resetLive(){
-  if(confirm("¿Seguro que quieres borrar la transmisión activa?")){
-    db.ref('transmision').remove().then(()=>{
+  if(confirm("¿Seguro que quieres borrar la transmisión activa de la Cancha " + canchaActual + "?")){
+    db.ref(CANCHA_PATH).remove().then(()=>{
       document.getElementById('lista-asist-local').innerHTML = '';
       document.getElementById('lista-asist-visita').innerHTML = '';
       showTab('partidos');

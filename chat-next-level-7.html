@@ -246,12 +246,11 @@ body{font-family:var(--font);background:linear-gradient(135deg,#064e26 0%,#0a162
   background-size:cover;
   background-position:center;
   font-family:'Arial Black',Arial,sans-serif;
-  padding:255px 30px 0;
+  padding:222px 30px 0;
   box-sizing:border-box;
 }
-.cartel-header{position:relative;z-index:2;text-align:center;margin-bottom:10px}
-.cartel-h1{font-size:24px;font-weight:900;letter-spacing:1px;color:#f3c94a;text-shadow:0 2px 0 #6b4c0a,0 0 18px rgba(243,201,74,.35);text-transform:uppercase;line-height:1.15}
-.cartel-h2{font-size:22px;font-weight:900;letter-spacing:2px;color:#f3c94a;text-shadow:0 2px 0 #6b4c0a,0 0 18px rgba(243,201,74,.35);text-transform:uppercase;margin-top:2px}
+.cartel-header{position:absolute;top:14px;left:0;right:0;z-index:2;text-align:center}
+.cartel-h1{font-size:19px;font-weight:900;letter-spacing:.5px;color:#f3c94a;text-shadow:0 2px 0 #6b4c0a,0 0 14px rgba(243,201,74,.35);text-transform:uppercase;line-height:1.15}
 .cartel-matches{position:relative;z-index:2;display:flex;flex-direction:column;margin-top:8px}
 .cartel-row{display:flex;align-items:center;gap:8px;padding:10px 0}
 .cartel-sep{border:none;border-top:2px dotted rgba(243,201,74,.55);margin:0}
@@ -260,6 +259,7 @@ body{font-family:var(--font);background:linear-gradient(135deg,#064e26 0%,#0a162
 .cartel-crest{width:38px;height:38px;object-fit:contain;flex-shrink:0}
 .cartel-name{font-size:14px;font-weight:900;color:#f5f5f0;letter-spacing:.3px;text-transform:uppercase;line-height:1.15}
 .cartel-center{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:104px;text-align:center;gap:2px}
+.cartel-jv{font-size:11px;color:#8fe89a;font-weight:800;letter-spacing:.5px;text-transform:uppercase;margin-bottom:1px}
 .cartel-fecha{font-size:10px;color:#d9d9d9;font-weight:700}
 .cartel-hora{font-size:15px;color:#fff;font-weight:900;white-space:nowrap}
 .cartel-campo{font-size:11px;color:#8fe89a;font-weight:700}
@@ -1256,8 +1256,6 @@ function renderCartelPreview(fechaStr, filled){
   if(!poster) return;
   if(!filled.length){ poster.innerHTML=''; return; }
 
-  const jornadaNum = (S.matches.find(m=>m.id===filled[0].matchId)||{}).jornada || '';
-
   let filasHtml = '';
   filled.forEach((slot, i)=>{
     const m = S.matches.find(x=>x.id===slot.matchId);
@@ -1272,6 +1270,7 @@ function renderCartelPreview(fechaStr, filled){
           <span class="cartel-name">${esc(tname(m.local))}</span>
         </div>
         <div class="cartel-center">
+          <span class="cartel-jv">Jornada ${esc(m.jornada||'?')} · Vuelta ${esc(m.vuelta||'1')}</span>
           <span class="cartel-fecha">${esc(document.getElementById('rol-fecha').value.split('-').reverse().join('/'))}</span>
           <div class="cartel-linea"></div>
           <span class="cartel-hora">${horaFmt}</span>
@@ -1288,8 +1287,7 @@ function renderCartelPreview(fechaStr, filled){
 
   poster.innerHTML = `
     <div class="cartel-header">
-      <div class="cartel-h1">Torneo Dominical Libres</div>
-      <div class="cartel-h2">Jornada ${esc(jornadaNum)}</div>
+      <div class="cartel-h1">Torneo Dominical Libre</div>
     </div>
     <div class="cartel-matches">${filasHtml}</div>
   `;

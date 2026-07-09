@@ -241,38 +241,35 @@ body{font-family:var(--font);background:linear-gradient(135deg,#064e26 0%,#0a162
 
 /* ── CARTEL DE JORNADA (poster descargable) ── */
 .cartel-wrap-scroll{overflow-x:auto;padding:6px 0;-webkit-overflow-scrolling:touch}
-.cartel-poster{position:relative;width:600px;min-height:760px;margin:0 auto;border-radius:10px;overflow:hidden;
-  background:
-    radial-gradient(ellipse at 50% -10%, rgba(30,90,50,.55) 0%, transparent 55%),
-    repeating-linear-gradient(115deg, rgba(120,255,140,.09) 0px, rgba(120,255,140,.09) 2px, transparent 2px, transparent 34px),
-    linear-gradient(160deg, #0c2415 0%, #071a0e 55%, #030a05 100%);
+.cartel-poster{position:relative;width:551px;height:713px;margin:0 auto;border-radius:10px;overflow:hidden;
+  background-image:url('fondonuevo.png');
+  background-size:cover;
+  background-position:center;
   font-family:'Arial Black',Arial,sans-serif;
-  padding:28px 24px 40px;
+  padding:255px 30px 0;
   box-sizing:border-box;
 }
-.cartel-wave{position:absolute;left:0;right:0;bottom:0;width:100%;line-height:0;z-index:0;pointer-events:none}
-.cartel-header{position:relative;z-index:2;text-align:center;margin-bottom:6px}
-.cartel-h1{font-size:30px;font-weight:900;letter-spacing:1px;color:#f3c94a;text-shadow:0 2px 0 #6b4c0a,0 0 18px rgba(243,201,74,.35);text-transform:uppercase;line-height:1.15}
-.cartel-h2{font-size:26px;font-weight:900;letter-spacing:2px;color:#f3c94a;text-shadow:0 2px 0 #6b4c0a,0 0 18px rgba(243,201,74,.35);text-transform:uppercase;margin-top:2px}
-.cartel-logo{display:block;margin:6px auto 18px;width:150px;height:auto;position:relative;z-index:2;filter:drop-shadow(0 4px 14px rgba(0,0,0,.5))}
-.cartel-matches{position:relative;z-index:2;display:flex;flex-direction:column}
-.cartel-row{display:flex;align-items:center;gap:8px;padding:14px 0}
+.cartel-header{position:relative;z-index:2;text-align:center;margin-bottom:10px}
+.cartel-h1{font-size:24px;font-weight:900;letter-spacing:1px;color:#f3c94a;text-shadow:0 2px 0 #6b4c0a,0 0 18px rgba(243,201,74,.35);text-transform:uppercase;line-height:1.15}
+.cartel-h2{font-size:22px;font-weight:900;letter-spacing:2px;color:#f3c94a;text-shadow:0 2px 0 #6b4c0a,0 0 18px rgba(243,201,74,.35);text-transform:uppercase;margin-top:2px}
+.cartel-matches{position:relative;z-index:2;display:flex;flex-direction:column;margin-top:8px}
+.cartel-row{display:flex;align-items:center;gap:8px;padding:10px 0}
 .cartel-sep{border:none;border-top:2px dotted rgba(243,201,74,.55);margin:0}
-.cartel-team{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.cartel-team{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
 .cartel-team.visita{flex-direction:row-reverse;text-align:right}
-.cartel-crest{width:42px;height:42px;object-fit:contain;flex-shrink:0}
-.cartel-name{font-size:16px;font-weight:900;color:#f5f5f0;letter-spacing:.3px;text-transform:uppercase;line-height:1.15}
-.cartel-center{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:118px;text-align:center;gap:2px}
-.cartel-fecha{font-size:11px;color:#d9d9d9;font-weight:700}
-.cartel-hora{font-size:17px;color:#fff;font-weight:900;white-space:nowrap}
-.cartel-campo{font-size:12px;color:#8fe89a;font-weight:700}
-.cartel-linea{width:26px;height:3px;background:#39ff14;border-radius:2px;margin:2px 0}
-.cartel-footer{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:26px;color:#f3c94a;font-weight:900;font-size:13px;letter-spacing:1px}
+.cartel-crest{width:38px;height:38px;object-fit:contain;flex-shrink:0}
+.cartel-name{font-size:14px;font-weight:900;color:#f5f5f0;letter-spacing:.3px;text-transform:uppercase;line-height:1.15}
+.cartel-center{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:104px;text-align:center;gap:2px}
+.cartel-fecha{font-size:10px;color:#d9d9d9;font-weight:700}
+.cartel-hora{font-size:15px;color:#fff;font-weight:900;white-space:nowrap}
+.cartel-campo{font-size:11px;color:#8fe89a;font-weight:700}
+.cartel-linea{width:24px;height:3px;background:#39ff14;border-radius:2px;margin:2px 0}
 .btn-descargar-cartel{width:100%;padding:12px;background:#f3c94a;color:#1a1200;border:none;border-radius:var(--r);font-size:14px;font-weight:800;cursor:pointer;margin-top:10px}
 .btn-descargar-cartel:hover{filter:brightness(1.08)}
 
 @media(max-width:580px){
-  .cartel-poster{width:100%;min-width:340px}
+  .cartel-poster{width:100%;min-width:340px;height:auto;aspect-ratio:1103/1426}
+
 
   body{padding:0;align-items:flex-start}
   #login-screen,#app-screen{border-radius:0;margin-top:0}
@@ -1250,8 +1247,9 @@ function updateRolPreview(){
 // ════════════════════════════════
 //  CARTEL DE JORNADA (PNG descargable)
 // ════════════════════════════════
-// Logo subido por Gerardo a su repo de GitHub (mismo lugar que index.html, etc.)
-const LOGO_CARTEL_URL = 'nuevo%20logo.png';
+// Fondo real subido por Gerardo a su repo de GitHub (ya trae el logo, las rayas,
+// la onda dorada/naranja/turquesa y el Instagram integrados en la imagen)
+const FONDO_CARTEL_URL = 'fondonuevo.png';
 
 function renderCartelPreview(fechaStr, filled){
   const poster = document.getElementById('cartel-poster');
@@ -1289,18 +1287,11 @@ function renderCartelPreview(fechaStr, filled){
   });
 
   poster.innerHTML = `
-    <svg class="cartel-wave" viewBox="0 0 600 170" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0,90 C120,40 180,140 320,95 C420,65 480,120 600,60 L600,170 L0,170 Z" fill="#d9b26a" opacity="0.9"></path>
-      <path d="M0,130 C140,90 220,170 360,120 C460,90 520,150 600,110 L600,170 L0,170 Z" fill="#e8823a" opacity="0.55"></path>
-      <path d="M0,150 C160,120 260,175 400,140 C480,120 540,160 600,135 L600,170 L0,170 Z" fill="#2f8f8a" opacity="0.85"></path>
-    </svg>
     <div class="cartel-header">
-      <div class="cartel-h1">Dominical Masculino</div>
+      <div class="cartel-h1">Torneo Dominical Libres</div>
       <div class="cartel-h2">Jornada ${esc(jornadaNum)}</div>
     </div>
-    <img class="cartel-logo" src="${LOGO_CARTEL_URL}" onerror="this.style.display='none'">
     <div class="cartel-matches">${filasHtml}</div>
-    <div class="cartel-footer">📷 nextlevel7__</div>
   `;
 }
 

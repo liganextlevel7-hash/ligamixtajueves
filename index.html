@@ -72,6 +72,20 @@
 .mini-pts  { font-weight:900; color:#39ff14; margin-left:auto; }
 .mini-marcador { font-weight:900; color:#ffd700; margin-left:auto; font-size:13px; }
 .mini-vs   { font-weight:900; color:#ffd700; margin-left:auto; }
+
+/* ── Formato "cartel" para Últimos Resultados y Próxima Jornada (mismo estilo del cartel del chat) ── */
+.cartel-row{display:flex;align-items:center;gap:6px;padding:8px 0}
+.cartel-sep{border:none;border-top:1.5px dotted rgba(255,215,0,.55);margin:0}
+.cartel-team{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+.cartel-team.visita{flex-direction:row-reverse;text-align:right}
+.cartel-crest{width:26px;height:26px;object-fit:contain;flex-shrink:0}
+.cartel-name{font-size:10px;font-weight:900;color:#f5f5f0;letter-spacing:.2px;text-transform:uppercase;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cartel-center{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:58px;text-align:center;gap:1px}
+.cartel-fecha{font-size:8px;color:#d9d9d9;font-weight:700}
+.cartel-hora{font-size:13px;color:#fff;font-weight:900;white-space:nowrap}
+.cartel-marcador{font-size:15px;color:#ffd700;font-weight:900;white-space:nowrap}
+.cartel-campo{font-size:8px;color:#8fe89a;font-weight:700}
+.cartel-linea{width:16px;height:2px;background:#39ff14;border-radius:2px;margin:1px 0}
 .car-cargando { color:rgba(255,255,255,0.3); text-align:center; padding:20px; font-size:12px; }
 .car-flecha { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; color:#fff; z-index:10; transition:all 0.3s; touch-action:manipulation; user-select:none; }
 .car-flecha:hover { background:rgba(255,255,255,0.2); }
@@ -161,9 +175,7 @@
   </div>
 
   <div class="card-sec c-partidos" id="ccard-2">
-    <div class="card-body">
-      <img src="fondo-partidos.png" class="card-fondo-img" onerror="this.style.display='none'">
-      <div class="card-overlay-color"></div>
+    <div class="card-body" style="background-image:url('fondonuevo.png');background-size:cover;background-position:center;">
       <div class="card-titulo">📊 Últimos Resultados</div>
       <div class="card-contenido" id="car-resultados"><div class="car-cargando">Cargando...</div></div>
       <a href="partidos.html" class="car-btn">VER PARTIDOS</a>
@@ -171,9 +183,7 @@
   </div>
 
   <div class="card-sec c-proxima" id="ccard-3">
-    <div class="card-body">
-      <img src="fondo-partidos.png" class="card-fondo-img" onerror="this.style.display='none'">
-      <div class="card-overlay-color"></div>
+    <div class="card-body" style="background-image:url('fondonuevo.png');background-size:cover;background-position:center;">
       <div class="card-titulo">📅 Próxima Jornada</div>
       <div class="card-contenido" id="car-proxima"><div class="car-cargando">Cargando...</div></div>
       <a href="partidos.html" class="car-btn">VER JORNADA</a>
@@ -339,12 +349,51 @@ async function cargarCarrusel() {
     }
     document.getElementById('car-tabla').innerHTML=htmlTabla||'<div class="car-cargando">Sin datos</div>';
     const filasP=tP.trim().split('\n'); const jugados=[],programados=[];
-    for(let i=1;i<filasP.length;i++){ const c=filasP[i].split(','); const estado=(c[6]||'').trim(); const local=carEqID[Number(c[2])]||'', visita=carEqID[Number(c[3])]||''; const p={local,visita,gl:c[4]||'',gv:c[5]||'',fecha:(c[8]||'').trim()}; if(estado==='Jugado') jugados.push(p); if(estado==='Programado') programados.push(p); }
+    for(let i=1;i<filasP.length;i++){ const c=filasP[i].split(','); const estado=(c[6]||'').trim(); const local=carEqID[Number(c[2])]||'', visita=carEqID[Number(c[3])]||''; const p={local,visita,gl:c[4]||'',gv:c[5]||'',fecha:(c[8]||'').trim(),hora:(c[9]||'').trim(),cancha:(c[7]||'').trim()}; if(estado==='Jugado') jugados.push(p); if(estado==='Programado') programados.push(p); }
+    function fmtHora12(hora24){
+      if(!hora24) return '';
+      const partes = hora24.split(':');
+      let h = parseInt(partes[0],10);
+      if(isNaN(h)) return '';
+      const m = partes[1] || '00';
+      const ampm = h >= 12 ? 'pm' : 'am';
+      h = h % 12; if(h===0) h = 12;
+      return `${h}:${m} ${ampm}`;
+    }
     let htmlRes='';
-    if(jugados.length){ const fu=jugados[jugados.length-1].fecha; if(fu) htmlRes=`<div style="font-size:10px;color:#ffd700;text-align:center;margin-bottom:6px;">${fu}</div>`; jugados.filter(p=>p.fecha===fu).slice(0,4).forEach(p=>{ htmlRes+=`<div class="mini-fila"><img src="${carLogos[p.local]||''}" onerror="this.style.display='none'"><span style="flex:1;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.local}</span><span class="mini-marcador">${p.gl}-${p.gv}</span><span style="flex:1;font-size:10px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.visita}</span><img src="${carLogos[p.visita]||''}" onerror="this.style.display='none'"></div>`; }); }
+    if(jugados.length){
+      const fu=jugados[jugados.length-1].fecha;
+      const filasFu = jugados.filter(p=>p.fecha===fu).slice(0,4);
+      filasFu.forEach((p,i)=>{
+        htmlRes+=`<div class="cartel-row">
+          <div class="cartel-team local"><img class="cartel-crest" src="${carLogos[p.local]||''}" onerror="this.style.opacity='.2'"><span class="cartel-name">${p.local}</span></div>
+          <div class="cartel-center">
+            <span class="cartel-fecha">${p.fecha}</span>
+            <div class="cartel-linea"></div>
+            <span class="cartel-marcador">${p.gl}-${p.gv}</span>
+          </div>
+          <div class="cartel-team visita"><img class="cartel-crest" src="${carLogos[p.visita]||''}" onerror="this.style.opacity='.2'"><span class="cartel-name">${p.visita}</span></div>
+        </div>${i < filasFu.length-1 ? '<hr class="cartel-sep">' : ''}`;
+      });
+    }
     document.getElementById('car-resultados').innerHTML=htmlRes||'<div class="car-cargando">Sin resultados</div>';
     let htmlProx='';
-    if(programados.length){ const fp=programados[0].fecha; if(fp) htmlProx=`<div style="font-size:10px;color:#ff5096;text-align:center;margin-bottom:6px;">${fp}</div>`; programados.filter(p=>p.fecha===fp).slice(0,4).forEach(p=>{ htmlProx+=`<div class="mini-fila"><img src="${carLogos[p.local]||''}" onerror="this.style.display='none'"><span style="flex:1;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.local}</span><span class="mini-vs">VS</span><span style="flex:1;font-size:10px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.visita}</span><img src="${carLogos[p.visita]||''}" onerror="this.style.display='none'"></div>`; }); }
+    if(programados.length){
+      const fp=programados[0].fecha;
+      const filasFp = programados.filter(p=>p.fecha===fp).slice(0,4);
+      filasFp.forEach((p,i)=>{
+        htmlProx+=`<div class="cartel-row">
+          <div class="cartel-team local"><img class="cartel-crest" src="${carLogos[p.local]||''}" onerror="this.style.opacity='.2'"><span class="cartel-name">${p.local}</span></div>
+          <div class="cartel-center">
+            <span class="cartel-fecha">${p.fecha}</span>
+            <div class="cartel-linea"></div>
+            <span class="cartel-hora">${fmtHora12(p.hora)}</span>
+            ${p.cancha?`<span class="cartel-campo">${p.cancha}</span>`:''}
+          </div>
+          <div class="cartel-team visita"><img class="cartel-crest" src="${carLogos[p.visita]||''}" onerror="this.style.opacity='.2'"><span class="cartel-name">${p.visita}</span></div>
+        </div>${i < filasFp.length-1 ? '<hr class="cartel-sep">' : ''}`;
+      });
+    }
     document.getElementById('car-proxima').innerHTML=htmlProx||'<div class="car-cargando">Sin partidos programados</div>';
     const jugadores=carParseCSV(tJ), eventos=carParseCSV(tEv), partic=carParseCSV(tPart);
     const golMap={}, partMap={};

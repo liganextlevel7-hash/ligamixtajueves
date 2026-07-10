@@ -338,51 +338,103 @@ async function downloadPNG() {
   btn.disabled = true;
   const eqMap = {};
   todosEquipos.forEach(e => { eqMap[String(e['ID_Equipo']).trim()] = e; });
+
   const temp = document.createElement('div');
   temp.style.position = 'fixed';
   temp.style.left = '-9999px';
   temp.style.top = '0';
   temp.style.width = '700px';
-  temp.style.background = '#0a0a0a';
-  temp.style.padding = '24px';
   temp.style.fontFamily = "'Roboto', Arial, sans-serif";
-  let html = `<div style="text-align:center;color:#b8f030;font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;margin-bottom:20px;">⚽ DOMINICAL — NEXT LEVEL 7</div>`;
-  ultimosFiltrados.forEach(p => {
+  temp.style.background = '#0a0a0a';
+  temp.style.padding = '0';
+
+  // Contenedor con fondo
+  const inner = document.createElement('div');
+  inner.style.cssText = `
+    position:relative;
+    background-image:url('fondonuevo.png');
+    background-size:cover;
+    background-position:center;
+    padding:28px 24px 32px;
+  `;
+
+  // Overlay oscuro
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position:absolute;inset:0;
+    background:rgba(0,0,0,0.62);
+    z-index:0;
+  `;
+  inner.appendChild(overlay);
+
+  // Contenido
+  const content = document.createElement('div');
+  content.style.cssText = 'position:relative;z-index:1;';
+
+  // Título
+  const firstP = ultimosFiltrados[0];
+  const jornadaTitulo = firstP?.Jornada ? `Jornada ${firstP.Jornada}` : 'Partidos';
+  const vueltaTitulo = firstP?.Vuelta === '2' ? 'Segunda Vuelta' : 'Primera Vuelta';
+  content.innerHTML = `
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:#b8f030;text-shadow:0 0 15px rgba(184,240,48,0.4);">⚽ NEXT LEVEL 7</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:#ffd700;margin-top:4px;">${jornadaTitulo} · ${vueltaTitulo}</div>
+    </div>
+  `;
+
+  ultimosFiltrados.forEach((p, i) => {
     const eqL = eqMap[String(p['Equipo_Local']).trim()] || {};
     const eqV = eqMap[String(p['Equipo_Visita']).trim()] || {};
     const nomL = (eqL['Nombre'] || `Equipo ${p['Equipo_Local']}`).toUpperCase();
     const nomV = (eqV['Nombre'] || `Equipo ${p['Equipo_Visita']}`).toUpperCase();
     const urlL = eqL['URL'] || '';
     const urlV = eqV['URL'] || '';
-    const gL = p['Goles_Local'] !== '' ? p['Goles_Local'] : '-';
-    const gV = p['Goles_Visita'] !== '' ? p['Goles_Visita'] : '-';
+    const gL = p['Goles_Local'] !== '' ? p['Goles_Local'] : null;
+    const gV = p['Goles_Visita'] !== '' ? p['Goles_Visita'] : null;
     const estado = (p['Estado'] || '').trim();
     const fecha = p['Fecha'] || '';
-    const jornadaTxt = p['Jornada'] ? `Jornada ${p['Jornada']}` : 'Jornada ?';
-    const scoreTxt = estado === 'Jugado' ? `${gL} - ${gV}` : 'VS';
-    html += `
-    <div style="background:linear-gradient(160deg,#0d1810,#0a1a0d);border:1px solid rgba(57,255,20,0.3);border-radius:14px;padding:16px;margin-bottom:14px;">
-      <div style="font-size:11px;color:#ffd700;font-weight:700;margin-bottom:10px;">#${p.ID_Partido} · ${jornadaTxt} ${fecha?' · '+fecha:''}</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:16px;">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;width:140px;">
-          <img src="${urlL}" style="width:50px;height:50px;object-fit:contain;" onerror="this.style.display='none'">
-          <div style="font-size:12px;font-weight:700;color:#fff;text-align:center;">${nomL}</div>
+    const hora = p['Hora'] ? formatHora(p['Hora']) : '';
+    const cancha = p['Cancha'] || '';
+    const jugado = estado === 'Jugado' && gL !== null && gV !== null;
+    const centerHTML = jugado
+      ? `<div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#d4f030;text-shadow:0 0 10px rgba(120,220,0,0.5);letter-spacing:2px;line-height:1;">${gL} - ${gV}</div>`
+      : `<div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:rgba(255,255,255,0.5);letter-spacing:2px;">VS</div>`;
+
+    const sep = i < ultimosFiltrados.length - 1
+      ? `<div style="border-top:1px dotted rgba(255,215,0,0.4);margin:0;"></div>`
+      : '';
+
+    content.innerHTML += `
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 6px;">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+          <img src="${urlL}" style="width:52px;height:52px;object-fit:contain;flex-shrink:0;" onerror="this.style.opacity='0.2'">
+          <div style="font-size:11px;font-weight:900;color:#f5f5f0;text-transform:uppercase;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${nomL}</div>
         </div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:#d4f030;min-width:70px;text-align:center;">${scoreTxt}</div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;width:140px;">
-          <img src="${urlV}" style="width:50px;height:50px;object-fit:contain;" onerror="this.style.display='none'">
-          <div style="font-size:12px;font-weight:700;color:#fff;text-align:center;">${nomV}</div>
+        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:90px;text-align:center;gap:3px;">
+          ${fecha ? `<div style="font-size:8px;color:#d9d9d9;font-weight:700;">${fecha}</div>` : ''}
+          <div style="width:16px;height:2px;background:#39ff14;border-radius:2px;margin:2px auto;"></div>
+          ${centerHTML}
+          ${hora ? `<div style="font-size:9px;color:#8fe89a;font-weight:700;">${hora}${cancha?' · '+cancha:''}</div>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;flex-direction:row-reverse;">
+          <img src="${urlV}" style="width:52px;height:52px;object-fit:contain;flex-shrink:0;" onerror="this.style.opacity='0.2'">
+          <div style="font-size:11px;font-weight:900;color:#f5f5f0;text-transform:uppercase;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;">${nomV}</div>
         </div>
       </div>
-    </div>`;
+      ${sep}
+    `;
   });
-  temp.innerHTML = html;
+
+  inner.appendChild(content);
+  temp.appendChild(inner);
   document.body.appendChild(temp);
+
   const imgs = temp.querySelectorAll('img');
   await Promise.all(Array.from(imgs).map(img => new Promise(resolve => {
     if (img.complete) resolve(); else { img.onload = resolve; img.onerror = resolve; }
   })));
-  await new Promise(r => setTimeout(r, 500));
+  await new Promise(r => setTimeout(r, 600));
+
   try {
     const canvas = await html2canvas(temp, {
       useCORS: true, allowTaint: true, scale: 2,
@@ -391,11 +443,12 @@ async function downloadPNG() {
     canvas.toBlob(blob => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = `partidos.png`;
+      a.href = url; a.download = `partidos_nextlevel7.png`;
       document.body.appendChild(a); a.click();
       document.body.removeChild(a); URL.revokeObjectURL(url);
     }, 'image/png');
   } catch(e) { alert('❌ Error: ' + e.message); }
+
   document.body.removeChild(temp);
   btn.textContent = '⬇ Descargar Lista como PNG';
   btn.disabled = false;

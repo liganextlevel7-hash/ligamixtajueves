@@ -78,29 +78,49 @@ function renderListaPartidos() {
   const cumpleFiltro = (p) => !filtroEquipo || String(p.Equipo_Local).trim()===filtroEquipo || String(p.Equipo_Visita).trim()===filtroEquipo;
   const programados = todosPartidosC.filter(p => p.Estado?.trim() === 'Programado' && cumpleFiltro(p));
   const jugados      = todosPartidosC.filter(p => p.Estado?.trim() === 'Jugado' && cumpleFiltro(p));
+  const pendientes   = todosPartidosC.filter(p => p.Estado?.trim() === 'Pendiente' && cumpleFiltro(p));
 
   let html = '';
   let idxGlobal = 0;
 
-  function tarjeta(p, esProgramado) {
+  function tarjeta(p, tipo) {
+    // tipo: 'programado' | 'jugado' | 'pendiente'
     const eqL = eqMap[String(p.Equipo_Local).trim()] || {};
     const eqV = eqMap[String(p.Equipo_Visita).trim()] || {};
     const nomL = (eqL.Nombre || `Equipo ${p.Equipo_Local}`).toUpperCase();
     const nomV = (eqV.Nombre || `Equipo ${p.Equipo_Visita}`).toUpperCase();
-    const scoreHTML = esProgramado
-      ? `<div class="stack-score programado">VS</div>`
-      : `<div class="stack-score">${p.Goles_Local} - ${p.Goles_Visita}</div>`;
+    const ganPor = (p.Ganado_Por || '').trim();
+    const ganPorClass = ganPor.toLowerCase();
+
+    const scoreHTML = tipo === 'jugado'
+      ? `<div class="stack-score">${p.Goles_Local} - ${p.Goles_Visita}</div>`
+      : `<div class="stack-score programado">VS</div>`;
+
     const jornadaTxt = p.Jornada ? `Jornada ${p.Jornada}` : 'Jornada ?';
-    const badgeHTML = esProgramado
-      ? (modoArbitro ? `<span class="stack-badge editable">LLENAR CÉDULA</span>` : `<span class="stack-badge consulta">VER CÉDULA</span>`)
-      : `<span class="stack-badge consulta">VER CÉDULA</span>`;
-    const bordeClass = esProgramado ? 'borde-programado' : 'borde-jugado';
+
+    let badgeHTML = '';
+    if (tipo === 'pendiente') {
+      badgeHTML = `<span class="stack-badge pendiente">PENDIENTE</span>`;
+    } else if (tipo === 'programado') {
+      badgeHTML = modoArbitro ? `<span class="stack-badge editable">LLENAR CÉDULA</span>` : `<span class="stack-badge consulta">VER CÉDULA</span>`;
+    } else {
+      badgeHTML = (ganPor ? `<span class="stack-badge ${ganPorClass}">${ganPor.toUpperCase()}</span>` : `<span class="stack-badge consulta">VER CÉDULA</span>`);
+    }
+
+    let bordeClass = '';
+    let estadoClass = tipo === 'programado' ? 'estado-programado' : tipo === 'jugado' ? 'estado-jugado' : 'estado-pendiente';
+    if (tipo === 'programado') bordeClass = 'borde-programado';
+    else if (ganPorClass === 'normal') bordeClass = 'borde-normal';
+    else if (ganPorClass === 'penales') bordeClass = 'borde-penales';
+    else if (ganPorClass === 'default') bordeClass = 'borde-default';
+
+    const clickable = tipo !== 'pendiente';
     const top = 16 + idxGlobal * 4;
     const z = idxGlobal + 1;
     idxGlobal++;
     return `
     <div class="stack-card" style="top:${top}px; z-index:${z};">
-      <div class="stack-card-inner ${bordeClass}" onclick="abrirCedula('${p.ID_Partido}')">
+      <div class="stack-card-inner ${estadoClass} ${bordeClass}" ${clickable ? `onclick="abrirCedula('${p.ID_Partido}')"` : ''}>
         <div class="stack-top-row">
           <span>${jornadaTxt}</span>
           <span>#${p.ID_Partido}</span>
@@ -108,7 +128,7 @@ function renderListaPartidos() {
         <div class="stack-teams">
           <div class="stack-team"><img src="${eqL.URL||''}" onerror="this.style.opacity='0.2'"><span class="stack-team-name">${nomL}</span></div>
           ${scoreHTML}
-          <div class="stack-team visita"><img src="${eqV.URL||''}" onerror="this.style.opacity='0.2'"><span class="stack-team-name">${nomV}</span></div>
+          <div class="stack-team"><img src="${eqV.URL||''}" onerror="this.style.opacity='0.2'"><span class="stack-team-name">${nomV}</span></div>
         </div>
         <div class="stack-bottom-row">
           ${p.Fecha?`<span>📅 ${p.Fecha}</span>`:''}
@@ -121,13 +141,17 @@ function renderListaPartidos() {
 
   if (programados.length) {
     html += `<div class="stack-section-title">PROGRAMADOS</div>`;
-    programados.forEach(p => { html += tarjeta(p, true); });
+    programados.forEach(p => { html += tarjeta(p, 'programado'); });
   }
   if (jugados.length) {
     html += `<div class="stack-section-title">JUGADOS</div>`;
-    jugados.forEach(p => { html += tarjeta(p, false); });
+    jugados.forEach(p => { html += tarjeta(p, 'jugado'); });
   }
-  if (!programados.length && !jugados.length) {
+  if (pendientes.length) {
+    html += `<div class="stack-section-title">PENDIENTES</div>`;
+    pendientes.forEach(p => { html += tarjeta(p, 'pendiente'); });
+  }
+  if (!programados.length && !jugados.length && !pendientes.length) {
     html = '<div class="empty-msg">No hay partidos disponibles</div>';
   }
 

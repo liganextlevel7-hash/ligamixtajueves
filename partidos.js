@@ -330,59 +330,51 @@ function renderStack(filtrados) {
   });
 }
 
-// ===== DESCARGAR PNG =====
-async function downloadPNG() {
-  if (!ultimosFiltrados.length) { alert('Primero carga los datos de los partidos.'); return; }
-  const btn = document.getElementById('dlBtn');
-  btn.textContent = '⏳ Generando...';
-  btn.disabled = true;
+// ===== DESCARGAR PNG (paginado: 4 partidos por página) =====
+const REPORTE_POR_PAGINA = 4;
+
+async function esperarImagenesReporte(el) {
+  const imgs = el.querySelectorAll('img');
+  await Promise.all(Array.from(imgs).map(img => new Promise(resolve => {
+    if (img.complete) resolve(); else { img.onload = resolve; img.onerror = resolve; }
+  })));
+  await new Promise(r => setTimeout(r, 200));
+}
+
+function construirPaginaReporte(paginaPartidos, numPagina, totalPaginas, jornadaTitulo, vueltaTitulo) {
   const eqMap = {};
   todosEquipos.forEach(e => { eqMap[String(e['ID_Equipo']).trim()] = e; });
 
-  const temp = document.createElement('div');
-  temp.style.position = 'fixed';
-  temp.style.left = '-9999px';
-  temp.style.top = '0';
-  temp.style.width = '700px';
-  temp.style.fontFamily = "'Roboto', Arial, sans-serif";
-  temp.style.background = '#0a0a0a';
-  temp.style.padding = '0';
-
-  // Contenedor con fondo
   const inner = document.createElement('div');
   inner.style.cssText = `
     position:relative;
+    width:700px;
+    min-height:900px;
     background-image:url('fondonuevo.png');
     background-size:cover;
     background-position:center;
     padding:28px 24px 32px;
+    box-sizing:border-box;
   `;
 
-  // Overlay oscuro
   const overlay = document.createElement('div');
-  overlay.style.cssText = `
-    position:absolute;inset:0;
-    background:rgba(0,0,0,0.62);
-    z-index:0;
-  `;
+  overlay.style.cssText = `position:absolute;inset:0;background:rgba(0,0,0,0.62);z-index:0;`;
   inner.appendChild(overlay);
 
-  // Contenido
   const content = document.createElement('div');
-  content.style.cssText = 'position:relative;z-index:1;';
+  content.style.cssText = 'position:relative;z-index:1;display:flex;flex-direction:column;min-height:844px;';
 
-  // Título
-  const firstP = ultimosFiltrados[0];
-  const jornadaTitulo = firstP?.Jornada ? `Jornada ${firstP.Jornada}` : 'Partidos';
-  const vueltaTitulo = firstP?.Vuelta === '2' ? 'Segunda Vuelta' : 'Primera Vuelta';
+  const paginaTxt = totalPaginas > 1 ? ` · Página ${numPagina}/${totalPaginas}` : '';
   content.innerHTML = `
     <div style="text-align:center;margin-bottom:20px;">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:#b8f030;text-shadow:0 0 15px rgba(184,240,48,0.4);">⚽ NEXT LEVEL 7</div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:#ffd700;margin-top:4px;">${jornadaTitulo} · ${vueltaTitulo}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:#ffd700;margin-top:4px;">${jornadaTitulo} · ${vueltaTitulo}${paginaTxt}</div>
     </div>
+    <div id="reporte-filas" style="flex:1;display:flex;flex-direction:column;justify-content:center;"></div>
   `;
 
-  ultimosFiltrados.forEach((p, i) => {
+  const filasWrap = content.querySelector('#reporte-filas');
+  paginaPartidos.forEach((p, i) => {
     const eqL = eqMap[String(p['Equipo_Local']).trim()] || {};
     const eqV = eqMap[String(p['Equipo_Visita']).trim()] || {};
     const nomL = (eqL['Nombre'] || `Equipo ${p['Equipo_Local']}`).toUpperCase();
@@ -400,56 +392,82 @@ async function downloadPNG() {
       ? `<div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#d4f030;text-shadow:0 0 10px rgba(120,220,0,0.5);letter-spacing:2px;line-height:1;">${gL} - ${gV}</div>`
       : `<div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:rgba(255,255,255,0.5);letter-spacing:2px;">VS</div>`;
 
-    const sep = i < ultimosFiltrados.length - 1
-      ? `<div style="border-top:1px dotted rgba(255,215,0,0.4);margin:0;"></div>`
+    const sep = i < paginaPartidos.length - 1
+      ? `<hr style="border:none;border-top:1px dotted rgba(255,215,0,0.4);margin:0;">`
       : '';
 
-    content.innerHTML += `
-      <div style="display:flex;align-items:center;gap:10px;padding:12px 6px;">
+    const fila = document.createElement('div');
+    fila.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;padding:16px 6px;">
         <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
-          <img src="${urlL}" style="width:52px;height:52px;object-fit:contain;flex-shrink:0;" onerror="this.style.opacity='0.2'">
-          <div style="font-size:11px;font-weight:900;color:#f5f5f0;text-transform:uppercase;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${nomL}</div>
+          <img src="${urlL}" style="width:60px;height:60px;object-fit:contain;flex-shrink:0;" onerror="this.style.opacity='0.2'">
+          <div style="font-size:13px;font-weight:900;color:#f5f5f0;text-transform:uppercase;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${nomL}</div>
         </div>
-        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:90px;text-align:center;gap:3px;">
-          ${fecha ? `<div style="font-size:8px;color:#d9d9d9;font-weight:700;">${fecha}</div>` : ''}
-          <div style="width:16px;height:2px;background:#39ff14;border-radius:2px;margin:2px auto;"></div>
+        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:100px;text-align:center;gap:3px;">
+          ${fecha ? `<div style="font-size:9px;color:#d9d9d9;font-weight:700;">${fecha}</div>` : ''}
+          <div style="width:18px;height:2px;background:#39ff14;border-radius:2px;margin:2px auto;"></div>
           ${centerHTML}
-          ${hora ? `<div style="font-size:9px;color:#8fe89a;font-weight:700;">${hora}${cancha?' · '+cancha:''}</div>` : ''}
+          ${hora ? `<div style="font-size:10px;color:#8fe89a;font-weight:700;">${hora}${cancha?' · '+cancha:''}</div>` : ''}
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;flex-direction:row-reverse;">
-          <img src="${urlV}" style="width:52px;height:52px;object-fit:contain;flex-shrink:0;" onerror="this.style.opacity='0.2'">
-          <div style="font-size:11px;font-weight:900;color:#f5f5f0;text-transform:uppercase;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;">${nomV}</div>
+          <img src="${urlV}" style="width:60px;height:60px;object-fit:contain;flex-shrink:0;" onerror="this.style.opacity='0.2'">
+          <div style="font-size:13px;font-weight:900;color:#f5f5f0;text-transform:uppercase;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;">${nomV}</div>
         </div>
       </div>
       ${sep}
     `;
+    filasWrap.appendChild(fila);
   });
 
   inner.appendChild(content);
-  temp.appendChild(inner);
-  document.body.appendChild(temp);
+  return inner;
+}
 
-  const imgs = temp.querySelectorAll('img');
-  await Promise.all(Array.from(imgs).map(img => new Promise(resolve => {
-    if (img.complete) resolve(); else { img.onload = resolve; img.onerror = resolve; }
-  })));
-  await new Promise(r => setTimeout(r, 600));
+async function downloadPNG() {
+  if (!ultimosFiltrados.length) { alert('Primero carga los datos de los partidos.'); return; }
+  const btn = document.getElementById('dlBtn');
+  btn.textContent = '⏳ Generando...';
+  btn.disabled = true;
+
+  const firstP = ultimosFiltrados[0];
+  const jornadaTitulo = firstP?.Jornada ? `Jornada ${firstP.Jornada}` : 'Partidos';
+  const vueltaTitulo = firstP?.Vuelta === '2' ? 'Segunda Vuelta' : 'Primera Vuelta';
+
+  const totalPaginas = Math.ceil(ultimosFiltrados.length / REPORTE_POR_PAGINA);
 
   try {
-    const canvas = await html2canvas(temp, {
-      useCORS: true, allowTaint: true, scale: 2,
-      backgroundColor: '#0a0a0a', imageTimeout: 20000, logging: false
-    });
-    canvas.toBlob(blob => {
+    for (let p = 0; p < totalPaginas; p++) {
+      const pagina = ultimosFiltrados.slice(p*REPORTE_POR_PAGINA, (p+1)*REPORTE_POR_PAGINA);
+      const temp = document.createElement('div');
+      temp.style.position = 'fixed';
+      temp.style.left = '-9999px';
+      temp.style.top = '0';
+
+      const inner = construirPaginaReporte(pagina, p+1, totalPaginas, jornadaTitulo, vueltaTitulo);
+      temp.appendChild(inner);
+      document.body.appendChild(temp);
+
+      await esperarImagenesReporte(temp);
+
+      const canvas = await html2canvas(temp, {
+        useCORS: true, allowTaint: true, scale: 2,
+        backgroundColor: '#0a0a0a', imageTimeout: 20000, logging: false
+      });
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = `partidos_nextlevel7.png`;
+      a.href = url;
+      a.download = totalPaginas > 1 ? `partidos_nextlevel7_pagina${p+1}.png` : `partidos_nextlevel7.png`;
       document.body.appendChild(a); a.click();
       document.body.removeChild(a); URL.revokeObjectURL(url);
-    }, 'image/png');
-  } catch(e) { alert('❌ Error: ' + e.message); }
 
-  document.body.removeChild(temp);
+      document.body.removeChild(temp);
+      await new Promise(r => setTimeout(r, 400));
+    }
+  } catch(e) {
+    alert('❌ Error: ' + e.message);
+  }
+
   btn.textContent = '⬇ Descargar Lista como PNG';
   btn.disabled = false;
 }

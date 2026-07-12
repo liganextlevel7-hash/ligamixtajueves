@@ -358,7 +358,7 @@ function construirPaginaReporte(paginaPartidos, numPagina, totalPaginas, jornada
   `;
 
   const overlay = document.createElement('div');
-  overlay.style.cssText = `position:absolute;inset:0;background:rgba(0,0,0,0.62);z-index:0;`;
+  overlay.style.cssText = `position:absolute;inset:0;background:rgba(0,0,0,0.15);z-index:0;`;
   inner.appendChild(overlay);
 
   const content = document.createElement('div');
@@ -423,21 +423,37 @@ function construirPaginaReporte(paginaPartidos, numPagina, totalPaginas, jornada
   return inner;
 }
 
+// Ordena por Campo (Campo 1, Campo 2, ...) y dentro de cada campo por horario,
+// igual que en el chat. Los partidos sin campo capturado van al final.
+function ordenarPorCampoHora(lista) {
+  return [...lista].sort((a,b) => {
+    const ca = (a['Cancha']||'').trim();
+    const cb = (b['Cancha']||'').trim();
+    if (ca !== cb) {
+      if (!ca) return 1;
+      if (!cb) return -1;
+      return ca.localeCompare(cb, 'es', {numeric:true, sensitivity:'base'});
+    }
+    return (a['Hora']||'').localeCompare(b['Hora']||'');
+  });
+}
+
 async function downloadPNG() {
   if (!ultimosFiltrados.length) { alert('Primero carga los datos de los partidos.'); return; }
   const btn = document.getElementById('dlBtn');
   btn.textContent = '⏳ Generando...';
   btn.disabled = true;
 
-  const firstP = ultimosFiltrados[0];
+  const partidosOrdenados = ordenarPorCampoHora(ultimosFiltrados);
+  const firstP = partidosOrdenados[0];
   const jornadaTitulo = firstP?.Jornada ? `Jornada ${firstP.Jornada}` : 'Partidos';
   const vueltaTitulo = firstP?.Vuelta === '2' ? 'Segunda Vuelta' : 'Primera Vuelta';
 
-  const totalPaginas = Math.ceil(ultimosFiltrados.length / REPORTE_POR_PAGINA);
+  const totalPaginas = Math.ceil(partidosOrdenados.length / REPORTE_POR_PAGINA);
 
   try {
     for (let p = 0; p < totalPaginas; p++) {
-      const pagina = ultimosFiltrados.slice(p*REPORTE_POR_PAGINA, (p+1)*REPORTE_POR_PAGINA);
+      const pagina = partidosOrdenados.slice(p*REPORTE_POR_PAGINA, (p+1)*REPORTE_POR_PAGINA);
       const temp = document.createElement('div');
       temp.style.position = 'fixed';
       temp.style.left = '-9999px';

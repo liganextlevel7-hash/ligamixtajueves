@@ -514,9 +514,20 @@ function cargarJugadoresPorEquipo(){
      var eqField = j.ID_Equipo || j.id_equipo || j.Equipo || j.equipo || '';
      return eqField.toString().trim() === idL.toString().trim() || eqField.toString().trim() === nombreL.toString().trim();
   });
+  // Deduplicar por ID de jugador por si hay registros repetidos
+  jL = jL.filter((j, idx, arr) => {
+    var jId = (j.ID_Jugador || j.id_jugador || j.ID || j.id || '').toString().trim();
+    return arr.findIndex(x => (x.ID_Jugador || x.id_jugador || x.ID || x.id || '').toString().trim() === jId) === idx;
+  });
+
   var jV = DB.jugadores.filter(j => {
      var eqField = j.ID_Equipo || j.id_equipo || j.Equipo || j.equipo || '';
      return eqField.toString().trim() === idV.toString().trim() || eqField.toString().trim() === nombreV.toString().trim();
+  });
+  // Deduplicar por ID de jugador por si hay registros repetidos
+  jV = jV.filter((j, idx, arr) => {
+    var jId = (j.ID_Jugador || j.id_jugador || j.ID || j.id || '').toString().trim();
+    return arr.findIndex(x => (x.ID_Jugador || x.id_jugador || x.ID || x.id || '').toString().trim() === jId) === idx;
   });
   
   function obtenerTextoEstructurado(jugadorObj) {

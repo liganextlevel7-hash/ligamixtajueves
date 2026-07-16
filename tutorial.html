@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cómo usar el portal — Liga Next Level 7</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030f05; --panel:#0a1f10; --panel2:#0e2814;
+  --neon:#39ff14; --neon-dim:rgba(57,255,20,.15);
+  --gold:#ffd700; --gold-soft:#f3c94a;
+  --text:#f5f5f0; --muted:#8fae90; --muted2:#6a8a6c;
+  --danger:#e03030; --blue:#29a6ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg);
+  background-image:radial-gradient(ellipse at 50% 0%, rgba(57,255,20,.06) 0%, transparent 55%);
+  color:var(--text);
+  font-family:'Roboto',Arial,sans-serif;
+  overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+.deck{position:fixed;inset:0;display:flex;flex-direction:column}
+.scrubber{display:flex;gap:5px;padding:14px 18px 0;flex-shrink:0}
+.scrub-seg{flex:1;height:4px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden;cursor:pointer}
+.scrub-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--neon),var(--gold));border-radius:3px;transition:width .25s linear}
+.scrub-seg.done .scrub-fill{width:100%;transition:none}
+.scrub-seg.active .scrub-fill{transition:width linear}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px 4px;flex-shrink:0}
+.topbar-title{font-family:'Bebas Neue',sans-serif;letter-spacing:2px;font-size:14px;color:var(--gold-soft)}
+.topbar-count{font-size:11px;color:var(--muted2);font-weight:700;letter-spacing:1px}
+.play-btn{background:none;border:1px solid rgba(255,255,255,.2);color:var(--muted);border-radius:20px;padding:4px 12px;font-size:11px;cursor:pointer;font-weight:700;letter-spacing:.5px}
+.play-btn:hover{border-color:var(--neon);color:var(--neon)}
+.stage{position:relative;flex:1;overflow:hidden}
+.scene{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:20px 24px 40px;
+  opacity:0;pointer-events:none;
+  transform:translateX(40px) scale(.98);
+  transition:opacity .5s ease, transform .5s ease;
+}
+.scene.active{opacity:1;pointer-events:all;transform:translateX(0) scale(1)}
+.scene.prev{transform:translateX(-40px) scale(.98)}
+.scene-inner{width:100%;max-width:920px;display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
+@media(max-width:760px){.scene-inner{grid-template-columns:1fr;gap:22px;text-align:center}}
+.mock{
+  position:relative;background:var(--panel);border:1.5px solid rgba(57,255,20,.35);border-radius:20px;
+  padding:18px;min-height:300px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;
+  box-shadow:0 0 0 1px rgba(0,0,0,.4), 0 20px 60px rgba(0,0,0,.6), 0 0 40px rgba(57,255,20,.08);
+  overflow:hidden;
+}
+.mock::before{content:'';position:absolute;inset:0;background-image:url('fondonuevo.png');background-size:cover;background-position:center;opacity:.16;z-index:0}
+.mock > *{position:relative;z-index:1}
+.mock-dot-row{position:absolute;top:12px;left:16px;display:flex;gap:5px;z-index:2}
+.mock-dot-row span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.15)}
+.txt-eyebrow{font-size:11px;font-weight:900;letter-spacing:3px;color:var(--neon);text-transform:uppercase;margin-bottom:8px}
+.txt-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,4vw,40px);letter-spacing:1px;color:var(--gold);line-height:1.05;margin-bottom:14px}
+.txt-body{font-size:14px;line-height:1.7;color:var(--muted);margin-bottom:16px}
+.steps{display:flex;flex-direction:column;gap:9px;text-align:left}
+.step{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--text);line-height:1.5}
+.step-dot{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--neon-dim);border:1px solid var(--neon);color:var(--neon);font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.navwrap{display:flex;align-items:center;justify-content:center;gap:22px;padding:10px 18px 22px;flex-shrink:0}
+.navbtn{
+  width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.5);border:1.5px solid rgba(255,255,255,.2);
+  color:var(--text);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0
+}
+.navbtn:hover{border-color:var(--neon);color:var(--neon);background:var(--neon-dim)}
+.dots{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;max-width:400px}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .25s}
+.dot.on{background:var(--neon);transform:scale(1.3);box-shadow:0 0 8px var(--neon)}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes blinkDot{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes popIn{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes slideBubble{0%{transform:translateX(-14px);opacity:0}100%{transform:translateX(0);opacity:1}}
+@keyframes drawLine{0%{stroke-dashoffset:200}100%{stroke-dashoffset:0}}
+@keyframes carouselShift{0%,30%{transform:translateX(0)}50%,80%{transform:translateX(-64px)}100%{transform:translateX(0)}}
+@keyframes flashGoal{0%,100%{opacity:0}10%,20%{opacity:1}30%{opacity:0}}
+@keyframes typeCursor{0%,100%{opacity:1}50%{opacity:0}}
+.mini-card{width:74px;height:96px;background:#000;border:1px solid var(--gold-soft);border-radius:10px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;box-shadow:0 0 12px rgba(255,215,0,.25)}
+.mini-card .ic{font-size:22px}
+.mini-card .lb{font-size:6.5px;color:var(--gold-soft);font-weight:900;letter-spacing:.5px;text-align:center;padding:0 4px}
+.carousel-row{display:flex;gap:10px;animation:carouselShift 4s ease-in-out infinite}
+.crest{width:34px;height:34px;border-radius:50%;background:linear-gradient(145deg,#222,#000);border:1.5px solid var(--gold-soft);display:flex;align-items:center;justify-content:center;font-size:15px}
+.chip{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:6px 12px;font-size:11px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.chip .d{width:6px;height:6px;border-radius:50%;background:var(--neon);animation:blinkDot 1.2s infinite}
+.bubble{background:var(--panel2);border:1px solid rgba(57,255,20,.25);border-radius:12px 12px 12px 3px;padding:7px 11px;font-size:11px;color:var(--text);max-width:170px;animation:slideBubble .5s ease both}
+.bubble.me{border-radius:12px 12px 3px 12px;background:rgba(57,255,20,.12);border-color:rgba(57,255,20,.4);align-self:flex-end}
+.score-big{font-family:'Bebas Neue',sans-serif;font-size:46px;color:var(--gold);letter-spacing:2px;line-height:1;text-shadow:0 0 16px rgba(255,215,0,.4)}
+.goal-flash{position:absolute;inset:0;background:radial-gradient(circle,rgba(255,215,0,.35),transparent 70%);animation:flashGoal 2.2s ease-in-out infinite;z-index:0}
+.sig-line{stroke:var(--neon);stroke-width:2.5;fill:none;stroke-dasharray:200;stroke-dashoffset:200;animation:drawLine 2.4s ease-in-out infinite}
+.field-mini{background:rgba(255,255,255,.06);border:1px solid rgba(57,255,20,.3);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--muted);width:150px;position:relative}
+.field-mini::after{content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);width:1px;height:14px;background:var(--neon);animation:typeCursor 1s infinite}
+.badge-cancha{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;padding:4px 12px;border-radius:14px;border:1px solid;animation:floatY 2.4s ease-in-out infinite}
+.badge-cancha.c1{color:var(--neon);border-color:var(--neon);background:rgba(57,255,20,.08)}
+.badge-cancha.c2{color:var(--blue);border-color:var(--blue);background:rgba(41,166,255,.08);animation-delay:.6s}
+.footer-note{position:fixed;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:var(--muted2);letter-spacing:.5px;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div class="deck">
+  <div class="scrubber" id="scrubber"></div>
+
+  <div class="topbar">
+    <div class="topbar-title">⚽ NEXT LEVEL 7 · GUÍA DEL PORTAL</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="topbar-count" id="topcount">1 / 9</span>
+      <button class="play-btn" id="playBtn" onclick="togglePlay()">▶ Auto</button>
+    </div>
+  </div>
+
+  <div class="stage" id="stage"></div>
+
+  <div class="navwrap">
+    <button class="navbtn" onclick="prevScene()">←</button>
+    <div class="dots" id="dots"></div>
+    <button class="navbtn" onclick="nextScene()">→</button>
+  </div>
+</div>
+<div class="footer-note">Usa las flechas del teclado o desliza para navegar</div>
+
+<script>
+const escenas = [
+  {
+    eyebrow: 'Bienvenida',
+    title: 'Así funciona<br>tu portal',
+    body: 'Un recorrido rápido por cada parte del sitio de la Liga Next Level 7: cómo se ve, para qué sirve y cómo la usan tus capitanes, árbitros y aficionados.',
+    steps: ['Da clic en las flechas o los puntos de abajo para avanzar','Cada escena explica una sección real del sitio','Al final quedas listo para usarlo o enseñarlo a tu equipo'],
+    mock: `<div class="mock-dot-row"><span></span><span></span><span></span></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--gold);text-shadow:0 0 20px rgba(255,215,0,.4);animation:floatY 2.6s ease-in-out infinite">NEXT LEVEL 7</div>
+      <div class="chip"><span class="d"></span>Portal en vivo</div>`
+  },
+  {
+    eyebrow: 'Página de Inicio',
+    title: 'Todo empieza<br>en un carrusel',
+    body: 'La portada de tu sitio (index.html) es un carrusel con tarjetas: cada una lleva a una sección distinta. Se desliza sola, o la gente la mueve con las flechas o el dedo.',
+    steps: ['🏆 Tabla General, ⚽ Goleadores, 📊 Resultados, 📅 Próxima Jornada','👕 Equipos, 🥇 Liguilla, 📝 Cédula','🔴 Transmisión en vivo y 💬 Chat, siempre visibles si hay actividad'],
+    mock: `<div class="mock-dot-row"><span></span><span></span><span></span></div>
+      <div class="carousel-row">
+        <div class="mini-card"><span class="ic">🏆</span><span class="lb">TABLA</span></div>
+        <div class="mini-card"><span class="ic">⚽</span><span class="lb">GOLEADORES</span></div>
+        <div class="mini-card"><span class="ic">📅</span><span class="lb">JORNADA</span></div>
+        <div class="mini-card"><span class="ic">💬</span><span class="lb">CHAT</span></div>
+      </div>`
+  },
+  {
+    eyebrow: 'Equipos y Jugadores',
+    title: 'Plantillas y<br>goleadores',
+    body: 'Cada equipo tiene su ficha con escudo y jugadores. La sección de jugadores muestra el Top 5 de goleadores y porteros, y puedes filtrar por equipo para ver su plantilla completa.',
+    steps: ['Elige un equipo en el selector para ver solo sus jugadores','El Top de goleadores/porteros se actualiza solo con cada jornada','Cada jugador muestra goles, asistencias y tarjetas'],
+    mock: `<div class="mock-dot-row"><span></span><span></span><span></span></div>
+      <div style="display:flex;gap:14px;align-items:flex-end">
+        <div class="crest" style="animation:floatY 2.2s ease-in-out infinite">🛡️</div>
+        <div class="crest" style="width:44px;height:44px;font-size:19px;border-color:var(--neon);animation:floatY 2.2s ease-in-out infinite .3s">🥇</div>
+        <div class="crest" style="animation:floatY 2.2s ease-in-out infinite .6s">🛡️</div>
+      </div>
+      <div class="chip">Top Goleadores · Jornada actual</div>`
+  },
+  {
+    eyebrow: 'Partidos',
+    title: 'Filtra, revisa<br>y descarga',
+    body: 'La sección de Partidos deja filtrar por jornada, fecha o equipo. Al tocar un partido jugado ves el detalle: goles, tarjetas y asistencia de cada jugador. Todo se puede bajar como imagen.',
+    steps: ['Filtra por Jornada, Fecha o Equipo y dale "Cargar Datos"','Toca cualquier tarjeta para ver el detalle del partido','Botón "Descargar como PNG" genera la imagen lista para compartir'],
+    mock: `<div class="mock-dot-row"><span></span><span></span><span></span></div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="crest">🦅</div>
+        <div class="score-big">3-1</div>
+        <div class="crest">🐆</div>
+      </div>
+      <div class="chip">Jornada 5 · Programado → Jugado</div>`
+  },
+  {
+    eyebrow: 'Tabla y Liguilla',
+    title: 'Posiciones y<br>fase final',
+    body: 'La Tabla General se actualiza sola con cada resultado guardado. Cuando arranca la fase de eliminación, la Liguilla muestra el cuadro de enfrentamientos hasta la final.',
+    steps: ['Puntos, goles y ranking se calculan automáticamente','El podio destaca top 3 con medallas de oro, plata y bronce','La Liguilla se activa cuando defines los cruces de eliminación'],
+    mock: `<div class="mock-dot-row"><span></span><span></span><span></span></div>
+      <div style="display:flex;gap:10px;align-items:flex-end">
+        <div style="text-align:center"><div style="font-size:22px">🥈</div><div class="crest" style="width:36px;height:36px">🛡️</div></div>
+        <div style="text-align:center"><div style="font-size:26px">🥇</div><div class="crest" style="width:44px;height:44px;border-color:var(--gold)">🛡️</div></div>
+        <div style="text-align:center"><div style="font-size:20px">🥉</div><div class="crest" style="width:32px;height:32px">🛡️</div></div>
+      </div>`
+  },
+  {
+    eyebrow: 'Chat de Coordinación',
+    title: 'Capitanes<br>se organizan solos',
+    body: 'Cada capitán entra eligiendo su equipo (sin contraseña) y al instante ve un aviso con los partidos que le faltan. El admin arma el "Rol del Domingo" con horarios y campo, y genera un cartel para publicar.',
+    steps: ['El capitán elige su equipo y entra directo','Popup automático: "estos son tus partidos pendientes"','El admin arma el rol y descarga el cartel en PNG para redes'],
+    mock: `<div class="mock-dot-row"><span></span><span></span><span></span></div>
+      <div style="display:flex;flex-direction:column;gap:7px;width:100%;align-items:flex-start">
+        <div class="bubble">¿A qué hora jugamos? ⚽</div>
+        <div class="bubble me">Domingo 9am · Campo 1 🟢</div>
+      </div>`
+  },
+  {
+    eyebrow: 'Transmisión en Vivo',
+    title: 'El marcador,<br>al segundo',
+    body: 'El público ve el marcador, cronómetro y eventos (goles, tarjetas) en tiempo real, con animación y sonido en cada gol. Si hay 2 partidos a la vez, elige cuál transmisión ver: Cancha 1 o Cancha 2.',
+    steps: ['Entra desde "Ver transmisión en vivo" en la portada','Si hay 2 canchas activas, elige cuál seguir','Animación y sonido especial en cada gol o tarjeta'],
+    mock: `<div class="goal-flash"></div>
+      <div class="mock-dot-row"><span></span><span></span><span></span></div>
+      <div class="score-big" style="animation:popIn .6s ease both">2 - 1</div>
+      <div style="display:flex;gap:8px"><span class="badge-cancha c1">CANCHA 1</span><span class="badge-cancha c2">CANCHA 2</span></div>`
+  },
+  {
+    eyebrow: 'Panel Admin · Transmisión',
+    title: 'Tú controlas<br>el partido',
+    body: 'Con la contraseña de admin entras al panel: eliges la cancha, seleccionas el partido programado y vas registrando goles, tarjetas y asistencia. Todo se guarda directo en tu hoja de resultados.',
+    steps: ['Entra con la contraseña y elige Cancha 1 o Cancha 2','Toca el partido programado para empezar a transmitir','Botones de gol/amarilla/roja quedan guardados al instante'],
+    mock: `<div class="mock-dot-row"><span></span><span></span><span></span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+        <span class="chip">⚽ +1 Gol</span><span class="chip">🟨 Amarilla</span><span class="chip">🟥 Roja</span>
+      </div>
+      <span class="badge-cancha c1">CANCHA 1 · EN VIVO</span>`
+  },
+  {
+    eyebrow: 'Cédula Arbitral',
+    title: 'Firma digital<br>al terminar',
+    body: 'El árbitro entra con su usuario, llena la cédula del partido (goles, tarjetas por jugador) y recoge la firma del árbitro y ambos capitanes directo en la pantalla. Al final, descarga el PDF oficial.',
+    steps: ['El árbitro inicia sesión con su usuario y contraseña','Marca los eventos de cada jugador durante el partido','Firma en pantalla y descarga el PDF listo para archivo'],
+    mock: `<div class="mock-dot-row"><span></span><span></span><span></span></div>
+      <svg width="140" height="50" viewBox="0 0 140 50"><path class="sig-line" d="M5,35 Q20,10 35,35 T65,30 Q80,15 95,35 T130,20"/></svg>
+      <div class="field-mini">Nombre del árbitro</div>`
+  }
+];
+
+let idx = 0;
+let playing = false;
+let playInterval = null;
+const DURACION = 6000;
+
+const stage = document.getElementById('stage');
+const dotsWrap = document.getElementById('dots');
+const scrubWrap = document.getElementById('scrubber');
+const topcount = document.getElementById('topcount');
+
+escenas.forEach((e, i) => {
+  const div = document.createElement('div');
+  div.className = 'scene';
+  div.id = 'scene-' + i;
+  div.innerHTML = `
+    <div class="scene-inner">
+      <div class="mock">${e.mock}</div>
+      <div>
+        <div class="txt-eyebrow">${e.eyebrow}</div>
+        <div class="txt-title">${e.title}</div>
+        <div class="txt-body">${e.body}</div>
+        <div class="steps">
+          ${e.steps.map((s,si)=>`<div class="step"><span class="step-dot">${si+1}</span><span>${s}</span></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  stage.appendChild(div);
+
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  dot.onclick = () => goTo(i);
+  dotsWrap.appendChild(dot);
+
+  const seg = document.createElement('div');
+  seg.className = 'scrub-seg';
+  seg.onclick = () => goTo(i);
+  seg.innerHTML = '<div class="scrub-fill"></div>';
+  scrubWrap.appendChild(seg);
+});
+
+function render(){
+  document.querySelectorAll('.scene').forEach((s,i)=>{
+    s.classList.remove('active','prev');
+    if(i===idx) s.classList.add('active');
+    else if(i<idx) s.classList.add('prev');
+  });
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on', i===idx));
+  document.querySelectorAll('.scrub-seg').forEach((seg,i)=>{
+    seg.classList.toggle('done', i<idx);
+    seg.classList.toggle('active', i===idx);
+    const fill = seg.querySelector('.scrub-fill');
+    if(i<idx){ fill.style.transition='none'; fill.style.width='100%'; }
+    else if(i>idx){ fill.style.transition='none'; fill.style.width='0%'; }
+  });
+  topcount.textContent = (idx+1) + ' / ' + escenas.length;
+}
+
+function goTo(i){
+  idx = Math.max(0, Math.min(escenas.length-1, i));
+  render();
+  if(playing) restartAutoFill();
+}
+function nextScene(){ if(idx < escenas.length-1) goTo(idx+1); else { stopPlay(); goTo(0);} }
+function prevScene(){ goTo(idx-1<0?0:idx-1); }
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight') nextScene();
+  if(e.key==='ArrowLeft') prevScene();
+});
+let touchX=0;
+document.addEventListener('touchstart', e=>{touchX=e.touches[0].clientX;});
+document.addEventListener('touchend', e=>{
+  const d = touchX - e.changedTouches[0].clientX;
+  if(Math.abs(d)>50){ d>0 ? nextScene() : prevScene(); }
+});
+
+function restartAutoFill(){
+  const seg = document.querySelectorAll('.scrub-seg')[idx];
+  const fill = seg.querySelector('.scrub-fill');
+  fill.style.transition='none'; fill.style.width='0%';
+  requestAnimationFrame(()=>{
+    fill.style.transition = `width ${DURACION}ms linear`;
+    fill.style.width='100%';
+  });
+}
+function togglePlay(){ playing ? stopPlay() : startPlay(); }
+function startPlay(){
+  playing = true;
+  document.getElementById('playBtn').textContent = '⏸ Pausar';
+  restartAutoFill();
+  playInterval = setInterval(()=>{ nextScene(); restartAutoFill(); }, DURACION);
+}
+function stopPlay(){
+  playing = false;
+  document.getElementById('playBtn').textContent = '▶ Auto';
+  clearInterval(playInterval);
+  document.querySelectorAll('.scrub-fill').forEach(f=>f.style.transition='none');
+}
+
+render();
+</script>
+</body>
+</html>

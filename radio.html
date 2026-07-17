@@ -11,24 +11,48 @@
     background: url('fondoradio.png') center/cover no-repeat fixed;
     font-family: 'Segoe UI', Arial, sans-serif;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     color: #fff;
     text-align: center;
   }
 
-  .logo {
-    max-width: 520px;
-    width: 90%;
+  a.volver {
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    color: #111;
+    background: linear-gradient(145deg, #b6ff2e, #f2c200);
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.75rem;
+    padding: 6px 14px;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(126, 211, 33, 0.5);
+    z-index: 10;
+  }
+  a.volver:hover { transform: scale(1.05); }
+
+  /* ===== BLOQUE ÚNICO: logo + reproductor + badge ===== */
+  /* Este contenedor es UNA sola pieza. Para agrandar o achicar TODO junto,
+     cambia solo el valor de --scale (abajo, en el style inline del div). */
+  .radio-widget {
+    width: 480px;          /* tamaño base fijo, no lo toques */
+    transform: scale(var(--scale, 1));
+    transform-origin: center center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .radio-widget .logo {
+    width: 100%;
     filter: drop-shadow(0 0 15px rgba(0,0,0,0.7));
     position: relative;
     z-index: 2;
   }
 
-  h1 { display: none; }
-
-  .player-card {
+  .radio-widget .player-card {
     background: rgba(10, 10, 10, 0.9);
     border: 3px solid #b6ff2e;
     border-radius: 50px;
@@ -37,8 +61,7 @@
     align-items: center;
     gap: 16px;
     box-shadow: 0 0 25px rgba(126, 211, 33, 0.5);
-    max-width: 90%;
-    width: 560px;
+    width: 90%;
     margin-top: -40px;
     position: relative;
     z-index: 1;
@@ -56,9 +79,7 @@
     justify-content: center;
     cursor: pointer;
     box-shadow: 0 0 12px rgba(126, 211, 33, 0.7);
-    transition: transform 0.15s ease;
   }
-  .play-btn:hover { transform: scale(1.08); }
   .play-btn svg { width: 22px; height: 22px; fill: #111; }
 
   .time {
@@ -75,7 +96,6 @@
     background: rgba(255,255,255,0.15);
     border-radius: 10px;
     overflow: hidden;
-    position: relative;
   }
   .progress-bar {
     height: 100%;
@@ -104,56 +124,43 @@
     box-shadow: 0 0 15px rgba(176,0,32,0.6);
     animation: pulse 1.5s infinite;
   }
-
-  body { justify-content: flex-start; }
-
   @keyframes pulse {
     0% { box-shadow: 0 0 0 0 rgba(176,0,32,0.6); }
     70% { box-shadow: 0 0 0 12px rgba(176,0,32,0); }
     100% { box-shadow: 0 0 0 0 rgba(176,0,32,0); }
   }
-
-  a.volver {
-    margin-top: 50px;
-    margin-bottom: 40px;
-    color: #111;
-    background: linear-gradient(145deg, #b6ff2e, #f2c200);
-    text-decoration: none;
-    font-weight: bold;
-    padding: 10px 22px;
-    border-radius: 30px;
-    box-shadow: 0 0 12px rgba(126, 211, 33, 0.5);
-    transition: transform 0.15s ease;
-  }
-  a.volver:hover { transform: scale(1.05); }
 </style>
 </head>
 <body>
 
-  <img src="radio.png" alt="Next Level 7 Radio" class="logo">
-  <h1>📻 Radio en Vivo</h1>
+  <a href="index.html" class="volver">← Volver al inicio</a>
 
-  <div class="player-card">
-    <button class="play-btn" id="playBtn" onclick="togglePlay()">
-      <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-      <svg id="pauseIcon" viewBox="0 0 24 24" style="display:none;"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
-    </button>
-    <span class="time" id="timeDisplay">0:00</span>
-    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
-    <button class="vol-btn" id="volBtn" onclick="toggleMute()">
-      <svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2c0-1.77-.94-3.29-2.5-4.03v8.05c1.56-.74 2.5-2.26 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-    </button>
+  <!-- ===== BLOQUE ÚNICO — cambia --scale:1 por 0.6, 1.5, 2, etc. para achicar/agrandar TODO junto ===== -->
+  <div class="radio-widget" style="--scale:1;">
+    <img src="radio.png" alt="Next Level 7 Radio" class="logo">
+
+    <div class="player-card">
+      <button class="play-btn" id="playBtn" onclick="togglePlay()">
+        <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="pauseIcon" viewBox="0 0 24 24" style="display:none;"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+      </button>
+      <span class="time" id="timeDisplay">0:00</span>
+      <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+      <button class="vol-btn" id="volBtn" onclick="toggleMute()">
+        <svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2c0-1.77-.94-3.29-2.5-4.03v8.05c1.56-.74 2.5-2.26 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+      </button>
+    </div>
+
+    <div class="live-badge">● EN VIVO</div>
   </div>
+  <!-- ===== FIN BLOQUE ÚNICO ===== -->
 
   <audio id="radioAudio" preload="none">
     <source src="https://stream.zeno.fm/nayznbjmygytv" type="audio/mpeg">
   </audio>
 
-  <div class="live-badge">● EN VIVO</div>
-
   <script>
     const audio = document.getElementById('radioAudio');
-    const playBtn = document.getElementById('playBtn');
     const playIcon = document.getElementById('playIcon');
     const pauseIcon = document.getElementById('pauseIcon');
     const timeDisplay = document.getElementById('timeDisplay');
@@ -182,7 +189,6 @@
       timeDisplay.textContent = `${mins}:${secs}`;
     });
 
-    // Autoplay intento (algunos navegadores lo bloquean hasta interacción)
     window.addEventListener('load', () => {
       audio.play().then(() => {
         isPlaying = true;
@@ -191,8 +197,6 @@
       }).catch(() => { /* el usuario deberá dar play manualmente */ });
     });
   </script>
-
-  <a href="index.html" class="volver">← Volver al inicio</a>
 
 </body>
 </html>

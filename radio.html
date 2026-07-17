@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Level 7 - Radio en Vivo</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: url('fondoradio.png') center/cover no-repeat fixed;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+    text-align: center;
+    padding-bottom: 60px;
+  }
+
+  .logo {
+    max-width: 320px;
+    margin-top: 40px;
+    filter: drop-shadow(0 0 15px rgba(0,0,0,0.7));
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    text-shadow: 2px 2px 6px #000;
+    margin: 10px 0 30px;
+  }
+
+  .player-card {
+    background: rgba(20, 20, 20, 0.75);
+    backdrop-filter: blur(4px);
+    border: 2px solid #7ed321;
+    border-radius: 50px;
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 0 25px rgba(126, 211, 33, 0.4);
+    max-width: 90%;
+    width: 420px;
+  }
+
+  audio {
+    width: 100%;
+    height: 40px;
+  }
+
+  .live-badge {
+    background: #b00020;
+    color: #fff;
+    font-weight: bold;
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-top: 18px;
+    letter-spacing: 1px;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(176,0,32,0.6); }
+    70% { box-shadow: 0 0 0 12px rgba(176,0,32,0); }
+    100% { box-shadow: 0 0 0 0 rgba(176,0,32,0); }
+  }
+
+  a.volver {
+    margin-top: 30px;
+    color: #7ed321;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  a.volver:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+  <img src="radio.png" alt="Next Level 7 Radio" class="logo">
+  <h1>📻 Radio en Vivo</h1>
+
+  <div class="player-card">
+    <audio controls autoplay>
+      <source src="https://stream.zeno.fm/nayznbjmygytv" type="audio/mpeg">
+      Tu navegador no soporta audio.
+    </audio>
+  </div>
+
+  <div class="live-badge">● EN VIVO</div>
+
+  <a href="index.html" class="volver">← Volver al inicio</a>
+
+</body>
+</html>

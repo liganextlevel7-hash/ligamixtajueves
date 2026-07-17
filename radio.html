@@ -70,17 +70,17 @@
   .play-btn {
     background: linear-gradient(145deg, #b6ff2e, #f2c200);
     border: none;
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 0 10px rgba(126, 211, 33, 0.7);
+    box-shadow: 0 0 8px rgba(126, 211, 33, 0.7);
   }
-  .play-btn svg { width: 15px; height: 15px; fill: #111; }
+  .play-btn svg { width: 12px; height: 12px; fill: #111; }
 
   .time {
     color: #f2c200;
@@ -164,37 +164,33 @@
     const playIcon = document.getElementById('playIcon');
     const pauseIcon = document.getElementById('pauseIcon');
     const timeDisplay = document.getElementById('timeDisplay');
-    let isPlaying = false;
 
     function togglePlay() {
-      if (!isPlaying) {
-        audio.play();
-        playIcon.style.display = 'none';
-        pauseIcon.style.display = 'block';
+      if (audio.paused) {
+        audio.play().catch(err => console.log('No se pudo reproducir:', err));
       } else {
         audio.pause();
-        playIcon.style.display = 'block';
-        pauseIcon.style.display = 'none';
       }
-      isPlaying = !isPlaying;
     }
 
     function toggleMute() {
       audio.muted = !audio.muted;
     }
 
+    audio.addEventListener('playing', () => {
+      playIcon.style.display = 'none';
+      pauseIcon.style.display = 'block';
+    });
+
+    audio.addEventListener('pause', () => {
+      playIcon.style.display = 'block';
+      pauseIcon.style.display = 'none';
+    });
+
     audio.addEventListener('timeupdate', () => {
       const mins = Math.floor(audio.currentTime / 60);
       const secs = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
       timeDisplay.textContent = `${mins}:${secs}`;
-    });
-
-    window.addEventListener('load', () => {
-      audio.play().then(() => {
-        isPlaying = true;
-        playIcon.style.display = 'none';
-        pauseIcon.style.display = 'block';
-      }).catch(() => { /* el usuario deberá dar play manualmente */ });
     });
   </script>
 

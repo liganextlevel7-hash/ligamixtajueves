@@ -330,9 +330,9 @@ body{font-family:var(--font);background:linear-gradient(135deg,#064e26 0%,#0a162
   <div class="radio-mini-header" onclick="toggleRadioWidget()">
     <span>📻 Radio NL7</span>
     <span class="radio-live-dot">●</span>
-    <span class="radio-toggle-arrow" id="radio-arrow">▾</span>
+    <span class="radio-toggle-arrow" id="radio-arrow">▸</span>
   </div>
-  <div class="radio-mini-body" id="radio-mini-body">
+  <div class="radio-mini-body collapsed" id="radio-mini-body">
     <div class="radio-iframe-wrap">
       <iframe
         src="https://listen.zeno.fm/player/next-level-7"
@@ -902,7 +902,9 @@ async function enterApp(){
   document.getElementById('hdr-teamname').textContent=S.isMod?'Panel de administración':(S.userType==='guest'?'Aficionado · Chat General':'Capitán · '+tname(S.teamId));
 
   // Pestañas visibles según tipo de usuario
-  document.querySelector('[data-tab="chat"]').style.display=(S.userType==='guest')?'none':'';
+  // Chat Equipos arranca oculto (a menos que yo sea el mod); el primer pollOnline() lo muestra
+  // solo si confirma que el moderador ya está conectado — evita que se vea un parpadeo.
+  document.querySelector('[data-tab="chat"]').style.display=S.isMod?'':'none';
   document.querySelector('[data-tab="partidos"]').style.display=(S.userType==='guest')?'none':'';
 
   if(S.isMod){
@@ -913,7 +915,7 @@ async function enterApp(){
 
   renderPartidos();
   startListeners();
-  switchTab(S.userType==='guest' ? 'general' : 'chat');
+  switchTab(S.isMod ? 'chat' : 'general');
 
   // Popup automático de partidos pendientes (solo para capitanes)
   if(S.userType==='captain'){
@@ -2047,7 +2049,7 @@ function escAttr(s){ return esc(s).replace(/"/g,'&quot;'); }
 // ════════════════════════════════
 //  RADIO MINI (widget flotante, nunca se detiene aunque se minimice)
 // ════════════════════════════════
-let radioCollapsed=false;
+let radioCollapsed=true;
 function toggleRadioWidget(){
   radioCollapsed=!radioCollapsed;
   document.getElementById('radio-mini-body').classList.toggle('collapsed',radioCollapsed);

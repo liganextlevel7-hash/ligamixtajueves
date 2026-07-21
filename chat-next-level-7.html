@@ -239,6 +239,18 @@ body{font-family:var(--font);background:linear-gradient(135deg,#064e26 0%,#0a162
 .mod-team-btn.selected span{color:var(--mod-border)}
 .mod-preview{background:var(--dark2);border:1px solid rgba(124,58,237,.3);border-radius:var(--r);padding:14px;margin-bottom:14px;min-height:80px}
 .mod-preview-empty{font-size:13px;color:var(--g500);text-align:center;padding:20px 0}
+
+/* 🔑 accesos de equipos (panel mod) */
+.access-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px;background:var(--dark2);border:1px solid var(--dark3);border-radius:var(--rs);margin-bottom:8px}
+.access-row img{width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.access-row-name{font-size:13px;font-weight:700;flex:1;min-width:90px}
+.access-status{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;white-space:nowrap}
+.access-status.custom{background:rgba(56,189,248,.15);color:#38bdf8}
+.access-status.default{background:rgba(255,255,255,.08);color:var(--g500)}
+.access-pass-input{flex:1;min-width:110px;padding:6px 10px;border-radius:8px;border:1px solid var(--dark3);background:var(--dark);color:var(--w);font-size:12px}
+.access-btn-set{padding:6px 12px;border-radius:8px;border:none;background:var(--neon);color:#03170a;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap}
+.access-btn-reset{padding:6px 10px;border-radius:8px;border:1px solid #f87171;background:transparent;color:#f87171;font-weight:700;font-size:11px;cursor:pointer;white-space:nowrap}
+.access-btn-reset:disabled{opacity:.3;cursor:not-allowed;border-color:var(--dark3);color:var(--g500)}
 .mod-match-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--dark3);border-radius:var(--rs);border:1px solid rgba(255,255,255,.05);margin-bottom:6px;transition:all .15s}
 .mod-match-row.clickable{cursor:pointer}
 .mod-match-row.clickable:hover{border-color:var(--neon);background:rgba(57,255,20,.06)}
@@ -611,6 +623,13 @@ body{font-family:var(--font);background:linear-gradient(135deg,#064e26 0%,#0a162
           <input type="text" class="msg-input" id="mod-msg-input" placeholder="Escribe un anuncio o aviso..." onkeydown="if(event.key==='Enter')sendModMsg()">
           <button class="btn-send" style="background:var(--mod)" onclick="sendModMsg()">Publicar</button>
         </div>
+      </div>
+
+      <!-- ACCESOS DE EQUIPOS -->
+      <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:16px">
+        <div class="mod-section-title" style="color:#38bdf8">🔑 Accesos de Equipos</div>
+        <div style="font-size:11px;color:var(--g500);margin-bottom:12px">Ponles una contraseña nueva (ej. si cambió el capitán) o resetéalos a la de tu hoja.</div>
+        <div id="mod-access-list"></div>
       </div>
 
       <!-- ZONA PELIGROSA -->
@@ -1987,6 +2006,50 @@ function renderModPanel(){
     };
     grid.appendChild(btn);
   });
+  renderModAccessList();
+}
+
+// ════════════════════════════════
+//  🔑 ACCESOS DE EQUIPOS: el mod puede asignar contraseña nueva o resetear a la de la hoja
+// ════════════════════════════════
+function renderModAccessList(){
+  const container=document.getElementById('mod-access-list');
+  if(!container) return;
+  const teams=Object.values(S.teams).sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  container.innerHTML=teams.map(t=>{
+    const override=S.teamLoginOverrides[t.id];
+    const hasOverride=!!(override&&override.contrasena);
+    return `<div class="access-row">
+      <img src="${t.logo}" onerror="this.style.opacity='.3'">
+      <div class="access-row-name">${esc(t.nombre)}</div>
+      <span class="access-status ${hasOverride?'custom':'default'}">${hasOverride?'Personalizada':'De la hoja'}</span>
+      <input type="text" class="access-pass-input" id="access-pass-${t.id}" placeholder="Nueva contraseña...">
+      <button class="access-btn-set" onclick="modSetTeamPassword('${t.id}')">Asignar</button>
+      <button class="access-btn-reset" onclick="modResetTeamPassword('${t.id}')" ${hasOverride?'':'disabled'}>↩️ Resetear</button>
+    </div>`;
+  }).join('');
+}
+
+async function modSetTeamPassword(teamId){
+  const input=document.getElementById('access-pass-'+teamId);
+  const pass=input.value.trim();
+  if(!pass || pass.length<4){
+    alert('Escribe una contraseña de al menos 4 caracteres.');
+    return;
+  }
+  const current=S.teamLoginOverrides[teamId]||{};
+  const updated={ usuario: current.usuario||'', contrasena: pass, updatedAt: Date.now() };
+  const ok=await fbSet('team_logins/'+teamId, updated);
+  if(!ok){ alert('No se pudo guardar — revisa tu conexión e inténtalo de nuevo.'); return; }
+  S.teamLoginOverrides[teamId]=updated;
+  renderModAccessList();
+}
+
+async function modResetTeamPassword(teamId){
+  if(!confirm('¿Volver a la contraseña original de tu hoja para este equipo?')) return;
+  await fbDelete('team_logins/'+teamId);
+  delete S.teamLoginOverrides[teamId];
+  renderModAccessList();
 }
 
 // Lista de partidos pendientes del equipo elegido — sin separar vueltas.

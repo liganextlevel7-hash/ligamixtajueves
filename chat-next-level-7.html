@@ -380,6 +380,9 @@ body{font-family:var(--font);background:linear-gradient(135deg,#064e26 0%,#0a162
   </div>
 </div>
 
+<!-- Cortina/jingle "Next Level 7 Radio": suena encima de la radio cada 10 min, solo en esta página -->
+<audio id="jingle-nl7" src="jingle-nl7.mp3" preload="auto"></audio>
+
 <!-- CARGA -->
 <div id="loading-screen">
   <div class="load-ball">⚽</div>
@@ -2348,6 +2351,27 @@ function toggleRadioWidget(){
   document.getElementById('radio-mini-body').classList.toggle('collapsed',radioCollapsed);
   document.getElementById('radio-arrow').textContent=radioCollapsed?'▸':'▾';
 }
+
+// ════════════════════════════════
+//  🎙️ CORTINA / JINGLE "Next Level 7 Radio" — suena encima de la radio cada 10 min
+// ════════════════════════════════
+const JINGLE_CADA_MS = 10 * 60 * 1000; // cada 10 minutos — cambia el 10 si algún día quieres otro intervalo
+const jingleAudio = document.getElementById('jingle-nl7');
+let jingleDesbloqueado = false;
+
+function desbloquearJingle(){
+  if(jingleDesbloqueado || !jingleAudio) return;
+  jingleDesbloqueado = true;
+  jingleAudio.play().then(()=>{ jingleAudio.pause(); jingleAudio.currentTime = 0; }).catch(()=>{});
+}
+document.addEventListener('click', desbloquearJingle, {once:true});
+document.addEventListener('touchstart', desbloquearJingle, {once:true});
+
+setInterval(()=>{
+  if(!jingleDesbloqueado || !jingleAudio) return;
+  jingleAudio.currentTime = 0;
+  jingleAudio.play().catch(e=>console.log('El jingle no pudo sonar automáticamente:', e));
+}, JINGLE_CADA_MS);
 
 // Limpiar online al cerrar
 window.addEventListener('beforeunload',()=>{ if(S.onlineKey) fbDelete('online/'+S.onlineKey); });

@@ -22,23 +22,23 @@ padding:30px 20px;
 .logo-liga{
 width:250px;
 max-width:80%;
-filter:drop-shadow(0 0 20px #39ff14);
+filter:drop-shadow(0 0 20px #00b4ff);
 }
 
 h1{
 font-size:55px;
 margin:10px 0;
-color:#7fff00;
+color:#4dd2ff;
 text-shadow:
-0 0 10px #7fff00,
-0 0 20px #7fff00,
-0 0 30px #7fff00,
-0 0 40px #7fff00;
+0 0 10px #4dd2ff,
+0 0 20px #4dd2ff,
+0 0 30px #4dd2ff,
+0 0 40px #4dd2ff;
 }
 
 .subtitulo{
 font-size:22px;
-color:#ffd700;
+color:#ff6b1a;
 font-weight:bold;
 margin-bottom:20px;
 }
@@ -52,7 +52,7 @@ display:inline-block;
 margin:6px;
 padding:12px 22px;
 background:rgba(0,0,0,.75);
-border:1px solid #39ff14;
+border:1px solid #00b4ff;
 border-radius:12px;
 color:white;
 text-decoration:none;
@@ -62,11 +62,11 @@ transition:.3s;
 
 nav a:hover{
 transform:translateY(-3px);
-background:#39ff14;
+background:#00b4ff;
 color:black;
 box-shadow:
-0 0 10px #39ff14,
-0 0 20px #39ff14;
+0 0 10px #00b4ff,
+0 0 20px #00b4ff;
 }
 
 .contenedor{
@@ -80,14 +80,14 @@ gap:20px;
 
 .card{
 background:rgba(0,0,0,.75);
-border:1px solid #39ff14;
+border:1px solid #00b4ff;
 border-radius:18px;
 padding:20px;
 backdrop-filter:blur(5px);
 
 box-shadow:
-0 0 10px #39ff14,
-0 0 20px rgba(57,255,20,.4);
+0 0 10px #00b4ff,
+0 0 20px rgba(0,180,255,.4);
 
 transition:.3s;
 }
@@ -95,13 +95,13 @@ transition:.3s;
 .card:hover{
 transform:translateY(-4px);
 box-shadow:
-0 0 15px #39ff14,
-0 0 30px rgba(57,255,20,.6);
+0 0 15px #00b4ff,
+0 0 30px rgba(0,180,255,.6);
 }
 
 .card h2{
 text-align:center;
-color:#8cff00;
+color:#66ddff;
 font-size:20px;
 margin-bottom:20px;
 }
@@ -110,7 +110,7 @@ margin-bottom:20px;
 text-align:center;
 font-size:18px;
 font-weight:bold;
-color:#ffd700;
+color:#ff6b1a;
 margin-bottom:15px;
 }
 
@@ -152,7 +152,7 @@ width:30%;
 text-align:center;
 font-size:20px;
 font-weight:bold;
-color:#ffd700;
+color:#ff6b1a;
 }
 
 .campo{
@@ -169,7 +169,7 @@ margin-top:10px;
 }
 
 .tabla th{
-background:#39ff14;
+background:#00b4ff;
 color:black;
 padding:12px;
 font-size:15px;
@@ -266,7 +266,7 @@ transition:.3s;
 .equipo-card:hover{
 transform:scale(1.05);
 background:rgba(255,255,255,.1);
-box-shadow:0 0 15px #39ff14;
+box-shadow:0 0 15px #00b4ff;
 }
 
 .equipo-logo{
@@ -296,13 +296,13 @@ z-index:9999;
 
 .popup-contenido{
 background:#111;
-border:2px solid #39ff14;
+border:2px solid #00b4ff;
 border-radius:20px;
 padding:30px;
 width:90%;
 max-width:450px;
 text-align:center;
-box-shadow:0 0 25px #39ff14;
+box-shadow:0 0 25px #00b4ff;
 position:relative;
 }
 
@@ -316,11 +316,11 @@ color:white;
 }
 
 #cerrar-popup:hover{
-color:#39ff14;
+color:#00b4ff;
 }
 
 #info-equipo h2{
-color:#39ff14;
+color:#00b4ff;
 margin-bottom:15px;
 }
 
@@ -373,7 +373,7 @@ padding:20px;
 width:100%;
 padding:15px;
 border-radius:12px;
-border:1px solid #39ff14;
+border:1px solid #00b4ff;
 background:#111;
 color:white;
 font-size:16px;
@@ -389,12 +389,12 @@ margin-top:20px;
 
 .jugador-card{
 background:rgba(0,0,0,.75);
-border:1px solid #39ff14;
+border:1px solid #00b4ff;
 border-radius:20px;
 padding:20px;
 text-align:center;
 box-shadow:
-0 0 10px #39ff14;
+0 0 10px #00b4ff;
 }
 
 .jugador-foto{
@@ -403,12 +403,12 @@ height:140px;
 border-radius:50%;
 object-fit:cover;
 margin-bottom:15px;
-border:3px solid #39ff14;
+border:3px solid #00b4ff;
 }
 
 .jugador-card h3{
 margin-bottom:15px;
-color:#39ff14;
+color:#00b4ff;
 }
 
 .jugador-card p{
@@ -423,14 +423,14 @@ grid-template-columns:1fr;
 
 }
 .lider{
-background:rgba(255,215,0,.15);
-border-left:5px solid gold;
+background:rgba(255,107,26,.15);
+border-left:5px solid #ff6b1a;
 font-weight:bold;
 }
 
 .clasificado{
-background:rgba(57,255,20,.10);
-border-left:5px solid #39ff14;
+background:rgba(0,180,255,.10);
+border-left:5px solid #00b4ff;
 }
 
 .tabla{
@@ -441,8 +441,8 @@ border-radius:15px;
 .tabla th{
 background:linear-gradient(
 90deg,
-#39ff14,
-#7fff00
+#00b4ff,
+#4dd2ff
 );
 color:black;
 font-weight:bold;
@@ -454,7 +454,7 @@ background:rgba(255,255,255,.08);
 
 .tabla td:first-child{
 font-weight:bold;
-color:#ffd700;
+color:#ff6b1a;
 }
 /* JUGADORES */
 
@@ -465,7 +465,7 @@ margin:auto;
 display:block;
 padding:15px;
 border-radius:15px;
-border:2px solid #39ff14;
+border:2px solid #00b4ff;
 background:#111;
 color:white;
 font-size:18px;
@@ -482,7 +482,7 @@ margin-top:20px;
 
 .jugador-card{
 background:rgba(0,0,0,.75);
-border:2px solid #39ff14;
+border:2px solid #00b4ff;
 border-radius:20px;
 padding:15px;
 text-align:center;
@@ -493,7 +493,7 @@ width:180px;
 height:180px;
 object-fit:cover;
 border-radius:15px;
-border:3px solid #39ff14;
+border:3px solid #00b4ff;
 }
 
 .jugador-card h3{
@@ -521,17 +521,17 @@ font-size:14px;
 }
 .jugador-card-pro{
 background:#050505;
-border:2px solid #39ff14;
+border:2px solid #00b4ff;
 border-radius:22px;
 padding:20px;
 margin-bottom:20px;
-box-shadow:0 0 20px rgba(57,255,20,.35);
+box-shadow:0 0 20px rgba(0,180,255,.35);
 transition:.3s;
 }
 
 .jugador-card-pro:hover{
 transform:translateY(-4px);
-box-shadow:0 0 30px rgba(57,255,20,.6);
+box-shadow:0 0 30px rgba(0,180,255,.6);
 }
 
 .jugador-header{
@@ -546,7 +546,7 @@ width:90px;
 height:90px;
 border-radius:50%;
 object-fit:cover;
-border:3px solid #39ff14;
+border:3px solid #00b4ff;
 }
 
 .jugador-info h3{
@@ -559,7 +559,7 @@ color:white;
 display:inline-block;
 margin-top:5px;
 padding:4px 10px;
-background:#39ff14;
+background:#00b4ff;
 color:black;
 border-radius:20px;
 font-size:12px;
@@ -588,7 +588,7 @@ margin-bottom:5px;
 .stat strong{
 display:block;
 font-size:22px;
-color:#39ff14;
+color:#00b4ff;
 }
 
 .stat small{
@@ -616,12 +616,12 @@ grid-template-columns:repeat(2,1fr);
 
 .jugador-card {
   background: #111;
-  border: 2px solid #39ff14;
+  border: 2px solid #00b4ff;
   border-radius: 15px;
   padding: 15px;
   text-align: center;
   color: white;
-  box-shadow: 0 0 15px #39ff14;
+  box-shadow: 0 0 15px #00b4ff;
 }
 
 .jugador-foto {
@@ -633,12 +633,12 @@ grid-template-columns:repeat(2,1fr);
 
 .jugador-info h3 {
   margin: 5px 0;
-  color: #39ff14;
+  color: #00b4ff;
 }
 
 .jugador-posicion {
   display: inline-block;
-  background: #39ff14;
+  background: #00b4ff;
   color: black;
   padding: 2px 8px;
   border-radius: 12px;
@@ -688,26 +688,26 @@ margin-top:15px;
 .filtros-partidos select{
 background:#111;
 color:white;
-border:2px solid #39ff14;
+border:2px solid #00b4ff;
 border-radius:15px;
 padding:12px 18px;
 font-size:15px;
 font-weight:bold;
 cursor:pointer;
 min-width:220px;
-box-shadow:0 0 10px rgba(57,255,20,.35);
+box-shadow:0 0 10px rgba(0,180,255,.35);
 transition:.3s;
 }
 
 .filtros-partidos select:hover{
-box-shadow:0 0 15px #39ff14;
+box-shadow:0 0 15px #00b4ff;
 }
 
 .filtros-partidos select:focus{
 outline:none;
 box-shadow:
-0 0 10px #39ff14,
-0 0 20px #39ff14;
+0 0 10px #00b4ff,
+0 0 20px #00b4ff;
 }
 
 /* =========================
@@ -716,21 +716,21 @@ box-shadow:
 
 .partido-tarjeta{
 background:rgba(0,0,0,.75);
-border:1px solid #39ff14;
+border:1px solid #00b4ff;
 border-radius:20px;
 padding:20px;
 margin-bottom:20px;
 
 box-shadow:
-0 0 10px rgba(57,255,20,.35);
+0 0 10px rgba(0,180,255,.35);
 
 transition:.3s;
 }
 
 .partido-tarjeta:hover{
 box-shadow:
-0 0 15px #39ff14,
-0 0 25px rgba(57,255,20,.35);
+0 0 15px #00b4ff,
+0 0 25px rgba(0,180,255,.35);
 }
 
 .partido-info{
@@ -768,13 +768,13 @@ text-align:center;
 .marcador-texto{
 font-size:28px;
 font-weight:bold;
-color:#ffd700;
+color:#ff6b1a;
 }
 
 .partido-detalles{
 margin-top:15px;
 padding-top:15px;
-border-top:1px solid rgba(57,255,20,.25);
+border-top:1px solid rgba(0,180,255,.25);
 
 display:flex;
 justify-content:center;
@@ -797,7 +797,7 @@ flex-wrap:wrap;
 }
 
 .tipo-encuentro{
-background:#39ff14;
+background:#00b4ff;
 color:black;
 padding:8px 15px;
 border-radius:30px;
@@ -806,7 +806,7 @@ font-size:13px;
 }
 
 .estado-partido{
-background:#ffd700;
+background:#ff6b1a;
 color:black;
 padding:8px 15px;
 border-radius:30px;
@@ -871,15 +871,15 @@ min-width:100%;
   padding: 20px;
   border-radius: 15px;
   background: rgba(0, 0, 0, 0.75);
-  border: 1px solid #39ff14;
-  box-shadow: 0 0 10px #39ff14;
+  border: 1px solid #00b4ff;
+  box-shadow: 0 0 10px #00b4ff;
 }
 
 .filtros-partidos select {
   margin: 5px;
   padding: 10px 15px;
   border-radius: 8px;
-  border: 1px solid #39ff14;
+  border: 1px solid #00b4ff;
   background: #111;
   color: white;
   font-weight: bold;
@@ -888,9 +888,9 @@ min-width:100%;
 }
 
 .filtros-partidos select:hover {
-  background: #39ff14;
+  background: #00b4ff;
   color: black;
-  border-color: #7fff00;
+  border-color: #4dd2ff;
 }
 
 .tabla-partidos {
@@ -899,7 +899,7 @@ min-width:100%;
   border-radius: 12px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.75);
-  box-shadow: 0 0 15px #39ff14;
+  box-shadow: 0 0 15px #00b4ff;
 }
 
 .tabla-partidos th, .tabla-partidos td {
@@ -910,7 +910,7 @@ min-width:100%;
 }
 
 .tabla-partidos th {
-  background: linear-gradient(90deg, #39ff14, #7fff00);
+  background: linear-gradient(90deg, #00b4ff, #4dd2ff);
   color: black;
   font-weight: bold;
 }
@@ -933,14 +933,14 @@ min-width:100%;
 
 .tabla-partidos .tipo-encuentro {
   font-weight: bold;
-  color: #ffd700;
+  color: #ff6b1a;
   margin-top: 4px;
   display: block;
 }
 
 .tabla-partidos .estado-partido {
   font-size: 12px;
-  color: #39ff14;
+  color: #00b4ff;
   display: block;
   margin-top: 2px;
 }
@@ -967,7 +967,7 @@ min-width:100%;
 #selector-ronda{
     background:#111;
     color:#fff;
-    border:2px solid #39ff14;
+    border:2px solid #00b4ff;
     border-radius:12px;
     padding:12px 18px;
     font-size:16px;
@@ -977,7 +977,7 @@ min-width:100%;
 }
 
 #selector-ronda:hover{
-    box-shadow:0 0 15px #39ff14;
+    box-shadow:0 0 15px #00b4ff;
 }
 
 #contenedor-bracket{
@@ -999,19 +999,19 @@ min-width:100%;
 
 .columna-bracket h3{
     text-align:center;
-    color:#39ff14;
+    color:#00b4ff;
     font-size:26px;
     margin-bottom:25px;
-    text-shadow:0 0 10px #39ff14;
+    text-shadow:0 0 10px #00b4ff;
 }
 
 .liguilla-match{
     background:#0a0a0a;
-    border:2px solid #39ff14;
+    border:2px solid #00b4ff;
     border-radius:15px;
     padding:12px;
     margin-bottom:20px;
-    box-shadow:0 0 15px rgba(57,255,20,.25);
+    box-shadow:0 0 15px rgba(0,180,255,.25);
 }
 
 .liguilla-equipo{
@@ -1040,14 +1040,14 @@ min-width:100%;
 }
 
 .liguilla-marcador{
-    color:#ffd700;
+    color:#ff6b1a;
     font-size:22px;
     font-weight:bold;
 }
 
 .liguilla-estado{
     text-align:center;
-    color:#39ff14;
+    color:#00b4ff;
     font-size:13px;
     margin-top:8px;
     font-weight:bold;

@@ -8,7 +8,7 @@
   body {
     margin: 0;
     min-height: 100vh;
-    background: radial-gradient(circle at center, #12351a 0%, #0a1a0d 60%, #050805 100%);
+    background: radial-gradient(circle at center, #0a2233 0%, #050f17 60%, #030608 100%);
     font-family: 'Segoe UI', Arial, sans-serif;
     display: flex;
     align-items: center;
@@ -22,13 +22,13 @@
     top: 18px;
     left: 18px;
     color: #111;
-    background: linear-gradient(145deg, #b6ff2e, #f2c200);
+    background: linear-gradient(145deg, #00b4ff, #ff6b1a);
     text-decoration: none;
     font-weight: bold;
     font-size: 0.75rem;
     padding: 6px 14px;
     border-radius: 20px;
-    box-shadow: 0 0 10px rgba(126, 211, 33, 0.5);
+    box-shadow: 0 0 10px rgba(0, 180, 255, 0.5);
     z-index: 10;
   }
   a.volver:hover { transform: scale(1.05); }
@@ -54,17 +54,75 @@
 
   .radio-widget .player-card {
     background: rgba(10, 10, 10, 0.92);
-    border: 2px solid #b6ff2e;
+    border: 2px solid #00b4ff;
     border-radius: 24px;
-    padding: 6px;
-    box-shadow: 0 0 20px rgba(126, 211, 33, 0.5);
+    padding: 10px 16px;
+    box-shadow: 0 0 20px rgba(0, 180, 255, 0.5);
     margin-top: -60px;
     position: relative;
     z-index: 1;
     overflow: hidden;
+    width: 300px;
+    max-width: 100%;
+    box-sizing: border-box;
     display: flex;
+    align-items: center;
+    gap: 10px;
     justify-content: center;
   }
+
+  .play-btn {
+    background: linear-gradient(145deg, #00b4ff, #ff6b1a);
+    border: none;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(0, 180, 255, 0.7);
+  }
+  .play-btn svg { width: 13px; height: 13px; fill: #111; }
+
+  .time {
+    color: #ff6b1a;
+    font-size: 0.8rem;
+    font-weight: bold;
+    min-width: 30px;
+    text-align: left;
+  }
+
+  .progress-wrap {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    width: 30%;
+    background: linear-gradient(90deg, #00b4ff, #4dd2ff, #ff6b1a);
+    border-radius: 10px;
+    animation: flow 2.5s linear infinite;
+    background-size: 200% 100%;
+  }
+  @keyframes flow {
+    0% { background-position: 0% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .vol-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+  }
+  .vol-btn svg { width: 16px; height: 16px; fill: #ff6b1a; }
 
   .live-badge {
     background: #b00020;
@@ -83,23 +141,9 @@
     70% { box-shadow: 0 0 0 12px rgba(176,0,32,0); }
     100% { box-shadow: 0 0 0 0 rgba(176,0,32,0); }
   }
-
-  /* Capa invisible: el PRIMER toque en cualquier parte de la pantalla (incluso
-     encima del reproductor de Zeno) activa el jingle, y luego desaparece sola
-     para dejar usar el reproductor con normalidad. */
-  #unlock-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 999;
-    background: transparent;
-    cursor: pointer;
-  }
 </style>
 </head>
 <body>
-
-  <!-- Capa invisible que captura el primer toque en cualquier parte (ver script abajo) -->
-  <div id="unlock-overlay"></div>
 
   <a href="index.html" class="volver">← Volver al inicio</a>
 
@@ -107,66 +151,125 @@
     <img src="radio.png" alt="Next Level 7 Radio" class="logo">
 
     <div class="player-card">
-      <iframe
-        src="https://listen.zeno.fm/player/next-level-7"
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        frameborder="0"
-        scrolling="no"
-        height="250"
-        width="300"
-        loading="lazy"
-        style="border-radius:20px; display:block; max-width:100%;">
-      </iframe>
+      <button class="play-btn" id="radioPlayBtn" aria-label="Reproducir radio">
+        <svg id="iconPlay" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="iconPause" viewBox="0 0 24 24" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+      </button>
+      <span class="time" id="radioEstado">EN VIVO</span>
+      <div class="progress-wrap"><div class="progress-bar" id="radioBarra" style="animation-play-state:paused;"></div></div>
+      <button class="vol-btn" id="radioVolBtn" aria-label="Silenciar radio">
+        <svg id="iconVolOn" viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10H3z"/></svg>
+        <svg id="iconVolOff" viewBox="0 0 24 24" style="display:none"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2L19 9.5 17.94 8.44 15.44 10.94 12.94 8.44 11.88 9.5 14.38 12l-2.5 2.5 1.06 1.06 2.5-2.5 2.5 2.5L19 14.5z"/></svg>
+      </button>
     </div>
+
+    <audio id="radioStream" src="https://stream.zeno.fm/nayznbjmygytv" preload="none"></audio>
 
     <div class="live-badge">● EN VIVO</div>
   </div>
 
-  <!-- Cortina/jingle "Next Level 7 Radio": suena junto con la radio cada 10 min.
-       Se activa solo, sin que tengas que tocar nada especial: en cuanto des cualquier
-       clic normal en esta página (por ejemplo, dentro del reproductor de arriba), queda listo. -->
+  <!-- Cortina/jingle "Next Level 7 Radio": suena encima de la radio cada 10 min, solo en esta página -->
   <audio id="jingle-nl7" src="jingle-nl7.mp3" preload="auto"></audio>
 
   <script>
-    const JINGLE_CADA_MS = 10 * 60 * 1000; // cada 10 minutos
-    const jingleAudio = document.getElementById('jingle-nl7');
-    const unlockOverlay = document.getElementById('unlock-overlay');
-    let jingleDesbloqueado = false;
+    // ===== Reproductor propio de la radio (stream directo) =====
+    const radioAudio = document.getElementById('radioStream');
+    const playBtn = document.getElementById('radioPlayBtn');
+    const iconPlay = document.getElementById('iconPlay');
+    const iconPause = document.getElementById('iconPause');
+    const volBtn = document.getElementById('radioVolBtn');
+    const iconVolOn = document.getElementById('iconVolOn');
+    const iconVolOff = document.getElementById('iconVolOff');
+    const barra = document.getElementById('radioBarra');
+    const estado = document.getElementById('radioEstado');
 
-    // Amplificamos el volumen del jingle más allá del 100% normal (Web Audio API),
-    // porque no podemos bajarle el volumen a la radio de Zeno (vive en otro sitio,
-    // fuera de nuestro control) — así que subimos el jingle para que sí se note.
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const jingleSource = audioCtx.createMediaElementSource(jingleAudio);
-    const jingleCompressor = audioCtx.createDynamicsCompressor(); // evita que suene distorsionado al subir el volumen
-    jingleCompressor.threshold.value = -24;
-    jingleCompressor.knee.value = 30;
-    jingleCompressor.ratio.value = 12;
-    jingleCompressor.attack.value = 0.003;
-    jingleCompressor.release.value = 0.25;
-    const jingleGain = audioCtx.createGain();
-    jingleGain.gain.value = 5; // 👉 sube este número (ej. 6, 7) si aún se escucha bajito; bájalo si suena distorsionado
-    jingleSource.connect(jingleCompressor).connect(jingleGain).connect(audioCtx.destination);
+    let radioSonando = false;
+    const VOLUMEN_NORMAL = 1;
+    radioAudio.volume = VOLUMEN_NORMAL;
+
+    playBtn.addEventListener('click', ()=>{
+      if(radioAudio.paused){
+        radioAudio.play().then(()=>{
+          radioSonando = true;
+          iconPlay.style.display = 'none';
+          iconPause.style.display = '';
+          barra.style.animationPlayState = 'running';
+          estado.textContent = 'EN VIVO';
+        }).catch(e=>console.log('No se pudo reproducir la radio:', e));
+      } else {
+        radioAudio.pause();
+        radioSonando = false;
+        iconPlay.style.display = '';
+        iconPause.style.display = 'none';
+        barra.style.animationPlayState = 'paused';
+        estado.textContent = 'PAUSA';
+      }
+    });
+
+    volBtn.addEventListener('click', ()=>{
+      radioAudio.muted = !radioAudio.muted;
+      iconVolOn.style.display = radioAudio.muted ? 'none' : '';
+      iconVolOff.style.display = radioAudio.muted ? '' : 'none';
+    });
+
+    // Baja/sube el volumen de la radio suavemente (para el duck del jingle)
+    function fundirVolumen(destino, duracionMs){
+      const pasos = 12;
+      const inicio = radioAudio.volume;
+      const delta = (destino - inicio) / pasos;
+      let paso = 0;
+      const intervalo = setInterval(()=>{
+        paso++;
+        radioAudio.volume = Math.min(1, Math.max(0, inicio + delta * paso));
+        if(paso >= pasos){
+          radioAudio.volume = destino;
+          clearInterval(intervalo);
+        }
+      }, duracionMs / pasos);
+    }
+
+    // ===== Cortina/jingle "Next Level 7 Radio" =====
+    const JINGLE_CADA_MS = 1 * 60 * 1000; // PRUEBA: cada 1 minuto — regresar a 10 * 60 * 1000 cuando termines de probar
+    const JINGLE_VOLUMEN = 1;
+    const RADIO_VOLUMEN_BAJO = 0.15; // a qué nivel baja la radio mientras suena el jingle
+    const jingleAudio = document.getElementById('jingle-nl7');
+    jingleAudio.volume = JINGLE_VOLUMEN;
+    let jingleDesbloqueado = false;
 
     function desbloquearJingle(){
       if(jingleDesbloqueado) return;
-      if(audioCtx.state === 'suspended') audioCtx.resume();
+      jingleDesbloqueado = true;
+      // Truco estándar: reproducir y pausar de inmediato tras el primer clic,
+      // para que el navegador permita reproducir audio automático más adelante.
+      jingleAudio.play().then(()=>{ jingleAudio.pause(); jingleAudio.currentTime = 0; }).catch(()=>{});
+    }
+    document.addEventListener('click', desbloquearJingle, {once:true});
+    document.addEventListener('touchstart', desbloquearJingle, {once:true});
+
+    // Intento de autoplay al cargar la página, sin esperar clic.
+    // Los navegadores pueden bloquear esto si el usuario no ha interactuado antes con el sitio;
+    // si falla, el jingle seguirá funcionando en cuanto la persona haga clic o toque la pantalla.
+    window.addEventListener('load', ()=>{
       jingleAudio.play().then(()=>{
         jingleDesbloqueado = true;
-        jingleAudio.pause();
-        jingleAudio.currentTime = 0;
-      }).catch(()=>{});
-      // Quitamos la capa para que el mismo toque (o el siguiente) ya le llegue
-      // normal al reproductor de Zeno que está debajo.
-      unlockOverlay.style.display = 'none';
-    }
-    unlockOverlay.addEventListener('click', desbloquearJingle);
-    unlockOverlay.addEventListener('touchstart', desbloquearJingle);
+      }).catch(e=>console.log('Autoplay bloqueado por el navegador, se activará con el primer clic:', e));
+    });
+
+    // Al terminar el jingle, regresa la radio a su volumen normal
+    jingleAudio.addEventListener('ended', ()=>{
+      if(radioSonando){
+        fundirVolumen(VOLUMEN_NORMAL, 800);
+      }
+    });
 
     setInterval(()=>{
       if(!jingleDesbloqueado) return;
+      // Si la radio está sonando, primero le bajamos el volumen (duck) antes de meter el jingle
+      if(radioSonando){
+        fundirVolumen(RADIO_VOLUMEN_BAJO, 600);
+      }
       jingleAudio.currentTime = 0;
-      jingleAudio.play().catch(()=>{});
+      jingleAudio.play().catch(e=>console.log('El jingle no pudo sonar automáticamente:', e));
     }, JINGLE_CADA_MS);
   </script>
 

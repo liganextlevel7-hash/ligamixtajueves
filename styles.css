@@ -1097,29 +1097,15 @@ min-width:100%;
 /* ===== FIX BOTONES CARRUSEL ===== */
 a.car-btn {
   text-decoration: none !important;
-  color: inherit !important;
 }
 
-.c-tabla .car-btn,
-.c-goles .car-btn,
-.c-partidos .car-btn,
-.c-proxima .car-btn {
-  color: #ff6b1a !important;
-  background: rgba(255,107,26,0.15) !important;
-  border: 1px solid #ff6b1a !important;
-}
-
-.c-equipos .car-btn,
-.c-liguilla .car-btn,
-.c-cedula .car-btn {
-  color: #000 !important;
-  background: rgba(255,107,26,0.85) !important;
-  border: 1px solid #ff6b1a !important;
-}
-
-.c-chat .car-btn,
-.c-radio .car-btn,
-.c-envivo .car-btn {
+.c-tabla a.car-btn,
+.c-goles a.car-btn,
+.c-partidos a.car-btn,
+.c-proxima a.car-btn,
+.c-equipos a.car-btn,
+.c-liguilla a.car-btn,
+.c-cedula a.car-btn {
   color: #ff6b1a !important;
   background: rgba(255,107,26,0.15) !important;
   border: 1px solid #ff6b1a !important;

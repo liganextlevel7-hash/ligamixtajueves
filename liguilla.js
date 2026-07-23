@@ -29,13 +29,13 @@ async function cargarLiguilla() {
 }
 
 const CQ = [
-    {border:"#ffd700",glow:"rgba(255,215,0,0.7)"},
-    {border:"#c0c0c0",glow:"rgba(192,192,192,0.7)"},
-    {border:"#b87333",glow:"rgba(184,115,51,0.7)"},
-    {border:"#39ff14",glow:"rgba(57,255,20,0.7)"},
+    {border:"#00b4ff",glow:"rgba(0,180,255,0.7)"},
+    {border:"#ff6b1a",glow:"rgba(255,107,26,0.7)"},
+    {border:"#4dd2ff",glow:"rgba(77,210,255,0.7)"},
+    {border:"#ff8c42",glow:"rgba(255,140,66,0.7)"},
 ];
 const CS = {border:"rgba(255,255,255,0.5)",glow:"rgba(255,255,255,0.2)"};
-const CF = {border:"#ff9800",glow:"rgba(255,152,0,0.6)"};
+const CF = {border:"#ff6b1a",glow:"rgba(255,107,26,0.6)"};
 
 function esPD(v){return !v||v.trim().toLowerCase().replace(/p+or/,"por")==="por definir";}
 
@@ -51,7 +51,7 @@ function equipo(nom,url,col){
 
 function vs(p){
     const j=(p.estado||"").trim().toLowerCase()==="jugado";
-    return `<div style="text-align:center;padding:3px 0 3px 56px;font-weight:900;font-size:13px;color:${j?'#ffd700':'rgba(255,255,255,0.25)'};">${j?`${(p.golesLocal||0).toString().trim()} - ${(p.golesVisita||0).toString().trim()}`:"VS"}</div>`;
+    return `<div style="text-align:center;padding:3px 0 3px 56px;font-weight:900;font-size:13px;color:${j?'#ff6b1a':'rgba(255,255,255,0.25)'};">${j?`${(p.golesLocal||0).toString().trim()} - ${(p.golesVisita||0).toString().trim()}`:"VS"}</div>`;
 }
 
 function card(p,col,sub){
@@ -67,12 +67,12 @@ function card(p,col,sub){
 function copa(ganador,urlG){
     const hay=!esPD(ganador);
     const lg=(hay&&urlG&&urlG.trim().startsWith("http"))
-        ?`<img src="${urlG.trim()}" style="width:60px;height:60px;object-fit:contain;border-radius:50%;border:2px solid #ffd700;box-shadow:0 0 14px rgba(255,215,0,0.8);" onerror="this.style.display='none'">`
-        :`<div style="width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.08);border:2px dashed rgba(255,215,0,0.4);display:flex;align-items:center;justify-content:center;font-size:26px;">⚽</div>`;
+        ?`<img src="${urlG.trim()}" style="width:60px;height:60px;object-fit:contain;border-radius:50%;border:2px solid #ff6b1a;box-shadow:0 0 14px rgba(255,107,26,0.8);" onerror="this.style.display='none'">`
+        :`<div style="width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.08);border:2px dashed rgba(255,107,26,0.4);display:flex;align-items:center;justify-content:center;font-size:26px;">⚽</div>`;
     return `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:0 10px;">
-        <div style="font-size:120px;line-height:1;filter:drop-shadow(0 0 28px rgba(255,215,0,0.95));">🏆</div>
+        <div style="font-size:120px;line-height:1;filter:drop-shadow(0 0 28px rgba(255,107,26,0.95));">🏆</div>
         ${lg}
-        <div style="color:${hay?'#ffd700':'rgba(255,255,255,0.4)'};font-weight:900;font-size:15px;letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 12px rgba(255,215,0,0.7);">${hay?ganador.trim():'Por Definir'}</div>
+        <div style="color:${hay?'#ff6b1a':'rgba(255,255,255,0.4)'};font-weight:900;font-size:15px;letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 12px rgba(255,107,26,0.7);">${hay?ganador.trim():'Por Definir'}</div>
         <div style="color:#fff;font-weight:900;font-size:30px;letter-spacing:3px;text-shadow:0 0 12px rgba(255,255,255,0.4);">CAMPEÓN</div>
     </div>`;
 }
@@ -110,15 +110,15 @@ function renderBracket(partidos, vista){
     }
 
     const linW="rgba(255,255,255,0.28)";
-    const linO="rgba(255,152,0,0.55)";
+    const linO="rgba(255,107,26,0.55)";
     const connH="50px"; // altura mínima de cada celda conector
 
     // Fila títulos
     const rTit=document.createElement("tr");
     rTit.append(
-        tdEl(`<div style="color:#ffd700;font-weight:900;font-size:11px;letter-spacing:3px;text-align:center;padding-bottom:6px;opacity:${oQ};">CUARTOS DE FINAL</div>`,"padding:0 8px;"),
+        tdEl(`<div style="color:#66ddff;font-weight:900;font-size:11px;letter-spacing:3px;text-align:center;padding-bottom:6px;opacity:${oQ};">CUARTOS DE FINAL</div>`,"padding:0 8px;"),
         tdEl("","width:32px;"),
-        tdEl(`<div style="color:#ffd700;font-weight:900;font-size:11px;letter-spacing:3px;text-align:center;padding-bottom:6px;font-style:italic;opacity:${oS};">SEMIFINALES</div>`,"padding:0 8px;"),
+        tdEl(`<div style="color:#66ddff;font-weight:900;font-size:11px;letter-spacing:3px;text-align:center;padding-bottom:6px;font-style:italic;opacity:${oS};">SEMIFINALES</div>`,"padding:0 8px;"),
         tdEl("","width:32px;"),
         tdEl(`<div style="color:#fff;font-weight:900;font-size:17px;letter-spacing:4px;text-align:center;padding-bottom:6px;font-style:italic;">FINAL</div>`,"padding:0 8px;")
     );
@@ -137,7 +137,7 @@ function renderBracket(partidos, vista){
         (()=>{const c=document.createElement("td");c.rowSpan=4;c.style.cssText="padding:8px;vertical-align:middle;text-align:center;";
             if(f){const w=document.createElement("div");w.style.cssText="display:flex;flex-direction:row;align-items:center;gap:16px;justify-content:center;";
                 w.appendChild(card(f,CF));
-                w.innerHTML+=`<div style="width:2px;height:70px;background:rgba(255,152,0,0.5);flex-shrink:0;"></div>`;
+                w.innerHTML+=`<div style="width:2px;height:70px;background:rgba(255,107,26,0.5);flex-shrink:0;"></div>`;
                 const dc=document.createElement("div");dc.innerHTML=copa(f.ganador,urlG);w.appendChild(dc);c.appendChild(w);}
             return c;})()
     );

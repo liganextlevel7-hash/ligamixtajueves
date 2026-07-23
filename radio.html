@@ -66,59 +66,6 @@
     justify-content: center;
   }
 
-  .play-btn {
-    background: linear-gradient(145deg, #00b4ff, #ff6b1a);
-    border: none;
-    width: 30px;
-    height: 30px;
-    min-width: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 0 8px rgba(0, 180, 255, 0.7);
-  }
-  .play-btn svg { width: 13px; height: 13px; fill: #111; }
-
-  .time {
-    color: #ff6b1a;
-    font-size: 0.8rem;
-    font-weight: bold;
-    min-width: 30px;
-    text-align: left;
-  }
-
-  .progress-wrap {
-    flex: 1;
-    height: 6px;
-    background: rgba(255,255,255,0.15);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .progress-bar {
-    height: 100%;
-    width: 30%;
-    background: linear-gradient(90deg, #00b4ff, #4dd2ff, #ff6b1a);
-    border-radius: 10px;
-    animation: flow 2.5s linear infinite;
-    background-size: 200% 100%;
-  }
-  @keyframes flow {
-    0% { background-position: 0% 0; }
-    100% { background-position: 200% 0; }
-  }
-
-  .vol-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    display: flex;
-    align-items: center;
-  }
-  .vol-btn svg { width: 16px; height: 16px; fill: #ff6b1a; }
-
   .live-badge {
     background: #b00020;
     color: #fff;
@@ -136,9 +83,23 @@
     70% { box-shadow: 0 0 0 12px rgba(176,0,32,0); }
     100% { box-shadow: 0 0 0 0 rgba(176,0,32,0); }
   }
+
+  /* Capa invisible: el PRIMER toque en cualquier parte de la pantalla (incluso
+     encima del reproductor de Zeno) activa el jingle, y luego desaparece sola
+     para dejar usar el reproductor con normalidad. */
+  #unlock-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: transparent;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
+
+  <!-- Capa invisible que captura el primer toque en cualquier parte (ver script abajo) -->
+  <div id="unlock-overlay"></div>
 
   <a href="index.html" class="volver">← Volver al inicio</a>
 
@@ -161,40 +122,51 @@
     <div class="live-badge">● EN VIVO</div>
   </div>
 
-  <!-- Cortina/jingle "Next Level 7 Radio": suena encima de la radio cada 10 min, solo en esta página -->
+  <!-- Cortina/jingle "Next Level 7 Radio": suena junto con la radio cada 10 min.
+       Se activa solo, sin que tengas que tocar nada especial: en cuanto des cualquier
+       clic normal en esta página (por ejemplo, dentro del reproductor de arriba), queda listo. -->
   <audio id="jingle-nl7" src="jingle-nl7.mp3" preload="auto"></audio>
 
   <script>
-    // ===== Cortina/jingle "Next Level 7 Radio" =====
     const JINGLE_CADA_MS = 1 * 60 * 1000; // PRUEBA: cada 1 minuto — regresar a 10 * 60 * 1000 cuando termines de probar
-    const JINGLE_VOLUMEN = 1;
     const jingleAudio = document.getElementById('jingle-nl7');
-    jingleAudio.volume = JINGLE_VOLUMEN;
+    const unlockOverlay = document.getElementById('unlock-overlay');
     let jingleDesbloqueado = false;
+
+    // Amplificamos el volumen del jingle más allá del 100% normal (Web Audio API),
+    // porque no podemos bajarle el volumen a la radio de Zeno (vive en otro sitio,
+    // fuera de nuestro control) — así que subimos el jingle para que sí se note.
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const jingleSource = audioCtx.createMediaElementSource(jingleAudio);
+    const jingleCompressor = audioCtx.createDynamicsCompressor(); // evita que suene distorsionado al subir el volumen
+    jingleCompressor.threshold.value = -24;
+    jingleCompressor.knee.value = 30;
+    jingleCompressor.ratio.value = 12;
+    jingleCompressor.attack.value = 0.003;
+    jingleCompressor.release.value = 0.25;
+    const jingleGain = audioCtx.createGain();
+    jingleGain.gain.value = 5; // 👉 sube este número (ej. 6, 7) si aún se escucha bajito; bájalo si suena distorsionado
+    jingleSource.connect(jingleCompressor).connect(jingleGain).connect(audioCtx.destination);
 
     function desbloquearJingle(){
       if(jingleDesbloqueado) return;
-      jingleDesbloqueado = true;
-      // Truco estándar: reproducir y pausar de inmediato tras el primer clic,
-      // para que el navegador permita reproducir audio automático más adelante.
-      jingleAudio.play().then(()=>{ jingleAudio.pause(); jingleAudio.currentTime = 0; }).catch(()=>{});
-    }
-    document.addEventListener('click', desbloquearJingle, {once:true});
-    document.addEventListener('touchstart', desbloquearJingle, {once:true});
-
-    // Intento de autoplay al cargar la página, sin esperar clic.
-    // Los navegadores pueden bloquear esto si el usuario no ha interactuado antes con el sitio;
-    // si falla, el jingle seguirá funcionando en cuanto la persona haga clic o toque la pantalla.
-    window.addEventListener('load', ()=>{
+      if(audioCtx.state === 'suspended') audioCtx.resume();
       jingleAudio.play().then(()=>{
         jingleDesbloqueado = true;
-      }).catch(e=>console.log('Autoplay bloqueado por el navegador, se activará con el primer clic:', e));
-    });
+        jingleAudio.pause();
+        jingleAudio.currentTime = 0;
+      }).catch(()=>{});
+      // Quitamos la capa para que el mismo toque (o el siguiente) ya le llegue
+      // normal al reproductor de Zeno que está debajo.
+      unlockOverlay.style.display = 'none';
+    }
+    unlockOverlay.addEventListener('click', desbloquearJingle);
+    unlockOverlay.addEventListener('touchstart', desbloquearJingle);
 
     setInterval(()=>{
       if(!jingleDesbloqueado) return;
       jingleAudio.currentTime = 0;
-      jingleAudio.play().catch(e=>console.log('El jingle no pudo sonar automáticamente:', e));
+      jingleAudio.play().catch(()=>{});
     }, JINGLE_CADA_MS);
   </script>
 

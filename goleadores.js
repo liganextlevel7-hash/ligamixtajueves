@@ -104,13 +104,13 @@ function siluetaSVG(tipo, pos, numero, logoUrl) {
       background: rgba(0,0,0,0.75);
       border-radius: 20px;
       padding: 14px;
-      box-shadow: 0 0 10px #39ff14, 0 0 20px rgba(57,255,20,0.4);
-      border: 1px solid #39ff14;
+      box-shadow: 0 0 10px #00b4ff, 0 0 20px rgba(0,180,255,0.4);
+      border: 1px solid #00b4ff;
       transition: 0.3s;
     }
     .gol-outer:hover {
       transform: translateY(-6px);
-      box-shadow: 0 0 18px #39ff14, 0 0 35px rgba(57,255,20,0.6);
+      box-shadow: 0 0 18px #00b4ff, 0 0 35px rgba(0,180,255,0.6);
     }
     .fifa-carta {
       width: 120px;
@@ -269,7 +269,7 @@ function crearCarta(jugador, tipo) {
 async function cargarTopGoleadores() {
   const contenedor = document.getElementById("top-goleadores");
   if (!contenedor) return;
-  contenedor.innerHTML = `<div style="text-align:center;color:#39ff14;padding:20px;">Cargando goleadores...</div>`;
+  contenedor.innerHTML = `<div style="text-align:center;color:#00b4ff;padding:20px;">Cargando goleadores...</div>`;
 
   try {
     const [resJ, resE, resP] = await Promise.all([

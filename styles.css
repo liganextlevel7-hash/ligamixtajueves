@@ -22,7 +22,7 @@ padding:30px 20px;
 .logo-liga{
 width:250px;
 max-width:80%;
-filter:drop-shadow(0 0 20px #00b4ff);
+filter:drop-shadow(0 0 20px #a855f7);
 }
 
 h1{
@@ -30,10 +30,10 @@ font-size:55px;
 margin:10px 0;
 color:#4dd2ff;
 text-shadow:
-0 0 10px #4dd2ff,
-0 0 20px #4dd2ff,
-0 0 30px #4dd2ff,
-0 0 40px #4dd2ff;
+0 0 10px #a855f7,
+0 0 20px #a855f7,
+0 0 30px #a855f7,
+0 0 40px #a855f7;
 }
 
 .subtitulo{

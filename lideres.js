@@ -250,7 +250,7 @@ function crearLider(equipo, tipo) {
 async function cargarLideres() {
   const contenedor = document.getElementById("tabla-general");
   if (!contenedor) return;
-  contenedor.innerHTML = `<div style="text-align:center;color:#39ff14;padding:20px;">Cargando líderes...</div>`;
+  contenedor.innerHTML = `<div style="text-align:center;color:#00b4ff;padding:20px;">Cargando líderes...</div>`;
 
   try {
     const res = await fetch(URL_ESTADISTICAS_LID);

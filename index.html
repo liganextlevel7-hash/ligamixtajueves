@@ -138,39 +138,6 @@
 .piramide-2 .podio-pts2 { color: #c0c0c0; }
 .piramide-3 .podio-pts2 { color: #cd7f32; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
-
-/* ===== LAYOUT SIDEBAR ===== */
-.nl-layout { display:flex; min-height:calc(100vh - 200px); }
-.nl-sidebar { width:80px; background:rgba(0,0,0,0.85); border-right:1px solid rgba(0,180,255,0.2); display:flex; flex-direction:column; align-items:center; padding:12px 0; gap:2px; position:sticky; top:0; height:calc(100vh - 200px); overflow-y:auto; }
-.nl-nav-item { position:relative; width:68px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 4px; border-radius:12px; cursor:pointer; transition:all .2s; gap:4px; }
-.nl-nav-item:hover { background:rgba(255,107,26,0.1); }
-.nl-nav-item.active { background:rgba(255,107,26,0.15); border:1px solid rgba(255,107,26,0.4); }
-.nl-nav-icon { font-size:22px; line-height:1; }
-.nl-nav-label { font-size:9px; color:#888; text-align:center; font-weight:600; letter-spacing:.3px; }
-.nl-nav-item.active .nl-nav-label { color:#ff6b1a; }
-.nl-nav-divider { width:44px; height:1px; background:rgba(255,255,255,0.1); margin:4px 0; }
-.nl-nav-whatsapp .nl-nav-label { color:#25d366 !important; }
-.nl-nav-whatsapp .nl-nav-icon { }
-.nl-nav-whatsapp:hover { background:rgba(37,211,102,0.1) !important; }
-.nl-main { flex:1; display:flex; align-items:flex-start; justify-content:center; padding:20px 10px 80px; }
-.nl-panel { display:none; width:100%; }
-.nl-panel.active { display:flex; justify-content:center; }
-
-/* BOTTOMBAR MOVIL */
-.nl-bottombar { display:none; position:fixed; bottom:0; left:0; right:0; background:rgba(0,0,0,0.95); border-top:1px solid rgba(0,180,255,0.2); z-index:100; overflow-x:auto; white-space:nowrap; padding:6px 0; }
-.nl-bot-item { display:inline-flex; flex-direction:column; align-items:center; justify-content:center; min-width:60px; padding:4px 6px; cursor:pointer; border-radius:10px; transition:all .2s; gap:2px; }
-.nl-bot-item span { font-size:20px; line-height:1; }
-.nl-bot-item small { font-size:9px; color:#666; font-weight:600; }
-.nl-bot-item.active { background:rgba(255,107,26,0.15); }
-.nl-bot-item.active small { color:#ff6b1a; }
-.nl-bot-wa small { color:#25d366 !important; }
-
-@media(max-width:768px){
-  .nl-sidebar { display:none; }
-  .nl-bottombar { display:flex; align-items:center; }
-  .nl-main { padding:10px 8px 80px; }
-}
-
 </style>
 </head>
 <body>
@@ -185,229 +152,156 @@
   </h1>
   <p class="subtitulo">Torneo Mixto Jueves</p>
 </header>
-<!-- LAYOUT PRINCIPAL -->
-<div class="nl-layout">
 
-  <!-- SIDEBAR ESCRITORIO (izquierda) -->
-  <nav class="nl-sidebar" id="nl-sidebar">
-    <div class="nl-nav-item active" data-panel="proxima" onclick="showPanel('proxima',this)">
-      <span class="nl-nav-icon">📅</span>
-      <span class="nl-nav-label">Jornada</span>
-    </div>
-    <div class="nl-nav-item" data-panel="resultados" onclick="showPanel('resultados',this)">
-      <span class="nl-nav-icon">📊</span>
-      <span class="nl-nav-label">Resultados</span>
-    </div>
-    <div class="nl-nav-item" data-panel="tabla" onclick="showPanel('tabla',this)">
-      <span class="nl-nav-icon">🏆</span>
-      <span class="nl-nav-label">Tabla</span>
-    </div>
-    <div class="nl-nav-item" data-panel="goles" onclick="showPanel('goles',this)">
-      <span class="nl-nav-icon">⚽</span>
-      <span class="nl-nav-label">Goleadores</span>
-    </div>
-    <div class="nl-nav-divider"></div>
-    <div class="nl-nav-item" data-panel="envivo" onclick="showPanel('envivo',this)" id="nav-envivo">
-      <span class="nl-nav-icon">📡</span>
-      <span class="nl-nav-label">En Vivo</span>
-      <span id="envivo-badge-nav" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;background:#e03030;border-radius:50%;"></span>
-    </div>
-    <div class="nl-nav-item" data-panel="equipos" onclick="showPanel('equipos',this)">
-      <span class="nl-nav-icon">👕</span>
-      <span class="nl-nav-label">Equipos</span>
-    </div>
-    <div class="nl-nav-item" data-panel="liguilla" onclick="showPanel('liguilla',this)">
-      <span class="nl-nav-icon">🥇</span>
-      <span class="nl-nav-label">Liguilla</span>
-    </div>
-    <div class="nl-nav-item" data-panel="cedula" onclick="showPanel('cedula',this)">
-      <span class="nl-nav-icon">📝</span>
-      <span class="nl-nav-label">Cédula</span>
-    </div>
-    <div class="nl-nav-divider"></div>
-    <div class="nl-nav-item" data-panel="chat" onclick="showPanel('chat',this)">
-      <span class="nl-nav-icon">💬</span>
-      <span class="nl-nav-label">Chat</span>
-      <span id="chat-badge-nav" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;background:#00b4ff;border-radius:50%;animation:blink 1.2s infinite;"></span>
-    </div>
-    <div class="nl-nav-item" data-panel="radio" onclick="showPanel('radio',this)">
-      <span class="nl-nav-icon">📻</span>
-      <span class="nl-nav-label">Radio</span>
-      <span id="radio-badge-nav" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;background:#ff6b1a;border-radius:50%;animation:blink 1.2s infinite;"></span>
-    </div>
-    <div class="nl-nav-divider"></div>
-    <div class="nl-nav-item nl-nav-whatsapp" onclick="window.open('https://wa.me/522214211261?text=Hola%2C+quiero+registrar+mi+equipo+en+el+Torneo+Mixto+Jueves.+Nombre+del+equipo%3A+','_blank')">
-      <span class="nl-nav-icon">📲</span>
-      <span class="nl-nav-label">Registro</span>
-    </div>
-  </nav>
+<div class="carrusel-seccion" id="carrusel-wrap">
 
-  <!-- CONTENIDO PRINCIPAL -->
-  <main class="nl-main">
+  <div class="card-sec c-tabla" id="ccard-0">
+    <div class="card-body" style="background-image:url('fondonuevo.png');background-size:cover;background-position:center;">
+      <div class="card-titulo">🏆 Tabla General</div>
+      <div class="card-contenido" id="car-tabla"><div class="car-cargando">Cargando...</div></div>
+      <a href="tablaGeneral.html" class="car-btn" style="color:#ff6b1a;background:rgba(255,107,26,0.15);border:1px solid #ff6b1a;text-decoration:none;">VER TABLA COMPLETA</a>
+    </div>
+  </div>
 
-    <!-- PANEL: PROXIMA JORNADA -->
-    <div class="nl-panel active" id="panel-proxima">
-      <div class="card-sec c-proxima" style="position:relative;width:100%;max-width:360px;margin:0 auto;border-radius:22px;overflow:hidden;border:1px solid #00b4ff;box-shadow:0 0 10px #00b4ff;">
-        <div class="card-body" style="background-image:url('fondonuevo.png');background-size:cover;background-position:center;min-height:440px;">
-          <div class="card-titulo">📅 Próxima Jornada</div>
-          <div class="card-contenido" id="car-proxima" style="margin-top:90px;"><div class="car-cargando">Cargando...</div></div>
-          <a href="partidos.html" class="car-btn" style="color:#ff6b1a;background:rgba(255,107,26,0.15);border:1px solid #ff6b1a;text-decoration:none;">VER JORNADA</a>
-        </div>
+  <div class="card-sec c-goles" id="ccard-1">
+    <div class="card-body" style="padding:14px 10px;background-image:url('fondonuevo.png');background-size:cover;background-position:center;">
+      <div class="card-titulo">⚽ Top Goleadores</div>
+      <div class="card-contenido" id="car-goles" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:4px 0;"><div class="car-cargando">Cargando...</div></div>
+      <a href="jugadores.html" class="car-btn" style="color:#ff6b1a;background:rgba(255,107,26,0.15);border:1px solid #ff6b1a;text-decoration:none;">VER TODOS</a>
+    </div>
+  </div>
+
+  <div class="card-sec c-partidos" id="ccard-2">
+    <div class="card-body" style="background-image:url('fondonuevo.png');background-size:cover;background-position:center;">
+      <div class="card-titulo">📊 Últimos Resultados</div>
+      <div class="card-contenido" id="car-resultados" style="margin-top:90px;"><div class="car-cargando">Cargando...</div></div>
+      <a href="partidos.html" class="car-btn" style="color:#ff6b1a;background:rgba(255,107,26,0.15);border:1px solid #ff6b1a;text-decoration:none;">VER PARTIDOS</a>
+    </div>
+  </div>
+
+  <div class="card-sec c-proxima" id="ccard-3">
+    <div class="card-body" style="background-image:url('fondonuevo.png');background-size:cover;background-position:center;">
+      <div class="card-titulo">📅 Próxima Jornada</div>
+      <div class="card-contenido" id="car-proxima" style="margin-top:90px;"><div class="car-cargando">Cargando...</div></div>
+      <a href="partidos.html" class="car-btn" style="color:#ff6b1a;background:rgba(255,107,26,0.15);border:1px solid #ff6b1a;text-decoration:none;">VER JORNADA</a>
+    </div>
+  </div>
+
+  <div class="card-sec c-equipos" id="ccard-4">
+    <div class="card-body" style="position:relative;padding:0 !important;">
+      <img src="equipos.png" class="liguilla-img" alt="Equipos" onerror="this.style.display='none'">
+      <div class="card-titulo">👕 EQUIPOS</div>
+      <a href="equipos.html" class="car-btn" style="color:#ff6b1a;background:rgba(255,107,26,0.15);border:1px solid #ff6b1a;text-decoration:none;">VER EQUIPOS</a>
+    </div>
+  </div>
+
+  <div class="card-sec c-liguilla" id="ccard-5">
+    <div class="card-body" style="position:relative;background-image:url('fondonuevo.png');background-size:cover;background-position:center;">
+      <img src="liguilla.png" class="liguilla-img" alt="Liguilla" onerror="this.style.display='none'">
+      <div class="card-titulo">🥇 LIGUILLA</div>
+      <a href="liguilla.html" class="car-btn" style="color:#ff6b1a;background:rgba(255,107,26,0.15);border:1px solid #ff6b1a;text-decoration:none;">VER LIGUILLA</a>
+    </div>
+  </div>
+
+  <div class="card-sec c-cedula" id="ccard-6">
+    <div class="card-body" style="position:relative;background-image:url('fondonuevo.png');background-size:cover;background-position:center;">
+      <img src="arbitro.png" class="cedula-img" alt="Cedula Arbitral" onerror="this.style.display='none'">
+      <div class="card-titulo">📝 CÉDULA</div>
+      <a href="cedula.html" class="car-btn" style="color:#ff6b1a;background:rgba(255,107,26,0.15);border:1px solid #ff6b1a;text-decoration:none;">IR A CÉDULA</a>
+    </div>
+  </div>
+
+  <!-- ===== CARD: EN VIVO ===== -->
+  <div class="card-sec c-envivo" id="ccard-7">
+    <div class="card-body" style="position:relative;padding:0 !important;background-image:url('fondonuevo.png');background-size:cover;background-position:center;min-height:440px;overflow:hidden;">
+      <div class="card-overlay-color"></div>
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 30%,rgba(224,48,48,0.15) 0%,transparent 65%);pointer-events:none;z-index:0;"></div>
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;z-index:1;pointer-events:none;">
+        <div style="font-size:60px;">📡</div>
+        <div style="font-size:16px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-align:center;color:#fff;">Transmisión<br>en Vivo</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);text-align:center;line-height:1.7;font-family:Arial,sans-serif;">Sigue el partido en tiempo real.<br>Marcador, goles y tarjetas<br>al instante. ⚽🟨🟥</div>
+      </div>
+      <!-- CAMBIO 2: badge EN VIVO dinámico arriba -->
+      <div id="envivo-publico" style="position:absolute;bottom:14px;left:18px;right:18px;z-index:5;display:none;">
+        <a href="envivo-publico.html" class="car-btn" style="background:rgba(255,107,26,0.15);color:#ff6b1a;border:1px solid #ff6b1a;">🔴 VER TRANSMISIÓN EN VIVO</a>
+      </div>
+      <div id="envivo-offline" style="position:absolute;bottom:14px;left:18px;right:18px;z-index:5;">
+        <div class="car-btn" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.3);border:1px solid rgba(255,255,255,0.1);cursor:default;">Sin transmisión activa</div>
+      </div>
+      <a href="nextlevelenvivo.html" id="envivo-admin-btn" style="position:absolute;top:14px;right:14px;z-index:6;background:rgba(255,107,26,0.15);color:#ff6b1a;border:1px solid #ff6b1a;border-radius:20px;padding:4px 12px;font-size:10px;font-weight:700;text-decoration:none;display:inline-block;">⚙️ ADMIN</a>
+      <div id="envivo-badge" style="display:none;position:absolute;top:10px;left:0;right:0;z-index:6;text-align:center;pointer-events:none;">
+        <span style="display:inline-flex;align-items:center;gap:6px;background:#e03030;color:white;font-size:12px;font-weight:900;padding:4px 14px;border-radius:20px;letter-spacing:1px;box-shadow:0 0 12px rgba(224,48,48,0.6);">
+          <span style="width:8px;height:8px;background:white;border-radius:50%;animation:blink 1.2s infinite;display:inline-block;"></span> EN VIVO AHORA
+        </span>
       </div>
     </div>
+  </div>
+  <!-- ===== FIN CARD EN VIVO ===== -->
 
-    <!-- PANEL: ULTIMOS RESULTADOS -->
-    <div class="nl-panel" id="panel-resultados">
-      <div class="card-sec c-partidos" style="position:relative;width:100%;max-width:360px;margin:0 auto;border-radius:22px;overflow:hidden;border:1px solid #00b4ff;box-shadow:0 0 10px #00b4ff;">
-        <div class="card-body" style="background-image:url('fondonuevo.png');background-size:cover;background-position:center;min-height:440px;">
-          <div class="card-titulo">📊 Últimos Resultados</div>
-          <div class="card-contenido" id="car-resultados" style="margin-top:90px;"><div class="car-cargando">Cargando...</div></div>
-          <a href="partidos.html" class="car-btn" style="color:#ff6b1a;background:rgba(255,107,26,0.15);border:1px solid #ff6b1a;text-decoration:none;">VER PARTIDOS</a>
+  <!-- ===== CARD CHAT ===== -->
+  <div class="card-sec c-chat" id="ccard-8">
+    <div class="card-body" style="position:relative;padding:0 !important;background-image:url('fondonuevo.png');background-size:cover;background-position:center;min-height:440px;overflow:hidden;">
+      <div class="card-overlay-color"></div>
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 20%,rgba(0,180,255,0.07) 0%,transparent 65%);pointer-events:none;z-index:0;"></div>
+      <!-- CAMBIO 3: badge en línea dinámico -->
+      <div id="chat-online-bar" style="display:none;position:absolute;top:12px;left:0;right:0;z-index:6;text-align:center;pointer-events:none;">
+        <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,0.75);border:1px solid rgba(0,180,255,0.5);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:#00b4ff;">
+          <span style="width:7px;height:7px;background:#00b4ff;border-radius:50%;display:inline-block;animation:blink 1.2s infinite;"></span>
+          <span id="chat-online-count">0</span> capitanes en línea
+        </span>
+      </div>
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;padding:40px 14px 60px;pointer-events:none;z-index:1;gap:6px;overflow:hidden;">
+        <div style="font-size:13px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-align:center;color:#00b4ff;margin-bottom:4px;">💬 Chat Next Level 7</div>
+        <div style="display:flex;align-items:flex-end;gap:6px;">
+          <div style="position:relative;flex-shrink:0;"><img src="https://i.imgur.com/gBvmM4v.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(0,180,255,0.5);display:block;"><div style="position:absolute;bottom:-2px;left:-2px;width:9px;height:9px;background:#111;border-radius:50% 0 50% 50%;transform:rotate(45deg);"></div></div>
+          <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);border-radius:12px 12px 12px 2px;padding:6px 10px;font-size:10px;color:rgba(255,255,255,0.75);max-width:75%;">¿A qué hora juegan el domingo? ⚽</div>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:6px;flex-direction:row-reverse;">
+          <div style="position:relative;flex-shrink:0;"><img src="https://i.imgur.com/fGQAhE5.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(0,180,255,0.5);display:block;"><div style="position:absolute;bottom:-2px;right:-2px;width:9px;height:9px;background:#111;border-radius:50% 50% 0 50%;transform:rotate(-45deg);"></div></div>
+          <div style="background:rgba(0,180,255,0.15);border:1px solid rgba(0,180,255,0.3);border-radius:12px 12px 2px 12px;padding:6px 10px;font-size:10px;color:#00b4ff;max-width:75%;">Nosotros a las 9am 👍</div>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:6px;">
+          <div style="position:relative;flex-shrink:0;"><img src="https://i.imgur.com/5TAVBS7.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(0,180,255,0.5);display:block;"><div style="position:absolute;bottom:-2px;left:-2px;width:9px;height:9px;background:#111;border-radius:50% 0 50% 50%;transform:rotate(45deg);"></div></div>
+          <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);border-radius:12px 12px 12px 2px;padding:6px 10px;font-size:10px;color:rgba(255,255,255,0.75);max-width:75%;">Confirmado ✅ nos vemos!</div>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:6px;flex-direction:row-reverse;">
+          <div style="position:relative;flex-shrink:0;"><img src="https://i.imgur.com/Qrx4JSj.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(0,180,255,0.5);display:block;"><div style="position:absolute;bottom:-2px;right:-2px;width:9px;height:9px;background:#111;border-radius:50% 50% 0 50%;transform:rotate(-45deg);"></div></div>
+          <div style="background:rgba(0,180,255,0.15);border:1px solid rgba(0,180,255,0.3);border-radius:12px 12px 2px 12px;padding:6px 10px;font-size:10px;color:#00b4ff;max-width:75%;">🗓️ Dom · 9:00 am · Campo 1</div>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:6px;">
+          <div style="position:relative;flex-shrink:0;"><img src="https://i.imgur.com/KTMLCv9.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(0,180,255,0.5);display:block;"><div style="position:absolute;bottom:-2px;left:-2px;width:9px;height:9px;background:#111;border-radius:50% 0 50% 50%;transform:rotate(45deg);"></div></div>
+          <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);border-radius:12px 12px 12px 2px;padding:6px 10px;font-size:10px;color:rgba(255,255,255,0.75);max-width:75%;">Ahí estaremos 💪🏽</div>
         </div>
       </div>
+      <a href="chat-next-level-7.html" class="car-btn" style="position:absolute;bottom:14px;left:18px;right:18px;width:auto;z-index:5;background:rgba(0,180,255,0.2);color:#00b4ff;border:1px solid #00b4ff;">ENTRAR AL CHAT</a>
     </div>
+  </div>
 
-    <!-- PANEL: TABLA GENERAL -->
-    <div class="nl-panel" id="panel-tabla">
-      <div class="card-sec c-tabla" style="position:relative;width:100%;max-width:360px;margin:0 auto;border-radius:22px;overflow:hidden;border:1px solid #00b4ff;box-shadow:0 0 10px #00b4ff;">
-        <div class="card-body" style="background-image:url('fondonuevo.png');background-size:cover;background-position:center;min-height:440px;">
-          <div class="card-titulo">🏆 Tabla General</div>
-          <div class="card-contenido" id="car-tabla"><div class="car-cargando">Cargando...</div></div>
-          <a href="tablaGeneral.html" class="car-btn" style="color:#ff6b1a;background:rgba(255,107,26,0.15);border:1px solid #ff6b1a;text-decoration:none;">VER TABLA COMPLETA</a>
-        </div>
+  <!-- ===== CARD RADIO ===== -->
+  <div class="card-sec c-radio" id="ccard-9">
+    <div class="card-body" style="position:relative;padding:0 !important;background-image:url('fondoradio.png');background-size:cover;background-position:center;min-height:440px;overflow:hidden;">
+      <div class="card-overlay-color"></div>
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 30%,rgba(0,180,255,0.12) 0%,transparent 65%);pointer-events:none;z-index:0;"></div>
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;z-index:1;pointer-events:none;">
+        <div style="font-size:60px;">📻</div>
+        <div style="font-size:16px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-align:center;color:#ff6b1a;">Radio<br>Next Level 7</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);text-align:center;line-height:1.7;font-family:Arial,sans-serif;">Escucha la transmisión en vivo<br>del partido con narración<br>y música de la liga. 🎙️🎶</div>
       </div>
-    </div>
-
-    <!-- PANEL: GOLEADORES -->
-    <div class="nl-panel" id="panel-goles">
-      <div class="card-sec c-goles" style="position:relative;width:100%;max-width:360px;margin:0 auto;border-radius:22px;overflow:hidden;border:1px solid #00b4ff;box-shadow:0 0 10px #00b4ff;">
-        <div class="card-body" style="padding:14px 10px;background-image:url('fondonuevo.png');background-size:cover;background-position:center;min-height:440px;">
-          <div class="card-titulo">⚽ Top Goleadores</div>
-          <div class="card-contenido" id="car-goles" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:4px 0;"><div class="car-cargando">Cargando...</div></div>
-          <a href="jugadores.html" class="car-btn" style="color:#ff6b1a;background:rgba(255,107,26,0.15);border:1px solid #ff6b1a;text-decoration:none;">VER TODOS</a>
-        </div>
+      <div id="radio-badge" style="display:none;position:absolute;top:10px;left:0;right:0;z-index:6;text-align:center;pointer-events:none;">
+        <span style="display:inline-flex;align-items:center;gap:6px;background:#00b4ff;color:#000;font-size:12px;font-weight:900;padding:4px 14px;border-radius:20px;letter-spacing:1px;box-shadow:0 0 12px rgba(0,180,255,0.6);">
+          <span style="width:8px;height:8px;background:#000;border-radius:50%;animation:blink 1.2s infinite;display:inline-block;"></span> RADIO EN VIVO
+        </span>
       </div>
+      <a href="radio.html" class="car-btn" style="position:absolute;bottom:14px;left:18px;right:18px;width:auto;z-index:5;background:rgba(255,107,26,0.15);color:#ff6b1a;border:1px solid #ff6b1a;">🎧 ESCUCHAR RADIO</a>
     </div>
+  </div>
+  <!-- ===== FIN CARD RADIO ===== -->
 
-    <!-- PANEL: EN VIVO -->
-    <div class="nl-panel" id="panel-envivo">
-      <div class="card-sec c-envivo" style="position:relative;width:100%;max-width:360px;margin:0 auto;border-radius:22px;overflow:hidden;border:1px solid #00b4ff;box-shadow:0 0 10px #00b4ff;">
-        <div class="card-body" style="position:relative;padding:0 !important;background-image:url('fondonuevo.png');background-size:cover;background-position:center;min-height:440px;overflow:hidden;">
-          <div class="card-overlay-color"></div>
-          <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 30%,rgba(224,48,48,0.15) 0%,transparent 65%);pointer-events:none;z-index:0;"></div>
-          <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;z-index:1;pointer-events:none;">
-            <div style="font-size:60px;">📡</div>
-            <div style="font-size:16px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-align:center;color:#fff;">Transmisión<br>en Vivo</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.6);text-align:center;line-height:1.7;font-family:Arial,sans-serif;">Sigue el partido en tiempo real.<br>Marcador, goles y tarjetas<br>al instante. ⚽🟨🟥</div>
-          </div>
-          <div id="envivo-publico" style="position:absolute;bottom:14px;left:18px;right:18px;z-index:5;display:none;">
-            <a href="envivo-publico.html" class="car-btn" style="background:rgba(255,107,26,0.15);color:#ff6b1a;border:1px solid #ff6b1a;">🔴 VER TRANSMISIÓN EN VIVO</a>
-          </div>
-          <div id="envivo-offline" style="position:absolute;bottom:14px;left:18px;right:18px;z-index:5;">
-            <div class="car-btn" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.3);border:1px solid rgba(255,255,255,0.1);cursor:default;">Sin transmisión activa</div>
-          </div>
-          <a href="nextlevelenvivo.html" id="envivo-admin-btn" style="position:absolute;top:14px;right:14px;z-index:6;background:rgba(255,107,26,0.15);color:#ff6b1a;border:1px solid #ff6b1a;border-radius:20px;padding:4px 12px;font-size:10px;font-weight:700;text-decoration:none;display:inline-block;">⚙️ ADMIN</a>
-          <div id="envivo-badge" style="display:none;position:absolute;top:10px;left:0;right:0;z-index:6;text-align:center;pointer-events:none;">
-            <span style="display:inline-flex;align-items:center;gap:6px;background:#e03030;color:white;font-size:12px;font-weight:900;padding:4px 14px;border-radius:20px;letter-spacing:1px;box-shadow:0 0 12px rgba(224,48,48,0.6);">
-              <span style="width:8px;height:8px;background:white;border-radius:50%;animation:blink 1.2s infinite;display:inline-block;"></span> EN VIVO AHORA
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PANEL: EQUIPOS -->
-    <div class="nl-panel" id="panel-equipos">
-      <div class="card-sec c-equipos" style="position:relative;width:100%;max-width:360px;margin:0 auto;border-radius:22px;overflow:hidden;border:1px solid #00b4ff;box-shadow:0 0 10px #00b4ff;">
-        <div class="card-body" style="position:relative;padding:0 !important;min-height:440px;">
-          <img src="equipos.png" class="liguilla-img" alt="Equipos" onerror="this.style.display='none'">
-          <div class="card-titulo">👕 EQUIPOS</div>
-          <a href="equipos.html" class="car-btn" style="color:#ff6b1a;background:rgba(255,107,26,0.15);border:1px solid #ff6b1a;text-decoration:none;">VER EQUIPOS</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- PANEL: LIGUILLA -->
-    <div class="nl-panel" id="panel-liguilla">
-      <div class="card-sec c-liguilla" style="position:relative;width:100%;max-width:360px;margin:0 auto;border-radius:22px;overflow:hidden;border:1px solid #00b4ff;box-shadow:0 0 10px #00b4ff;">
-        <div class="card-body" style="position:relative;background-image:url('fondonuevo.png');background-size:cover;background-position:center;min-height:440px;">
-          <img src="liguilla.png" class="liguilla-img" alt="Liguilla" onerror="this.style.display='none'">
-          <div class="card-titulo">🥇 LIGUILLA</div>
-          <a href="liguilla.html" class="car-btn" style="color:#ff6b1a;background:rgba(255,107,26,0.15);border:1px solid #ff6b1a;text-decoration:none;">VER LIGUILLA</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- PANEL: CEDULA -->
-    <div class="nl-panel" id="panel-cedula">
-      <div class="card-sec c-cedula" style="position:relative;width:100%;max-width:360px;margin:0 auto;border-radius:22px;overflow:hidden;border:1px solid #00b4ff;box-shadow:0 0 10px #00b4ff;">
-        <div class="card-body" style="position:relative;background-image:url('fondonuevo.png');background-size:cover;background-position:center;min-height:440px;">
-          <img src="arbitro.png" class="cedula-img" alt="Cedula Arbitral" onerror="this.style.display='none'">
-          <div class="card-titulo">📝 CÉDULA</div>
-          <a href="cedula.html" class="car-btn" style="color:#ff6b1a;background:rgba(255,107,26,0.15);border:1px solid #ff6b1a;text-decoration:none;">IR A CÉDULA</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- PANEL: CHAT -->
-    <div class="nl-panel" id="panel-chat">
-      <div class="card-sec c-chat" style="position:relative;width:100%;max-width:360px;margin:0 auto;border-radius:22px;overflow:hidden;border:1px solid #00b4ff;box-shadow:0 0 10px #00b4ff;">
-        <div class="card-body" style="position:relative;padding:0 !important;background-image:url('fondonuevo.png');background-size:cover;background-position:center;min-height:440px;overflow:hidden;">
-          <div class="card-overlay-color"></div>
-          <div id="chat-online-bar" style="display:none;position:absolute;top:12px;left:0;right:0;z-index:6;text-align:center;pointer-events:none;">
-            <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,0.75);border:1px solid rgba(0,180,255,0.5);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:#00b4ff;">
-              <span style="width:7px;height:7px;background:#00b4ff;border-radius:50%;display:inline-block;animation:blink 1.2s infinite;"></span>
-              <span id="chat-online-count">0</span> capitanes en línea
-            </span>
-          </div>
-          <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;padding:40px 14px 60px;pointer-events:none;z-index:1;gap:6px;overflow:hidden;">
-            <div style="font-size:13px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-align:center;color:#00b4ff;margin-bottom:4px;">💬 Chat Next Level 7</div>
-            <div style="display:flex;align-items:flex-end;gap:6px;"><div style="position:relative;flex-shrink:0;"><img src="https://i.imgur.com/gBvmM4v.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(0,180,255,0.5);display:block;"></div><div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);border-radius:12px 12px 12px 2px;padding:6px 10px;font-size:10px;color:rgba(255,255,255,0.75);max-width:75%;">¿A qué hora juegan el jueves? ⚽</div></div>
-            <div style="display:flex;align-items:flex-end;gap:6px;flex-direction:row-reverse;"><div style="position:relative;flex-shrink:0;"><img src="https://i.imgur.com/fGQAhE5.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(0,180,255,0.5);display:block;"></div><div style="background:rgba(0,180,255,0.15);border:1px solid rgba(0,180,255,0.3);border-radius:12px 12px 2px 12px;padding:6px 10px;font-size:10px;color:#00b4ff;max-width:75%;">Nosotros a las 7pm 👍</div></div>
-            <div style="display:flex;align-items:flex-end;gap:6px;"><div style="position:relative;flex-shrink:0;"><img src="https://i.imgur.com/5TAVBS7.png" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(0,180,255,0.5);display:block;"></div><div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);border-radius:12px 12px 12px 2px;padding:6px 10px;font-size:10px;color:rgba(255,255,255,0.75);max-width:75%;">Confirmado ✅ nos vemos!</div></div>
-          </div>
-          <a href="chat-next-level-7.html" class="car-btn" style="position:absolute;bottom:14px;left:18px;right:18px;width:auto;z-index:5;background:rgba(0,180,255,0.2);color:#00b4ff;border:1px solid #00b4ff;">ENTRAR AL CHAT</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- PANEL: RADIO -->
-    <div class="nl-panel" id="panel-radio">
-      <div class="card-sec c-radio" style="position:relative;width:100%;max-width:360px;margin:0 auto;border-radius:22px;overflow:hidden;border:1px solid #00b4ff;box-shadow:0 0 10px #00b4ff;">
-        <div class="card-body" style="position:relative;padding:0 !important;background-image:url('fondoradio.png');background-size:cover;background-position:center;min-height:440px;overflow:hidden;">
-          <div class="card-overlay-color"></div>
-          <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;z-index:1;pointer-events:none;">
-            <div style="font-size:60px;">📻</div>
-            <div style="font-size:16px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-align:center;color:#ff6b1a;">Radio<br>Next Level 7</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.6);text-align:center;line-height:1.7;font-family:Arial,sans-serif;">Escucha la transmisión en vivo<br>del partido con narración<br>y música de la liga. 🎙️🎶</div>
-          </div>
-          <div id="radio-badge" style="display:none;position:absolute;top:10px;left:0;right:0;z-index:6;text-align:center;pointer-events:none;">
-            <span style="display:inline-flex;align-items:center;gap:6px;background:#ff6b1a;color:#000;font-size:11px;font-weight:900;padding:4px 12px;border-radius:20px;">
-              <span style="width:7px;height:7px;background:#000;border-radius:50%;display:inline-block;animation:blink 1.2s infinite;"></span> EN VIVO
-            </span>
-          </div>
-          <a href="radio.html" class="car-btn" style="position:absolute;bottom:14px;left:18px;right:18px;width:auto;z-index:5;background:rgba(255,107,26,0.15);color:#ff6b1a;border:1px solid #ff6b1a;">🎙️ ESCUCHAR RADIO</a>
-        </div>
-      </div>
-    </div>
-
-  </main>
+  <div class="car-flecha car-fl" onclick="carMover(-1)">&#8592;</div>
+  <div class="car-flecha car-fr" onclick="carMover(1)">&#8594;</div>
+  <div class="car-dots" id="car-dots"></div>
 </div>
 
-<!-- BOTTOMBAR MOVIL -->
-<nav class="nl-bottombar">
-  <div class="nl-bot-item active" data-panel="proxima" onclick="showPanel('proxima',this)"><span>📅</span><small>Jornada</small></div>
-  <div class="nl-bot-item" data-panel="resultados" onclick="showPanel('resultados',this)"><span>📊</span><small>Result.</small></div>
-  <div class="nl-bot-item" data-panel="tabla" onclick="showPanel('tabla',this)"><span>🏆</span><small>Tabla</small></div>
-  <div class="nl-bot-item" data-panel="goles" onclick="showPanel('goles',this)"><span>⚽</span><small>Goles</small></div>
-  <div class="nl-bot-item" data-panel="envivo" onclick="showPanel('envivo',this)"><span>📡</span><small>En Vivo</small></div>
-  <div class="nl-bot-item" data-panel="equipos" onclick="showPanel('equipos',this)"><span>👕</span><small>Equipos</small></div>
-  <div class="nl-bot-item" data-panel="liguilla" onclick="showPanel('liguilla',this)"><span>🥇</span><small>Liguilla</small></div>
-  <div class="nl-bot-item" data-panel="cedula" onclick="showPanel('cedula',this)"><span>📝</span><small>Cédula</small></div>
-  <div class="nl-bot-item" data-panel="chat" onclick="showPanel('chat',this)"><span>💬</span><small>Chat</small></div>
-  <div class="nl-bot-item" data-panel="radio" onclick="showPanel('radio',this)"><span>📻</span><small>Radio</small></div>
-  <div class="nl-bot-item nl-bot-wa" onclick="window.open('https://wa.me/522214211261?text=Hola%2C+quiero+registrar+mi+equipo+en+el+Torneo+Mixto+Jueves.+Nombre+del+equipo%3A+','_blank')"><span>📲</span><small>Registro</small></div>
-</nav>
 <script>
 const palabras = ['LIGA', 'NEXT', 'LEVEL', '7'];
 const letrasEl = document.getElementById('titulo-letras');
@@ -541,13 +435,31 @@ async function cargarCarrusel() {
     document.getElementById('car-goles').innerHTML=htmlGoles;
   } catch(e){ console.error(e); }
 }
-// Sidebar navigation
-function showPanel(id, el){
-  document.querySelectorAll('.nl-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nl-nav-item, .nl-bot-item').forEach(i=>i.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
-  document.querySelectorAll('[data-panel="'+id+'"]').forEach(i=>i.classList.add('active'));
+const carCards=document.querySelectorAll('.card-sec'), carTotal=carCards.length;
+let carActivo=0;
+function carActualizar(){
+  carCards.forEach((card,i)=>{
+    card.className=card.className.replace(/\b(c|l1|l2|r1|r2)\b/g,'').trim();
+    const diff=((i-carActivo)%carTotal+carTotal)%carTotal;
+    let cls='';
+    if(diff===0) cls='c';
+    else if(diff===1) cls='r1';
+    else if(diff===2) cls='r2';
+    else if(diff===carTotal-1) cls='l1';
+    else if(diff===carTotal-2) cls='l2';
+    if(cls) card.classList.add(cls);
+  });
+  document.querySelectorAll('.car-dot').forEach((d,i)=>d.classList.toggle('on',i===carActivo));
 }
+function carMover(dir){ carActivo=((carActivo+dir)%carTotal+carTotal)%carTotal; carActualizar(); }
+const carDotsEl=document.getElementById('car-dots');
+carCards.forEach((_,i)=>{ const d=document.createElement('div'); d.className='car-dot'+(i===0?' on':''); d.onclick=()=>{carActivo=i;carActualizar();}; carDotsEl.appendChild(d); });
+carCards.forEach((card,i)=>{ card.addEventListener('click',e=>{ if(!card.classList.contains('c')){ e.preventDefault(); e.stopPropagation(); carActivo=i; carActualizar(); } }); });
+let carTx=0;
+document.getElementById('carrusel-wrap').addEventListener('touchstart',e=>{carTx=e.touches[0].clientX;});
+document.getElementById('carrusel-wrap').addEventListener('touchend',e=>{ const d=carTx-e.changedTouches[0].clientX; if(Math.abs(d)>50) carMover(d>0?1:-1); });
+setInterval(()=>carMover(1),5000);
+carActualizar();
 cargarCarrusel();
 
 (function checkFirebase(){

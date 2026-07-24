@@ -1,9 +1,9 @@
-const CSV_USUARIOS          = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=961328720&single=true&output=csv';
-const CSV_PARTIDOS_C        = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=1362473459&single=true&output=csv';
-const CSV_EQUIPOS_C         = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=1894947293&single=true&output=csv';
-const CSV_JUGADORES_C       = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=1940220650&single=true&output=csv';
-const CSV_PARTICIPACIONES_C = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=626975401&single=true&output=csv';
-const CSV_EVENTOS_C         = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=645868286&single=true&output=csv';
+const CSV_USUARIOS          = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=961328720&single=true&output=csv';
+const CSV_PARTIDOS_C        = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=1362473459&single=true&output=csv';
+const CSV_EQUIPOS_C         = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=1894947293&single=true&output=csv';
+const CSV_JUGADORES_C       = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=1940220650&single=true&output=csv';
+const CSV_PARTICIPACIONES_C = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=626975401&single=true&output=csv';
+const CSV_EVENTOS_C         = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=645868286&single=true&output=csv';
 
 let usuarioActual = null, modoArbitro = false, partidoActual = null;
 let todosJugadores = [], todasParticipaciones = [], todosEquiposC = [], todosPartidosC = [], todosEventosC = [];
@@ -64,10 +64,10 @@ function renderModoArbitroRow() {
   const el = document.getElementById('modo-arbitro-row');
   el.innerHTML = modoArbitro
     ? `<div style="display:flex;align-items:center;gap:10px;">
-         <span style="font-size:12px;color:#39ff14;">Árbitro: <b>${usuarioActual?.Nombre||'Árbitro'}</b></span>
+         <span style="font-size:12px;color:#14b8fe;">Árbitro: <b>${usuarioActual?.Nombre||'Árbitro'}</b></span>
          <button onclick="cerrarSesion()" style="padding:6px 12px;background:rgba(255,68,68,0.2);border:1px solid #ff4444;border-radius:8px;color:#ff4444;cursor:pointer;font-size:12px;touch-action:manipulation;">Salir</button>
        </div>`
-    : `<button onclick="mostrarLogin()" style="padding:8px 16px;background:rgba(57,255,20,0.1);border:1px solid #39ff14;border-radius:8px;color:#39ff14;cursor:pointer;font-size:13px;font-weight:bold;touch-action:manipulation;">Modo Árbitro</button>`;
+    : `<button onclick="mostrarLogin()" style="padding:8px 16px;background:rgba(20,184,254,0.1);border:1px solid #14b8fe;border-radius:8px;color:#14b8fe;cursor:pointer;font-size:13px;font-weight:bold;touch-action:manipulation;">Modo Árbitro</button>`;
 }
 
 // ===== LISTA (tarjetas apiladas, igual estilo que partidos.html) =====
@@ -209,7 +209,7 @@ function abrirCedula(idPartido) {
     ${esEditable ? `
     <div class="cron-bar">
       <span id="cron-display" class="cron-display">00:00</span>
-      <button id="btn-cron" onclick="toggleCron()" class="cron-btn" style="background:rgba(57,255,20,0.1);border-color:#39ff14;color:#39ff14;">INICIAR</button>
+      <button id="btn-cron" onclick="toggleCron()" class="cron-btn" style="background:rgba(20,184,254,0.1);border-color:#14b8fe;color:#14b8fe;">INICIAR</button>
       <button onclick="resetCron()" class="cron-btn" style="background:rgba(255,68,68,0.1);border-color:#ff4444;color:#ff4444;">RESET</button>
     </div>` : ''}
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
@@ -221,7 +221,7 @@ function abrirCedula(idPartido) {
         <div class="ced-jornada-tag">${partidoActual.Jornada?'JORNADA '+partidoActual.Jornada:''}</div>
         <div id="marcador-live" class="ced-score-num">${gL} - ${gV}</div>
         <div style="font-size:10px;color:rgba(255,255,255,0.4);">${partidoActual.Fecha||''}</div>
-        <div style="font-size:10px;color:${esEditable?'#39ff14':'rgba(255,255,255,0.3)'};">${esEditable?'MODO EDICIÓN':'SOLO CONSULTA'}</div>
+        <div style="font-size:10px;color:${esEditable?'#14b8fe':'rgba(255,255,255,0.3)'};">${esEditable?'MODO EDICIÓN':'SOLO CONSULTA'}</div>
       </div>
       <div class="ced-team-col">
         <img src="${eqV.URL||''}">
@@ -255,8 +255,8 @@ function abrirCedula(idPartido) {
         <span class="ced-jug-name">${jug.Nombre||'#'+id}</span>
         <button id="btn-v-${id}" onclick="tgV('${id}')" class="ced-btn" style="width:32px;height:28px;">V</button>
         <button onclick="gMenos('${id}')" class="ced-btn" style="width:28px;height:28px;color:#fff;font-size:15px;line-height:1;">-</button>
-        <span id="g-${id}" style="font-size:14px;font-weight:900;color:#d4f030;min-width:18px;text-align:center;">0</span>
-        <button onclick="gMas('${id}')" class="ced-btn" style="width:28px;height:28px;border-color:#39ff14;background:#1a3a1a;color:#39ff14;font-size:15px;line-height:1;">+</button>
+        <span id="g-${id}" style="font-size:14px;font-weight:900;color:#2bb8f4;min-width:18px;text-align:center;">0</span>
+        <button onclick="gMas('${id}')" class="ced-btn" style="width:28px;height:28px;border-color:#14b8fe;background:#19303a;color:#14b8fe;font-size:15px;line-height:1;">+</button>
         <button id="btn-am-${id}" onclick="tgAm('${id}')" class="ced-btn" style="width:32px;height:28px;font-size:10px;">AM</button>
         <button id="btn-rj-${id}" onclick="tgRj('${id}')" class="ced-btn" style="width:32px;height:28px;font-size:10px;">RJ</button>
       </div>`;
@@ -290,9 +290,9 @@ function abrirCedula(idPartido) {
         <div><div class="ced-col-title">${eqV.Nombre||'Visita'}</div>${htmlV}</div>
       </div>
       <div class="col-mob" style="display:none;">
-        <div class="ced-col-title" style="border-bottom:1px solid rgba(57,255,20,0.3);padding-bottom:6px;">${eqL.Nombre||'Local'}</div>
+        <div class="ced-col-title" style="border-bottom:1px solid rgba(20,184,254,0.3);padding-bottom:6px;">${eqL.Nombre||'Local'}</div>
         ${htmlL}
-        <div class="ced-col-title" style="margin-top:14px;border-bottom:1px solid rgba(57,255,20,0.3);padding-bottom:6px;">${eqV.Nombre||'Visita'}</div>
+        <div class="ced-col-title" style="margin-top:14px;border-bottom:1px solid rgba(20,184,254,0.3);padding-bottom:6px;">${eqV.Nombre||'Visita'}</div>
         ${htmlV}
       </div>`;
   } else {
@@ -340,9 +340,9 @@ function resetCron() {
 function tgV(id) {
   eventosRegistrados[id].asistencia = !eventosRegistrados[id].asistencia;
   const btn = document.getElementById('btn-v-'+id);
-  btn.style.background = eventosRegistrados[id].asistencia ? '#1a3a1a' : '#111';
-  btn.style.color      = eventosRegistrados[id].asistencia ? '#39ff14' : '#666';
-  btn.style.borderColor= eventosRegistrados[id].asistencia ? '#39ff14' : '#444';
+  btn.style.background = eventosRegistrados[id].asistencia ? '#19303a' : '#111';
+  btn.style.color      = eventosRegistrados[id].asistencia ? '#14b8fe' : '#666';
+  btn.style.borderColor= eventosRegistrados[id].asistencia ? '#14b8fe' : '#444';
 }
 function tgAm(id) {
   eventosRegistrados[id].amarilla = !eventosRegistrados[id].amarilla;
@@ -350,7 +350,7 @@ function tgAm(id) {
   const btn = document.getElementById('btn-am-'+id);
   btn.style.background = eventosRegistrados[id].amarilla ? '#b8860b' : '#111';
   btn.style.color      = eventosRegistrados[id].amarilla ? '#fff'    : '#666';
-  btn.style.borderColor= eventosRegistrados[id].amarilla ? '#ffd700' : '#444';
+  btn.style.borderColor= eventosRegistrados[id].amarilla ? '#ff6b1a' : '#444';
 }
 function tgRj(id) {
   eventosRegistrados[id].roja = !eventosRegistrados[id].roja;
@@ -392,7 +392,7 @@ function iniciarFirma() {
     canvas._init = false;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle='#39ff14'; ctx.lineWidth=2; ctx.lineCap='round';
+    ctx.strokeStyle='#14b8fe'; ctx.lineWidth=2; ctx.lineCap='round';
     let drawing=false;
     function pos(e) {
       const r=canvas.getBoundingClientRect(), sx=canvas.width/r.width, sy=canvas.height/r.height;
@@ -438,9 +438,9 @@ function guardarCedula() {
   const data   = rows.map(r=>r.join('\t')).join('\n');
   const wrap   = document.getElementById('cedula-data-wrap');
   wrap.innerHTML = `
-    <pre style="background:rgba(0,0,0,0.5);border:1px solid #39ff14;border-radius:8px;padding:12px;color:#b8f030;font-size:11px;overflow-x:auto;white-space:pre-wrap;">${header}\n${data}</pre>
+    <pre style="background:rgba(0,0,0,0.5);border:1px solid #14b8fe;border-radius:8px;padding:12px;color:#2bb8f4;font-size:11px;overflow-x:auto;white-space:pre-wrap;">${header}\n${data}</pre>
     <button onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent).then(()=>this.textContent='Copiado!')"
-      style="margin-top:8px;padding:8px 14px;background:rgba(57,255,20,0.2);border:1px solid #39ff14;border-radius:8px;color:#39ff14;cursor:pointer;font-size:12px;touch-action:manipulation;">
+      style="margin-top:8px;padding:8px 14px;background:rgba(20,184,254,0.2);border:1px solid #14b8fe;border-radius:8px;color:#14b8fe;cursor:pointer;font-size:12px;touch-action:manipulation;">
       Copiar para pegar en Sheets
     </button>`;
   statusEl.textContent = rows.length+' evento(s) listos para copiar';

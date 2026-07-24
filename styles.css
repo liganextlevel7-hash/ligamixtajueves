@@ -1110,3 +1110,20 @@ a.car-btn {
   background: rgba(255,107,26,0.15) !important;
   border: 1px solid #ff6b1a !important;
 }
+
+/* ===== FIX BOTONES CARRUSEL ===== */
+a.car-btn {
+  text-decoration: none !important;
+}
+
+.c-tabla a.car-btn,
+.c-goles a.car-btn,
+.c-partidos a.car-btn,
+.c-proxima a.car-btn,
+.c-equipos a.car-btn,
+.c-liguilla a.car-btn,
+.c-cedula a.car-btn {
+  color: #ff6b1a !important;
+  background: rgba(255,107,26,0.15) !important;
+  border: 1px solid #ff6b1a !important;
+}

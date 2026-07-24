@@ -1,5 +1,5 @@
 const URL_ESTADISTICAS =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=979195152&single=true&output=csv";
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=979195152&single=true&output=csv";
 
 const logos = {
   "Soldados Del Amor":"https://i.imgur.com/gBvmM4v.png",

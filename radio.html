@@ -240,6 +240,37 @@
 
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-thumb { background: #245; border-radius: 4px; }
+
+  /* ===== Pestañas: Radio Oficial / Mi Espacio ===== */
+  .modo-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .modo-tab {
+    flex: 1;
+    background: #071019;
+    border: 1px solid #245;
+    color: #9fd8ff;
+    font-weight: bold;
+    font-size: 0.78rem;
+    padding: 10px 6px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .modo-tab.activo {
+    background: linear-gradient(145deg, #00b4ff, #ff6b1a);
+    color: #111;
+    border-color: transparent;
+  }
+  #panel-personal { display: none; }
+  .personal-nota {
+    font-size: 0.7rem;
+    color: #8aa;
+    text-align: left;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
 </style>
 </head>
 <body>
@@ -254,8 +285,14 @@
 
     <div class="player-card">
 
-      <div id="yt-player-container"><div id="yt-player"></div></div>
+      <div id="yt-player-container"><div id="yt-player"></div><div id="yt-player-personal"></div></div>
 
+      <div class="modo-tabs">
+        <button id="tab-oficial" class="modo-tab activo">📻 Radio Oficial</button>
+        <button id="tab-personal" class="modo-tab">🎧 Mi Espacio</button>
+      </div>
+
+      <div id="panel-oficial">
       <div class="now-playing" id="now-playing">
         <img id="np-thumb" src="" alt="">
         <div class="info">
@@ -269,7 +306,7 @@
 
       <button id="btn-escuchar" style="margin-top:14px; background:linear-gradient(145deg,#00b4ff,#0080c0); border:none; color:#fff; font-weight:bold; border-radius:14px; padding:10px 22px; font-size:0.9rem; cursor:pointer; width:100%;">▶ Escuchar</button>
 
-      <div class="seccion-titulo">Buscar música</div>
+      <div class="seccion-titulo">Buscar música (se integra a la Radio Oficial, para todos)</div>
       <div class="buscador">
         <input type="text" id="input-buscar" placeholder="Nombre de la canción o artista..." maxlength="80">
         <button id="btn-buscar">Buscar</button>
@@ -280,6 +317,30 @@
       <div class="seccion-titulo">Cola (<span id="cola-count">0</span>)</div>
       <div class="cola-lista" id="cola-lista"></div>
       <div class="cupo-msg" id="cupo-msg"></div>
+      </div>
+
+      <div id="panel-personal">
+        <p class="personal-nota">Aquí escuchas tú solo/a, en tu propio espacio — no se mezcla con la Radio Oficial y nadie más lo escucha.</p>
+
+        <div class="now-playing" id="np-personal-wrap">
+          <img id="np-personal-thumb" src="" alt="">
+          <div class="info">
+            <div class="titulo" id="np-personal-titulo">Nada sonando — busca algo abajo</div>
+          </div>
+          <button id="btn-saltar-personal" title="Saltar canción" style="background:#222; border:1px solid #ff6b1a; color:#ff6b1a; border-radius:10px; padding:6px 10px; font-size:0.75rem; cursor:pointer; flex-shrink:0;">⏭</button>
+        </div>
+
+        <div class="seccion-titulo">Buscar música (solo para ti)</div>
+        <div class="buscador">
+          <input type="text" id="input-buscar-personal" placeholder="Nombre de la canción o artista..." maxlength="80">
+          <button id="btn-buscar-personal">Buscar</button>
+        </div>
+        <div class="resultados" id="resultados-personal"></div>
+        <div class="estado-msg" id="estado-msg-personal"></div>
+
+        <div class="seccion-titulo">Tu cola (<span id="cola-personal-count">0</span>)</div>
+        <div class="cola-lista" id="cola-personal-lista"></div>
+      </div>
 
     </div>
   </div>
@@ -500,6 +561,13 @@
     let ytPlayer = null;
     let ytListo = false;
     let ultimoVideoIdCargado = null;
+    let modoActual = 'oficial'; // 'oficial' | 'personal'
+
+    // ---- Reproductor y cola PERSONALES (locales, sin Firebase) ----
+    let ytPlayerPersonal = null;
+    let ytListoPersonal = false;
+    let colaPersonal = [];
+    let personalSonando = null; // {videoId, title, thumbnail}
 
     const tagScript = document.createElement('script');
     tagScript.src = 'https://www.youtube.com/iframe_api';
@@ -513,6 +581,15 @@
         events: {
           onReady: () => { ytListo = true; sincronizarConEstadoActual(); },
           onStateChange: onPlayerStateChange
+        }
+      });
+      ytPlayerPersonal = new YT.Player('yt-player-personal', {
+        height: '1',
+        width: '1',
+        playerVars: { autoplay: 0, controls: 0, disablekb: 1, playsinline: 1 },
+        events: {
+          onReady: () => { ytListoPersonal = true; },
+          onStateChange: onPlayerPersonalStateChange
         }
       });
     };
@@ -565,6 +642,12 @@
       }
     }
 
+    // Antes solo se re-sincronizaba al cambiar de canción; ahora se revisa cada 6s
+    // durante toda la canción, para que el desfase no se vaya acumulando "después de un rato".
+    setInterval(() => {
+      if (modoActual === 'oficial') sincronizarConEstadoActual();
+    }, 6000);
+
     // ===================== DESBLOQUEO DE AUDIO (jingle + YouTube) =====================
     const jingleAudio = document.getElementById('jingle-nl7');
     const unlockOverlay = document.getElementById('unlock-overlay');
@@ -613,6 +696,135 @@
       jingleAudio.currentTime = 0;
       jingleAudio.play().catch(() => {});
     }, JINGLE_CADA_MS);
+
+    // ===================== MODO PERSONAL ("Mi Espacio") =====================
+    // Búsqueda y cola 100% locales a este navegador: no se guardan en Firebase,
+    // no las escucha nadie más, y no dependen ni afectan a la Radio Oficial.
+
+    const inputBuscarP = document.getElementById('input-buscar-personal');
+    const btnBuscarP = document.getElementById('btn-buscar-personal');
+    const resultadosPDiv = document.getElementById('resultados-personal');
+    const estadoMsgP = document.getElementById('estado-msg-personal');
+    const npPersonalTitulo = document.getElementById('np-personal-titulo');
+    const npPersonalThumb = document.getElementById('np-personal-thumb');
+    const colaPersonalDiv = document.getElementById('cola-personal-lista');
+    const colaPersonalCount = document.getElementById('cola-personal-count');
+
+    async function buscarCancionesPersonal() {
+      const q = inputBuscarP.value.trim();
+      if (!q) return;
+      btnBuscarP.disabled = true;
+      estadoMsgP.textContent = 'Buscando...';
+      resultadosPDiv.innerHTML = '';
+      try {
+        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoCategoryId=10&maxResults=8&q=${encodeURIComponent(q)}&key=${YOUTUBE_API_KEY}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!res.ok) {
+          estadoMsgP.textContent = 'Error al buscar: ' + (data.error?.message || res.status);
+          btnBuscarP.disabled = false;
+          return;
+        }
+        estadoMsgP.textContent = '';
+        (data.items || []).forEach(item => {
+          const fila = document.createElement('div');
+          fila.className = 'item-fila';
+          fila.innerHTML = `
+            <img src="${item.snippet.thumbnails.default.url}">
+            <div class="info">
+              <div class="titulo">${escapeHtml(item.snippet.title)}</div>
+              <div class="sub">${escapeHtml(item.snippet.channelTitle)}</div>
+            </div>
+            <button>Agregar</button>
+          `;
+          fila.querySelector('button').addEventListener('click', () => {
+            agregarAColaPersonal({
+              videoId: item.id.videoId,
+              title: item.snippet.title,
+              thumbnail: item.snippet.thumbnails.default.url
+            });
+          });
+          resultadosPDiv.appendChild(fila);
+        });
+      } catch (err) {
+        estadoMsgP.textContent = 'Error de conexión al buscar.';
+      }
+      btnBuscarP.disabled = false;
+    }
+    btnBuscarP.addEventListener('click', buscarCancionesPersonal);
+    inputBuscarP.addEventListener('keydown', (e) => { if (e.key === 'Enter') buscarCancionesPersonal(); });
+
+    function pintarColaPersonal() {
+      colaPersonalCount.textContent = colaPersonal.length;
+      colaPersonalDiv.innerHTML = '';
+      colaPersonal.forEach(song => {
+        const fila = document.createElement('div');
+        fila.className = 'item-fila';
+        fila.innerHTML = `
+          <img src="${song.thumbnail}">
+          <div class="info"><div class="titulo">${escapeHtml(song.title)}</div></div>
+        `;
+        colaPersonalDiv.appendChild(fila);
+      });
+    }
+
+    function agregarAColaPersonal(song) {
+      colaPersonal.push(song);
+      pintarColaPersonal();
+      if (!personalSonando) avanzarColaPersonal();
+    }
+
+    function avanzarColaPersonal() {
+      if (colaPersonal.length === 0) {
+        personalSonando = null;
+        npPersonalTitulo.textContent = 'Nada sonando — busca algo abajo';
+        npPersonalThumb.src = '';
+        return;
+      }
+      personalSonando = colaPersonal.shift();
+      pintarColaPersonal();
+      npPersonalTitulo.textContent = personalSonando.title;
+      npPersonalThumb.src = personalSonando.thumbnail;
+      if (ytListoPersonal) {
+        ytPlayerPersonal.loadVideoById({ videoId: personalSonando.videoId, startSeconds: 0 });
+      }
+    }
+
+    function onPlayerPersonalStateChange(event) {
+      if (event.data === YT.PlayerState.ENDED) avanzarColaPersonal();
+    }
+
+    document.getElementById('btn-saltar-personal').addEventListener('click', () => {
+      if (personalSonando) avanzarColaPersonal();
+    });
+
+    // ===================== CAMBIO DE PESTAÑAS =====================
+    const tabOficial = document.getElementById('tab-oficial');
+    const tabPersonal = document.getElementById('tab-personal');
+    const panelOficial = document.getElementById('panel-oficial');
+    const panelPersonal = document.getElementById('panel-personal');
+
+    tabOficial.addEventListener('click', () => {
+      if (modoActual === 'oficial') return;
+      modoActual = 'oficial';
+      tabOficial.classList.add('activo');
+      tabPersonal.classList.remove('activo');
+      panelOficial.style.display = '';
+      panelPersonal.style.display = 'none';
+      if (ytListoPersonal) try { ytPlayerPersonal.pauseVideo(); } catch (e) {}
+      if (ytListo) { sincronizarConEstadoActual(); try { ytPlayer.playVideo(); } catch (e) {} }
+    });
+
+    tabPersonal.addEventListener('click', () => {
+      if (modoActual === 'personal') return;
+      modoActual = 'personal';
+      tabPersonal.classList.add('activo');
+      tabOficial.classList.remove('activo');
+      panelPersonal.style.display = '';
+      panelOficial.style.display = 'none';
+      if (ytListo) try { ytPlayer.pauseVideo(); } catch (e) {}
+      if (ytListoPersonal && personalSonando) try { ytPlayerPersonal.playVideo(); } catch (e) {}
+    });
   </script>
 
 </body>

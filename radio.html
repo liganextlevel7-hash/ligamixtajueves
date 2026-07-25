@@ -262,9 +262,12 @@
           <div class="titulo" id="np-titulo">Cargando...</div>
           <div class="agregado-por" id="np-agregado">—</div>
         </div>
+        <button id="btn-saltar" title="Saltar canción" style="background:#222; border:1px solid #00b4ff; color:#00b4ff; border-radius:10px; padding:6px 10px; font-size:0.75rem; cursor:pointer; flex-shrink:0;">⏭</button>
       </div>
 
       <div class="live-badge">● EN VIVO</div>
+
+      <button id="btn-escuchar" style="margin-top:14px; background:linear-gradient(145deg,#00b4ff,#0080c0); border:none; color:#fff; font-weight:bold; border-radius:14px; padding:10px 22px; font-size:0.9rem; cursor:pointer; width:100%;">▶ Escuchar</button>
 
       <div class="seccion-titulo">Buscar música</div>
       <div class="buscador">
@@ -520,6 +523,13 @@
       }
     }
 
+    const btnSaltar = document.getElementById('btn-saltar');
+    btnSaltar.addEventListener('click', () => {
+      if (estadoActualCache && estadoActualCache.videoId) {
+        avanzarCola(estadoActualCache.videoId);
+      }
+    });
+
     let estadoActualCache = null;
     nowPlayingRef.on('value', snap => {
       estadoActualCache = snap.val();
@@ -588,6 +598,14 @@
     }
     unlockOverlay.addEventListener('click', desbloquearAudio);
     unlockOverlay.addEventListener('touchstart', desbloquearAudio);
+
+    const btnEscuchar = document.getElementById('btn-escuchar');
+    btnEscuchar.addEventListener('click', () => {
+      desbloquearAudio();
+      btnEscuchar.textContent = '🔊 Reproduciendo';
+      btnEscuchar.disabled = true;
+      btnEscuchar.style.opacity = '0.6';
+    });
 
     const JINGLE_CADA_MS = 10 * 60 * 1000;
     setInterval(() => {

@@ -393,8 +393,39 @@
     // ===================== CONFIG =====================
     // 👉 PEGA AQUÍ TU API KEY DE YOUTUBE DATA API v3
     const YOUTUBE_API_KEY = "AIzaSyAQqwu1QmrWJQev5lPxKw0nC8Q5gaJDKcE";
-    const MAX_CANCIONES_POR_USUARIO = 2;
+    const MAX_CANCIONES_POR_USUARIO = 3;
     const COOLDOWN_MS = 15 * 60 * 1000; // 15 minutos
+
+    // ===================== PLAYLIST DE RESPALDO =====================
+    // Suena en bucle SOLO en la Radio Oficial cuando la cola de la gente está
+    // vacía. En cuanto alguien agrega una canción, esa se antepone; al
+    // terminarse lo que la gente agregó, se regresa sola aquí.
+    const PLAYLIST_RESPALDO = [
+      { videoId: 'SlgtjRq5AXs', title: 'Los Ángeles Azules, Belinda, Lalo Ebratt - Amor a Primera Vista' },
+      { videoId: 'KCN568dL3K0', title: 'Éxito de los 90' },
+      { videoId: 'OFDazPw8CWM', title: 'Timbiriche - Tú y Yo Somos Uno Mismo' },
+      { videoId: 'vmBHE3NXclA', title: 'Hombres G - Devuélveme a mi Chica' },
+      { videoId: 'OwGG5fX7bxY', title: 'Mecano - Hijo de la Luna' },
+      { videoId: 'smfo5w7sKMY', title: 'Miguel Bosé - Amante Bandido' },
+      { videoId: '2poXmu9nQ70', title: 'Alaska y Dinarama - A Quién le Importa' },
+      { videoId: 'yiB8rLs6vHk', title: 'Ana Belén - Qué Será' },
+      { videoId: 'p9n7erXdRCs', title: 'Flans - No Controles' },
+      { videoId: 'EoPJdXAzDs8', title: 'Luis Miguel - Culpable o No' },
+      { videoId: 'EU3LuPOYFu4', title: 'Franco de Vita - Te Amo' },
+      { videoId: '2ZACWIPuTDE', title: 'Roberto Carlos - Amigo' },
+      { videoId: 'mFc6VAVMgKo', title: 'Maná - Rayando el Sol' },
+      { videoId: 'SEOsusFXyuM', title: 'Duncan Dhu - En Algún Lugar' },
+      { videoId: '3DV57Y4tEAM', title: 'Enrique Iglesias - Experiencia Religiosa' },
+      { videoId: 'ZMUqIoDtSwc', title: 'Alejandro Sanz - Corazón Partío' },
+      { videoId: 'nwjWU35BkBM', title: 'Los Secretos - Sobre un Vidrio Mojado' },
+      { videoId: '5O4lse0dWPU', title: 'Mocedades - Amor de Hombre' },
+      { videoId: 'pjPA7CXutDw', title: 'Los Fabulosos Cadillacs - Matador' },
+      { videoId: 'kIr8hsVTCzg', title: 'Café Tacvba - La Ingrata' },
+      { videoId: 'MBe_iDSD1q8', title: 'Ricky Martin - María' },
+      { videoId: '4MULjbUhIz4', title: 'La Mosca - Para No Verte Más' },
+      { videoId: 'P8CoNgTfgqo', title: 'Molotov - Gimme tha Power' },
+      { videoId: 'oTdK6zG0M3U', title: 'Jaguares - Detrás de los Cerros' }
+    ];
 
     // ===================== ADMIN: solo un aparato reproduce el audio real =====================
     const ADMIN_PASSWORD = 'nl7admin';
@@ -498,12 +529,14 @@
 
     // ===================== AGREGAR A LA COLA =====================
     async function agregarACola(song, boton) {
-      const check = await puedeAgregarCancion();
-      if (!check.permitido) {
-        estadoMsg.textContent = `Ya agregaste ${MAX_CANCIONES_POR_USUARIO} canciones. Espera unos minutos para volver a agregar.`;
-        return;
+      if (!esAdminActivo) {
+        const check = await puedeAgregarCancion();
+        if (!check.permitido) {
+          estadoMsg.textContent = `Ya agregaste ${MAX_CANCIONES_POR_USUARIO} canciones. Espera unos minutos para volver a agregar.`;
+          return;
+        }
       }
-      if (!nickname) nickname = getOrAskNickname();
+      if (!nickname) nickname = esAdminActivo ? (getOrAskAdminNombre() + ' (Admin)') : getOrAskNickname();
 
       if (boton) boton.disabled = true;
       await queueRef.push({
@@ -514,7 +547,7 @@
         userId: userId,
         addedAt: Date.now()
       });
-      await registrarUso();
+      if (!esAdminActivo) await registrarUso();
 
       // si no hay nada sonando, arrancar de inmediato (avanzarCola ya protege contra doble arranque)
       nowPlayingRef.once('value', snap => {
@@ -543,7 +576,19 @@
         const queue = current.queue || {};
         const entradas = Object.entries(queue).sort((a, b) => (a[1].addedAt || 0) - (b[1].addedAt || 0));
         if (entradas.length === 0) {
-          current.nowPlaying = null;
+          // Cola de la gente vacía: seguimos con la playlist de respaldo, en bucle.
+          const idxAnterior = typeof current.respaldoIndex === 'number' ? current.respaldoIndex : -1;
+          const idx = (idxAnterior + 1) % PLAYLIST_RESPALDO.length;
+          const song = PLAYLIST_RESPALDO[idx];
+          current.respaldoIndex = idx;
+          current.nowPlaying = {
+            videoId: song.videoId,
+            title: song.title,
+            thumbnail: 'https://i.ytimg.com/vi/' + song.videoId + '/hqdefault.jpg',
+            addedBy: '📻 Radio Next Level 7',
+            startedAt: Date.now(),
+            esRespaldo: true
+          };
           return current;
         }
         const [key, song] = entradas[0];
@@ -660,24 +705,19 @@
       if (!esAdminActivo) return; // los invitados no reproducen nada en su aparato
       if (!ytListo || !estadoActualCache) return;
       const np = estadoActualCache;
-      const elapsedSec = Math.max(0, (Date.now() - (np.startedAt || Date.now())) / 1000);
       if (ultimoVideoIdCargado !== np.videoId) {
         ultimoVideoIdCargado = np.videoId;
-        ytPlayer.loadVideoById({ videoId: np.videoId, startSeconds: elapsedSec });
-      } else {
-        // Reajuste suave si el navegador se desincroniza (ej. tras estar en segundo plano)
-        ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() !== undefined &&
-          Promise.resolve(ytPlayer.getCurrentTime()).then(actual => {
-            if (Math.abs(actual - elapsedSec) > 3) ytPlayer.seekTo(elapsedSec, true);
-          });
+        // Como ahora solo este aparato reproduce audio real, cada canción arranca
+        // siempre del segundo 0 — ya no hay que "alcanzar" a nadie más. Antes, si
+        // YouTube metía un anuncio antes del video, el reloj seguía corriendo y la
+        // canción terminaba saltándose los primeros segundos al terminar el anuncio.
+        ytPlayer.loadVideoById({ videoId: np.videoId, startSeconds: 0 });
       }
     }
 
-    // Antes solo se re-sincronizaba al cambiar de canción; ahora se revisa cada 6s
-    // durante toda la canción, para que el desfase no se vaya acumulando "después de un rato".
-    setInterval(() => {
-      if (modoActual === 'oficial') sincronizarConEstadoActual();
-    }, 6000);
+    // Ya no hace falta resincronizar periódicamente: solo el aparato del admin
+    // reproduce audio real, y ese ya se actualiza directo cuando cambia la canción
+    // (ver nowPlayingRef.on('value', ...) más arriba).
 
     // ===================== DESBLOQUEO DE AUDIO (jingle + YouTube) — SOLO ADMIN =====================
     // Los invitados nunca reproducen nada en su aparato, así que no necesitan desbloquear audio.
@@ -932,7 +972,11 @@
       btnSaltar.style.display = 'inline-block';
       prepararAudioAdmin();
       iniciarJingleAdmin();
-      if (ytListo) sincronizarConEstadoActual();
+      // Si no hay nada sonando todavía (ni cola de la gente ni respaldo activo), arrancamos.
+      nowPlayingRef.once('value', snap => {
+        if (!snap.val()) avanzarCola(null);
+        else if (ytListo) sincronizarConEstadoActual();
+      });
 
       // Si este aparato pierde la conexión de verdad (se cierra, se apaga,
       // se va el internet y no vuelve), Firebase libera la sesión solo —
@@ -1000,7 +1044,7 @@
       modoActual = 'personal';
       tabPersonal.classList.add('activo');
       tabOficial.classList.remove('activo');
-      panelPersonal.style.display = '';
+      panelPersonal.style.display = 'block';
       panelOficial.style.display = 'none';
       if (ytListo) try { ytPlayer.pauseVideo(); } catch (e) {}
       if (ytListoPersonal && personalSonando) try { ytPlayerPersonal.playVideo(); } catch (e) {}

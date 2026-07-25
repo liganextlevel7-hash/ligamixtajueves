@@ -299,12 +299,31 @@
           <div class="titulo" id="np-titulo">Cargando...</div>
           <div class="agregado-por" id="np-agregado">—</div>
         </div>
-        <button id="btn-saltar" title="Saltar canción" style="background:#222; border:1px solid #00b4ff; color:#00b4ff; border-radius:10px; padding:6px 10px; font-size:0.75rem; cursor:pointer; flex-shrink:0;">⏭</button>
+        <button id="btn-saltar" title="Saltar canción" style="background:#222; border:1px solid #00b4ff; color:#00b4ff; border-radius:10px; padding:6px 10px; font-size:0.75rem; cursor:pointer; flex-shrink:0; display:none;">⏭</button>
+      </div>
+
+      <!-- ===== ADMIN: solo este aparato reproduce el audio real ===== -->
+      <div id="admin-box" style="text-align:left; margin-bottom:14px;">
+        <div id="admin-guest-view">
+          <div style="font-size:0.68rem; color:#8aa; margin-bottom:6px;">🔇 Modo invitado: puedes agregar canciones, pero el audio solo suena en el aparato del administrador.</div>
+          <button id="btn-abrir-login-admin" style="background:none; border:1px solid #333; color:#8aa; border-radius:10px; padding:6px 12px; font-size:0.7rem; cursor:pointer;">🔐 Entrar como administrador</button>
+          <div id="admin-login-form" style="display:none; margin-top:8px; gap:6px; flex-direction:column;">
+            <input type="password" id="admin-pass-input" placeholder="Contraseña de administrador" style="padding:8px 10px; border-radius:10px; border:1px solid #245; background:#071019; color:#fff; font-size:0.8rem; outline:none;">
+            <button id="btn-confirmar-admin" style="background:linear-gradient(145deg,#00b4ff,#ff6b1a); border:none; color:#111; font-weight:bold; border-radius:10px; padding:8px; font-size:0.8rem; cursor:pointer;">Entrar</button>
+            <div id="admin-login-error" style="font-size:0.7rem; color:#ff6b6b; min-height:14px;"></div>
+          </div>
+        </div>
+        <div id="admin-active-view" style="display:none; background:rgba(0,180,255,0.1); border:1px solid #00b4ff; border-radius:10px; padding:8px 10px;">
+          <div style="font-size:0.75rem; font-weight:bold; color:#00b4ff;">🎙️ Modo Admin activo</div>
+          <div style="font-size:0.68rem; color:#9fd8ff; margin:2px 0 6px;">El audio suena en este aparato. Conéctalo a las bocinas.</div>
+          <button id="btn-cerrar-admin" style="background:none; border:1px solid #00b4ff; color:#00b4ff; border-radius:8px; padding:5px 10px; font-size:0.7rem; cursor:pointer;">Cerrar sesión de admin</button>
+        </div>
+        <div id="admin-bumped-msg" style="display:none; font-size:0.72rem; color:#ffb366; margin-top:6px;">⚠️ Otro aparato tomó el control de administrador. Ahora estás en modo invitado.</div>
       </div>
 
       <div class="live-badge">● EN VIVO</div>
 
-      <button id="btn-escuchar" style="margin-top:14px; background:linear-gradient(145deg,#00b4ff,#0080c0); border:none; color:#fff; font-weight:bold; border-radius:14px; padding:10px 22px; font-size:0.9rem; cursor:pointer; width:100%;">▶ Escuchar</button>
+      <button id="btn-escuchar" style="display:none; margin-top:14px; background:linear-gradient(145deg,#00b4ff,#0080c0); border:none; color:#fff; font-weight:bold; border-radius:14px; padding:10px 22px; font-size:0.9rem; cursor:pointer; width:100%;">▶ Escuchar</button>
 
       <div class="seccion-titulo">Buscar música (se integra a la Radio Oficial, para todos)</div>
       <div class="buscador">
@@ -372,6 +391,12 @@
     const YOUTUBE_API_KEY = "AIzaSyAQqwu1QmrWJQev5lPxKw0nC8Q5gaJDKcE";
     const MAX_CANCIONES_POR_USUARIO = 2;
     const COOLDOWN_MS = 15 * 60 * 1000; // 15 minutos
+
+    // ===================== ADMIN: solo un aparato reproduce el audio real =====================
+    const ADMIN_PASSWORD = 'nl7admin';
+    const adminSessionRef = db.ref('jukebox/activeAdminSession');
+    const misSessionId = 'admin_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    let esAdminActivo = false;
 
     // ===================== IDENTIDAD DEL USUARIO (local, sin login) =====================
     function getOrCreateUserId() {
@@ -602,6 +627,7 @@
 
     const btnSaltar = document.getElementById('btn-saltar');
     btnSaltar.addEventListener('click', () => {
+      if (!esAdminActivo) return;
       if (estadoActualCache && estadoActualCache.videoId) {
         avanzarCola(estadoActualCache.videoId);
       }
@@ -627,6 +653,7 @@
     }
 
     function sincronizarConEstadoActual() {
+      if (!esAdminActivo) return; // los invitados no reproducen nada en su aparato
       if (!ytListo || !estadoActualCache) return;
       const np = estadoActualCache;
       const elapsedSec = Math.max(0, (Date.now() - (np.startedAt || Date.now())) / 1000);
@@ -648,24 +675,32 @@
       if (modoActual === 'oficial') sincronizarConEstadoActual();
     }, 6000);
 
-    // ===================== DESBLOQUEO DE AUDIO (jingle + YouTube) =====================
+    // ===================== DESBLOQUEO DE AUDIO (jingle + YouTube) — SOLO ADMIN =====================
+    // Los invitados nunca reproducen nada en su aparato, así que no necesitan desbloquear audio.
     const jingleAudio = document.getElementById('jingle-nl7');
     const unlockOverlay = document.getElementById('unlock-overlay');
     let jingleDesbloqueado = false;
+    let audioCtx = null, jingleGain = null;
+    let jingleIntervalId = null;
 
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const jingleSource = audioCtx.createMediaElementSource(jingleAudio);
-    const jingleCompressor = audioCtx.createDynamicsCompressor();
-    jingleCompressor.threshold.value = -24;
-    jingleCompressor.knee.value = 30;
-    jingleCompressor.ratio.value = 12;
-    jingleCompressor.attack.value = 0.003;
-    jingleCompressor.release.value = 0.25;
-    const jingleGain = audioCtx.createGain();
-    jingleGain.gain.value = 5;
-    jingleSource.connect(jingleCompressor).connect(jingleGain).connect(audioCtx.destination);
+    function prepararAudioAdmin() {
+      if (audioCtx) return; // ya está listo
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const jingleSource = audioCtx.createMediaElementSource(jingleAudio);
+      const jingleCompressor = audioCtx.createDynamicsCompressor();
+      jingleCompressor.threshold.value = -24;
+      jingleCompressor.knee.value = 30;
+      jingleCompressor.ratio.value = 12;
+      jingleCompressor.attack.value = 0.003;
+      jingleCompressor.release.value = 0.25;
+      jingleGain = audioCtx.createGain();
+      jingleGain.gain.value = 5;
+      jingleSource.connect(jingleCompressor).connect(jingleGain).connect(audioCtx.destination);
+    }
 
     function desbloquearAudio() {
+      if (!esAdminActivo) return;
+      prepararAudioAdmin();
       if (audioCtx.state === 'suspended') audioCtx.resume();
       if (!jingleDesbloqueado) {
         jingleAudio.play().then(() => {
@@ -691,11 +726,17 @@
     });
 
     const JINGLE_CADA_MS = 10 * 60 * 1000;
-    setInterval(() => {
-      if (!jingleDesbloqueado) return;
-      jingleAudio.currentTime = 0;
-      jingleAudio.play().catch(() => {});
-    }, JINGLE_CADA_MS);
+    function iniciarJingleAdmin() {
+      if (jingleIntervalId) return;
+      jingleIntervalId = setInterval(() => {
+        if (!esAdminActivo || !jingleDesbloqueado) return;
+        jingleAudio.currentTime = 0;
+        jingleAudio.play().catch(() => {});
+      }, JINGLE_CADA_MS);
+    }
+    function detenerJingleAdmin() {
+      if (jingleIntervalId) { clearInterval(jingleIntervalId); jingleIntervalId = null; }
+    }
 
     // ===================== MODO PERSONAL ("Mi Espacio") =====================
     // Búsqueda y cola 100% locales a este navegador: no se guardan en Firebase,
@@ -798,6 +839,83 @@
       if (personalSonando) avanzarColaPersonal();
     });
 
+    // ===================== LOGIN / LOGOUT DE ADMIN =====================
+    const adminGuestView = document.getElementById('admin-guest-view');
+    const adminActiveView = document.getElementById('admin-active-view');
+    const adminBumpedMsg = document.getElementById('admin-bumped-msg');
+    const btnAbrirLoginAdmin = document.getElementById('btn-abrir-login-admin');
+    const adminLoginForm = document.getElementById('admin-login-form');
+    const adminPassInput = document.getElementById('admin-pass-input');
+    const btnConfirmarAdmin = document.getElementById('btn-confirmar-admin');
+    const adminLoginError = document.getElementById('admin-login-error');
+    const btnCerrarAdmin = document.getElementById('btn-cerrar-admin');
+
+    btnAbrirLoginAdmin.addEventListener('click', () => {
+      adminLoginForm.style.display = adminLoginForm.style.display === 'none' ? 'flex' : 'none';
+      adminPassInput.focus();
+    });
+
+    async function intentarLoginAdmin() {
+      const pass = adminPassInput.value;
+      if (pass !== ADMIN_PASSWORD) {
+        adminLoginError.textContent = 'Contraseña incorrecta.';
+        return;
+      }
+      adminLoginError.textContent = '';
+      adminPassInput.value = '';
+
+      // Tomamos el control: cualquier otro aparato que esté activo se apaga solo.
+      await adminSessionRef.set({ sessionId: misSessionId, loggedInAt: Date.now() });
+
+      activarModoAdminLocal();
+    }
+    btnConfirmarAdmin.addEventListener('click', intentarLoginAdmin);
+    adminPassInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') intentarLoginAdmin(); });
+
+    function activarModoAdminLocal() {
+      esAdminActivo = true;
+      adminGuestView.style.display = 'none';
+      adminActiveView.style.display = 'block';
+      adminBumpedMsg.style.display = 'none';
+      document.getElementById('btn-escuchar').style.display = 'block';
+      document.getElementById('btn-escuchar').textContent = '▶ Escuchar';
+      document.getElementById('btn-escuchar').disabled = false;
+      document.getElementById('btn-escuchar').style.opacity = '1';
+      btnSaltar.style.display = 'inline-block';
+      prepararAudioAdmin();
+      iniciarJingleAdmin();
+      if (ytListo) sincronizarConEstadoActual();
+    }
+
+    function desactivarModoAdminLocal(porOtroAparato) {
+      esAdminActivo = false;
+      adminActiveView.style.display = 'none';
+      adminGuestView.style.display = 'block';
+      adminBumpedMsg.style.display = porOtroAparato ? 'block' : 'none';
+      document.getElementById('btn-escuchar').style.display = 'none';
+      btnSaltar.style.display = 'none';
+      detenerJingleAdmin();
+      if (ytPlayer && ytPlayer.pauseVideo) { try { ytPlayer.pauseVideo(); } catch (e) {} }
+    }
+
+    btnCerrarAdmin.addEventListener('click', async () => {
+      // Solo limpiamos la sesión compartida si sigue siendo la nuestra (por si ya nos "ganaron" el control).
+      const snap = await adminSessionRef.once('value');
+      const actual = snap.val();
+      if (actual && actual.sessionId === misSessionId) {
+        await adminSessionRef.remove();
+      }
+      desactivarModoAdminLocal(false);
+    });
+
+    // Si otro aparato entra como admin, este se apaga solo (estilo "cambiar de bocina" en Spotify).
+    adminSessionRef.on('value', snap => {
+      const actual = snap.val();
+      if (esAdminActivo && (!actual || actual.sessionId !== misSessionId)) {
+        desactivarModoAdminLocal(true);
+      }
+    });
+
     // ===================== CAMBIO DE PESTAÑAS =====================
     const tabOficial = document.getElementById('tab-oficial');
     const tabPersonal = document.getElementById('tab-personal');
@@ -812,7 +930,7 @@
       panelOficial.style.display = '';
       panelPersonal.style.display = 'none';
       if (ytListoPersonal) try { ytPlayerPersonal.pauseVideo(); } catch (e) {}
-      if (ytListo) { sincronizarConEstadoActual(); try { ytPlayer.playVideo(); } catch (e) {} }
+      if (esAdminActivo && ytListo) { sincronizarConEstadoActual(); try { ytPlayer.playVideo(); } catch (e) {} }
     });
 
     tabPersonal.addEventListener('click', () => {

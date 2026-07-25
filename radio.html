@@ -306,6 +306,7 @@
       <div id="admin-box" style="text-align:left; margin-bottom:14px;">
         <div id="admin-guest-view">
           <div style="font-size:0.68rem; color:#8aa; margin-bottom:6px;">🔇 Modo invitado: puedes agregar canciones, pero el audio solo suena en el aparato del administrador.</div>
+          <div id="admin-quien-conectado" style="display:none; font-size:0.7rem; color:#ffb366; background:rgba(255,179,102,0.08); border:1px solid rgba(255,179,102,0.35); border-radius:10px; padding:8px 10px; margin-bottom:8px;"></div>
           <button id="btn-abrir-login-admin" style="background:none; border:1px solid #333; color:#8aa; border-radius:10px; padding:6px 12px; font-size:0.7rem; cursor:pointer;">🔐 Entrar como administrador</button>
           <div id="admin-login-form" style="display:none; margin-top:8px; gap:6px; flex-direction:column;">
             <input type="password" id="admin-pass-input" placeholder="Contraseña de administrador" style="padding:8px 10px; border-radius:10px; border:1px solid #245; background:#071019; color:#fff; font-size:0.8rem; outline:none;">
@@ -314,12 +315,12 @@
           </div>
         </div>
         <div id="admin-active-view" style="display:none; background:rgba(0,180,255,0.1); border:1px solid #00b4ff; border-radius:10px; padding:8px 10px;">
-          <div style="font-size:0.75rem; font-weight:bold; color:#00b4ff;">🎙️ Modo Admin activo</div>
-          <div style="font-size:0.68rem; color:#9fd8ff; margin:2px 0 6px;">El audio suena en este aparato. Conéctalo a las bocinas.</div>
+          <div style="font-size:0.75rem; font-weight:bold; color:#00b4ff;">🎙️ Modo Admin activo — <span id="admin-mi-nombre"></span></div>
+          <div style="font-size:0.68rem; color:#9fd8ff; margin:2px 0 6px;">El audio suena en este aparato. Conéctalo a las bocinas. Cuando termines, cierra tu sesión para que otro pueda entrar.</div>
           <button id="btn-cerrar-admin" style="background:none; border:1px solid #00b4ff; color:#00b4ff; border-radius:8px; padding:5px 10px; font-size:0.7rem; cursor:pointer;">Cerrar sesión de admin</button>
         </div>
-        <div id="admin-bumped-msg" style="display:none; font-size:0.72rem; color:#ffb366; margin-top:6px;">⚠️ Otro aparato tomó el control de administrador. Ahora estás en modo invitado.</div>
       </div>
+
 
       <div class="live-badge">● EN VIVO</div>
 
@@ -698,10 +699,24 @@
       jingleSource.connect(jingleCompressor).connect(jingleGain).connect(audioCtx.destination);
     }
 
-    function desbloquearAudio() {
+    function desbloquearAudio(evento) {
       // Quitamos la capa invisible SIEMPRE, sea o no admin, para que nunca
       // se quede bloqueando los clics a los demás botones (login, tabs, etc.)
       unlockOverlay.style.display = 'none';
+
+      // En móvil, el primer toque se lo "come" esta capa y nunca llega al botón
+      // real de abajo (ej. "Mi Espacio"). Aquí lo reenviamos manualmente para
+      // que el mismo primer toque también active el botón que estaba tapando.
+      if (evento) {
+        const punto = (evento.touches && evento.touches[0]) ? evento.touches[0] : evento;
+        if (punto && punto.clientX !== undefined) {
+          const elementoReal = document.elementFromPoint(punto.clientX, punto.clientY);
+          if (elementoReal && elementoReal !== unlockOverlay) {
+            elementoReal.click();
+          }
+        }
+      }
+
       if (!esAdminActivo) return;
       prepararAudioAdmin();
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -716,8 +731,10 @@
         try { ytPlayer.playVideo(); } catch (e) {}
       }
     }
+    // Solo 'touchstart' en móvil y 'click' en compu (evita que el toque se
+    // procese dos veces, una por touch y otra por el click que sigue).
     unlockOverlay.addEventListener('click', desbloquearAudio);
-    unlockOverlay.addEventListener('touchstart', desbloquearAudio);
+    unlockOverlay.addEventListener('touchstart', (e) => { e.preventDefault(); desbloquearAudio(e); }, { passive: false });
 
     const btnEscuchar = document.getElementById('btn-escuchar');
     btnEscuchar.addEventListener('click', () => {
@@ -844,13 +861,24 @@
     // ===================== LOGIN / LOGOUT DE ADMIN =====================
     const adminGuestView = document.getElementById('admin-guest-view');
     const adminActiveView = document.getElementById('admin-active-view');
-    const adminBumpedMsg = document.getElementById('admin-bumped-msg');
+    const adminQuienConectado = document.getElementById('admin-quien-conectado');
+    const adminMiNombre = document.getElementById('admin-mi-nombre');
     const btnAbrirLoginAdmin = document.getElementById('btn-abrir-login-admin');
     const adminLoginForm = document.getElementById('admin-login-form');
     const adminPassInput = document.getElementById('admin-pass-input');
     const btnConfirmarAdmin = document.getElementById('btn-confirmar-admin');
     const adminLoginError = document.getElementById('admin-login-error');
     const btnCerrarAdmin = document.getElementById('btn-cerrar-admin');
+
+    function getOrAskAdminNombre() {
+      let nombre = localStorage.getItem('nl7_admin_nombre');
+      if (!nombre) {
+        nombre = prompt('¿Cómo te llamas? (para que los demás sepan quién está conectado como admin)', '') || 'Admin';
+        nombre = nombre.trim().slice(0, 24) || 'Admin';
+        localStorage.setItem('nl7_admin_nombre', nombre);
+      }
+      return nombre;
+    }
 
     btnAbrirLoginAdmin.addEventListener('click', () => {
       adminLoginForm.style.display = adminLoginForm.style.display === 'none' ? 'flex' : 'none';
@@ -863,22 +891,31 @@
         adminLoginError.textContent = 'Contraseña incorrecta.';
         return;
       }
+
+      // Revisamos si ya hay alguien conectado como admin antes de dejarte entrar.
+      const snap = await adminSessionRef.once('value');
+      const actual = snap.val();
+      if (actual && actual.sessionId !== misSessionId) {
+        adminLoginError.textContent = `Ya está conectado como admin: ${actual.nombre || 'alguien más'}. Pídele que cierre su sesión primero.`;
+        return;
+      }
+
       adminLoginError.textContent = '';
       adminPassInput.value = '';
 
-      // Tomamos el control: cualquier otro aparato que esté activo se apaga solo.
-      await adminSessionRef.set({ sessionId: misSessionId, loggedInAt: Date.now() });
+      const miNombre = getOrAskAdminNombre();
+      await adminSessionRef.set({ sessionId: misSessionId, loggedInAt: Date.now(), nombre: miNombre });
 
-      activarModoAdminLocal();
+      activarModoAdminLocal(miNombre);
     }
     btnConfirmarAdmin.addEventListener('click', intentarLoginAdmin);
     adminPassInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') intentarLoginAdmin(); });
 
-    function activarModoAdminLocal() {
+    function activarModoAdminLocal(nombre) {
       esAdminActivo = true;
       adminGuestView.style.display = 'none';
       adminActiveView.style.display = 'block';
-      adminBumpedMsg.style.display = 'none';
+      adminMiNombre.textContent = nombre || getOrAskAdminNombre();
       document.getElementById('btn-escuchar').style.display = 'block';
       document.getElementById('btn-escuchar').textContent = '▶ Escuchar';
       document.getElementById('btn-escuchar').disabled = false;
@@ -889,11 +926,10 @@
       if (ytListo) sincronizarConEstadoActual();
     }
 
-    function desactivarModoAdminLocal(porOtroAparato) {
+    function desactivarModoAdminLocal() {
       esAdminActivo = false;
       adminActiveView.style.display = 'none';
       adminGuestView.style.display = 'block';
-      adminBumpedMsg.style.display = porOtroAparato ? 'block' : 'none';
       document.getElementById('btn-escuchar').style.display = 'none';
       btnSaltar.style.display = 'none';
       detenerJingleAdmin();
@@ -901,20 +937,27 @@
     }
 
     btnCerrarAdmin.addEventListener('click', async () => {
-      // Solo limpiamos la sesión compartida si sigue siendo la nuestra (por si ya nos "ganaron" el control).
+      // Solo limpiamos la sesión compartida si sigue siendo la nuestra.
       const snap = await adminSessionRef.once('value');
       const actual = snap.val();
       if (actual && actual.sessionId === misSessionId) {
         await adminSessionRef.remove();
       }
-      desactivarModoAdminLocal(false);
+      desactivarModoAdminLocal();
     });
 
-    // Si otro aparato entra como admin, este se apaga solo (estilo "cambiar de bocina" en Spotify).
+    // Ya NO expulsamos a nadie automáticamente (para evitar falsas alarmas por
+    // cortes de conexión). Solo mostramos, a los invitados, quién está
+    // conectado ahora mismo como admin — para que se coordinen entre ustedes.
     adminSessionRef.on('value', snap => {
       const actual = snap.val();
-      if (esAdminActivo && (!actual || actual.sessionId !== misSessionId)) {
-        desactivarModoAdminLocal(true);
+      if (!esAdminActivo) {
+        if (actual && actual.nombre) {
+          adminQuienConectado.style.display = 'block';
+          adminQuienConectado.textContent = `🔴 ${actual.nombre} está conectado como admin ahora mismo. Pídele que cierre su sesión para poder entrar tú.`;
+        } else {
+          adminQuienConectado.style.display = 'none';
+        }
       }
     });
 

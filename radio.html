@@ -276,9 +276,33 @@
       <div id="yt-player-container"><div id="yt-player"></div><div id="yt-player-personal"></div></div>
 
       <div class="modo-tabs">
-        <button id="tab-oficial" class="modo-tab activo">📻 Radio Oficial</button>
-        <button id="tab-personal" class="modo-tab">🎧 Mi Espacio</button>
+        <button id="tab-oficial" class="modo-tab activo" onclick="window.cambiarModoNL7('oficial')">📻 Radio Oficial</button>
+        <button id="tab-personal" class="modo-tab" onclick="window.cambiarModoNL7('personal')">🎧 Mi Espacio</button>
       </div>
+      <script>
+        // Cambio de pestaña 100% independiente del resto del código: funciona
+        // aunque Firebase, YouTube, o cualquier otra cosa de la página falle.
+        window.cambiarModoNL7 = function (modo) {
+          var tOf = document.getElementById('tab-oficial');
+          var tPe = document.getElementById('tab-personal');
+          var pOf = document.getElementById('panel-oficial');
+          var pPe = document.getElementById('panel-personal');
+          if (modo === 'personal') {
+            tPe.classList.add('activo');
+            tOf.classList.remove('activo');
+            pPe.style.display = 'block';
+            pOf.style.display = 'none';
+          } else {
+            tOf.classList.add('activo');
+            tPe.classList.remove('activo');
+            pOf.style.display = 'block';
+            pPe.style.display = 'none';
+          }
+          if (typeof window.alAmbiarModoNL7Extra === 'function') {
+            try { window.alAmbiarModoNL7Extra(modo); } catch (e) {}
+          }
+        };
+      </script>
 
       <div id="panel-oficial">
       <div class="now-playing" id="now-playing">
@@ -373,7 +397,6 @@
       appId: "1:1043570234430:web:f18b44045feeda7eb7ed6f"
     };
     firebase.initializeApp(firebaseConfig);
-    document.addEventListener('click', () => { document.title = '✅ CLIC OK - ' + Date.now(); }); // DIAGNÓSTICO TEMPORAL
     const db = firebase.database();
     const jukeboxRef = db.ref('jukebox');
     const nowPlayingRef = db.ref('jukebox/nowPlaying');
@@ -1030,34 +1053,20 @@
       }
     });
 
-    // ===================== CAMBIO DE PESTAÑAS =====================
-    const tabOficial = document.getElementById('tab-oficial');
-    const tabPersonal = document.getElementById('tab-personal');
-    const panelOficial = document.getElementById('panel-oficial');
-    const panelPersonal = document.getElementById('panel-personal');
-
-    tabOficial.addEventListener('click', () => {
-      if (modoActual === 'oficial') return;
-      modoActual = 'oficial';
-      tabOficial.classList.add('activo');
-      tabPersonal.classList.remove('activo');
-      panelOficial.style.display = '';
-      panelPersonal.style.display = 'none';
-      if (ytListoPersonal) try { ytPlayerPersonal.pauseVideo(); } catch (e) {}
-      if (esAdminActivo && ytListo) { sincronizarConEstadoActual(); try { ytPlayer.playVideo(); } catch (e) {} }
-    });
-
-    tabPersonal.addEventListener('click', () => {
-      tabPersonal.style.outline = '5px solid red'; // DIAGNÓSTICO TEMPORAL: confirma si el clic llegó aquí
-      if (modoActual === 'personal') return;
-      modoActual = 'personal';
-      tabPersonal.classList.add('activo');
-      tabOficial.classList.remove('activo');
-      panelPersonal.style.display = 'block';
-      panelOficial.style.display = 'none';
-      if (ytListo) try { ytPlayer.pauseVideo(); } catch (e) {}
-      if (ytListoPersonal && personalSonando) try { ytPlayerPersonal.playVideo(); } catch (e) {}
-    });
+    // ===================== CAMBIO DE PESTAÑAS (extra: pausar/reanudar audio) =====================
+    // El cambio de panel en sí ya lo hace window.cambiarModoNL7 (definido junto a los
+    // botones, independiente de todo esto). Aquí solo enganchamos el detalle de
+    // pausar un reproductor y reanudar el otro, si esta parte del código cargó bien.
+    window.alAmbiarModoNL7Extra = function (modo) {
+      modoActual = modo;
+      if (modo === 'oficial') {
+        if (ytListoPersonal) try { ytPlayerPersonal.pauseVideo(); } catch (e) {}
+        if (esAdminActivo && ytListo) { sincronizarConEstadoActual(); try { ytPlayer.playVideo(); } catch (e) {} }
+      } else {
+        if (ytListo) try { ytPlayer.pauseVideo(); } catch (e) {}
+        if (ytListoPersonal && personalSonando) try { ytPlayerPersonal.playVideo(); } catch (e) {}
+      }
+    };
   </script>
 
 </body>

@@ -699,6 +699,9 @@
     }
 
     function desbloquearAudio() {
+      // Quitamos la capa invisible SIEMPRE, sea o no admin, para que nunca
+      // se quede bloqueando los clics a los demás botones (login, tabs, etc.)
+      unlockOverlay.style.display = 'none';
       if (!esAdminActivo) return;
       prepararAudioAdmin();
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -712,7 +715,6 @@
       if (ytPlayer && ytPlayer.playVideo) {
         try { ytPlayer.playVideo(); } catch (e) {}
       }
-      unlockOverlay.style.display = 'none';
     }
     unlockOverlay.addEventListener('click', desbloquearAudio);
     unlockOverlay.addEventListener('touchstart', desbloquearAudio);

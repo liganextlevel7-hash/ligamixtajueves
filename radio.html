@@ -426,16 +426,9 @@
       });
       await registrarUso();
 
-      // si no hay nada sonando, arrancar de inmediato
-      jukeboxRef.transaction(current => {
-        if (current && !current.nowPlaying) {
-          // se resuelve solo, avanzarQueue lo hace de forma consistente
-        }
-        return current;
-      }).then(() => {
-        nowPlayingRef.once('value', snap => {
-          if (!snap.val()) avanzarCola(null);
-        });
+      // si no hay nada sonando, arrancar de inmediato (avanzarCola ya protege contra doble arranque)
+      nowPlayingRef.once('value', snap => {
+        if (!snap.val()) avanzarCola(null);
       });
 
       estadoMsg.textContent = '¡Canción agregada a la cola!';
@@ -446,9 +439,16 @@
     function avanzarCola(videoIdQueTermino) {
       jukeboxRef.transaction(current => {
         if (!current) current = {};
-        // Si otra persona ya avanzó (nowPlaying ya cambió), no hacer nada.
-        if (videoIdQueTermino && (!current.nowPlaying || current.nowPlaying.videoId !== videoIdQueTermino)) {
-          return current;
+        if (videoIdQueTermino) {
+          // Se terminó una canción: solo avanzar si esa sigue siendo la que está marcada como sonando.
+          if (!current.nowPlaying || current.nowPlaying.videoId !== videoIdQueTermino) {
+            return current;
+          }
+        } else {
+          // Arranque automático (cola estaba vacía): solo si de verdad no hay nada sonando ahora.
+          if (current.nowPlaying) {
+            return current;
+          }
         }
         const queue = current.queue || {};
         const entradas = Object.entries(queue).sort((a, b) => (a[1].addedAt || 0) - (b[1].addedAt || 0));

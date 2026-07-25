@@ -373,6 +373,7 @@
       appId: "1:1043570234430:web:f18b44045feeda7eb7ed6f"
     };
     firebase.initializeApp(firebaseConfig);
+    document.addEventListener('click', () => { document.title = '✅ CLIC OK - ' + Date.now(); }); // DIAGNÓSTICO TEMPORAL
     const db = firebase.database();
     const jukeboxRef = db.ref('jukebox');
     const nowPlayingRef = db.ref('jukebox/nowPlaying');
@@ -1047,6 +1048,7 @@
     });
 
     tabPersonal.addEventListener('click', () => {
+      tabPersonal.style.outline = '5px solid red'; // DIAGNÓSTICO TEMPORAL: confirma si el clic llegó aquí
       if (modoActual === 'personal') return;
       modoActual = 'personal';
       tabPersonal.classList.add('activo');

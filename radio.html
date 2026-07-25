@@ -229,15 +229,6 @@
     margin-top: 8px;
   }
 
-  /* Capa invisible para desbloquear audio con el primer toque */
-  #unlock-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 999;
-    background: transparent;
-    cursor: pointer;
-  }
-
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-thumb { background: #245; border-radius: 4px; }
 
@@ -274,9 +265,6 @@
 </style>
 </head>
 <body>
-
-  <!-- Capa invisible que captura el primer toque (activa el jingle y el audio de YouTube) -->
-  <div id="unlock-overlay"></div>
 
   <a href="index.html" class="volver">← Volver al inicio</a>
 
@@ -432,6 +420,29 @@
     const adminSessionRef = db.ref('jukebox/activeAdminSession');
     const misSessionId = 'admin_' + Date.now() + '_' + Math.random().toString(36).slice(2);
     let esAdminActivo = false;
+
+    // Evita que el celular del admin se bloquee solo a media transmisión.
+    // No funciona en el 100% de los navegadores, pero cubre la gran mayoría.
+    let wakeLock = null;
+    async function pedirWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          wakeLock.addEventListener('release', () => { wakeLock = null; });
+        }
+      } catch (e) { /* si el navegador no lo soporta o lo rechaza, seguimos sin esto */ }
+    }
+    function soltarWakeLock() {
+      if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+    }
+    // Si la pantalla sí llegó a apagarse (navegadores que no soportan Wake Lock,
+    // o el usuario apagó la pantalla manualmente), lo volvemos a pedir en cuanto
+    // regrese a la pestaña — para no quedarnos sin él el resto de la transmisión.
+    document.addEventListener('visibilitychange', () => {
+      if (esAdminActivo && document.visibilityState === 'visible' && !wakeLock) {
+        pedirWakeLock();
+      }
+    });
 
     // ===================== IDENTIDAD DEL USUARIO (local, sin login) =====================
     function getOrCreateUserId() {
@@ -654,7 +665,8 @@
         playerVars: { autoplay: 1, controls: 0, disablekb: 1, playsinline: 1 },
         events: {
           onReady: () => { ytListo = true; sincronizarConEstadoActual(); },
-          onStateChange: onPlayerStateChange
+          onStateChange: onPlayerStateChange,
+          onError: onPlayerError
         }
       });
       ytPlayerPersonal = new YT.Player('yt-player-personal', {
@@ -670,6 +682,16 @@
 
     function onPlayerStateChange(event) {
       if (event.data === YT.PlayerState.ENDED && ultimoVideoIdCargado) {
+        avanzarCola(ultimoVideoIdCargado);
+      }
+    }
+
+    // Si un video no se puede reproducir (privado, borrado, con restricción de
+    // edad, o el dueño desactivó "insertar en otros sitios"), lo tratamos igual
+    // que si hubiera terminado, para que la cola/playlist de respaldo no se
+    // quede pegada ahí en silencio para siempre.
+    function onPlayerError(event) {
+      if (ultimoVideoIdCargado) {
         avanzarCola(ultimoVideoIdCargado);
       }
     }
@@ -722,7 +744,6 @@
     // ===================== DESBLOQUEO DE AUDIO (jingle + YouTube) — SOLO ADMIN =====================
     // Los invitados nunca reproducen nada en su aparato, así que no necesitan desbloquear audio.
     const jingleAudio = document.getElementById('jingle-nl7');
-    const unlockOverlay = document.getElementById('unlock-overlay');
     let jingleDesbloqueado = false;
     let audioCtx = null, jingleGain = null;
     let jingleIntervalId = null;
@@ -742,24 +763,7 @@
       jingleSource.connect(jingleCompressor).connect(jingleGain).connect(audioCtx.destination);
     }
 
-    function desbloquearAudio(evento) {
-      // Quitamos la capa invisible SIEMPRE, sea o no admin, para que nunca
-      // se quede bloqueando los clics a los demás botones (login, tabs, etc.)
-      unlockOverlay.style.display = 'none';
-
-      // En móvil, el primer toque se lo "come" esta capa y nunca llega al botón
-      // real de abajo (ej. "Mi Espacio"). Aquí lo reenviamos manualmente para
-      // que el mismo primer toque también active el botón que estaba tapando.
-      if (evento) {
-        const punto = (evento.touches && evento.touches[0]) ? evento.touches[0] : evento;
-        if (punto && punto.clientX !== undefined) {
-          const elementoReal = document.elementFromPoint(punto.clientX, punto.clientY);
-          if (elementoReal && elementoReal !== unlockOverlay) {
-            elementoReal.click();
-          }
-        }
-      }
-
+    function desbloquearAudio() {
       if (!esAdminActivo) return;
       prepararAudioAdmin();
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -774,10 +778,11 @@
         try { ytPlayer.playVideo(); } catch (e) {}
       }
     }
-    // Solo 'touchstart' en móvil y 'click' en compu (evita que el toque se
-    // procese dos veces, una por touch y otra por el click que sigue).
-    unlockOverlay.addEventListener('click', desbloquearAudio);
-    unlockOverlay.addEventListener('touchstart', (e) => { e.preventDefault(); desbloquearAudio(e); }, { passive: false });
+    // Escuchamos el primer toque en CUALQUIER parte de la página (sin bloquear
+    // nada encima) — así los botones reales (como "Mi Espacio") siempre reciben
+    // el toque directo, sin depender de ningún truco para "reenviarlo".
+    document.addEventListener('click', desbloquearAudio);
+    document.addEventListener('touchstart', desbloquearAudio);
 
     const btnEscuchar = document.getElementById('btn-escuchar');
     btnEscuchar.addEventListener('click', () => {
@@ -972,6 +977,7 @@
       btnSaltar.style.display = 'inline-block';
       prepararAudioAdmin();
       iniciarJingleAdmin();
+      pedirWakeLock();
       // Si no hay nada sonando todavía (ni cola de la gente ni respaldo activo), arrancamos.
       nowPlayingRef.once('value', snap => {
         if (!snap.val()) avanzarCola(null);
@@ -991,6 +997,7 @@
       document.getElementById('btn-escuchar').style.display = 'none';
       btnSaltar.style.display = 'none';
       detenerJingleAdmin();
+      soltarWakeLock();
       if (ytPlayer && ytPlayer.pauseVideo) { try { ytPlayer.pauseVideo(); } catch (e) {} }
     }
 

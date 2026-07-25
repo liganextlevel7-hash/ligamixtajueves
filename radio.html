@@ -306,7 +306,10 @@
       <div id="admin-box" style="text-align:left; margin-bottom:14px;">
         <div id="admin-guest-view">
           <div style="font-size:0.68rem; color:#8aa; margin-bottom:6px;">🔇 Modo invitado: puedes agregar canciones, pero el audio solo suena en el aparato del administrador.</div>
-          <div id="admin-quien-conectado" style="display:none; font-size:0.7rem; color:#ffb366; background:rgba(255,179,102,0.08); border:1px solid rgba(255,179,102,0.35); border-radius:10px; padding:8px 10px; margin-bottom:8px;"></div>
+          <div id="admin-quien-conectado" style="display:none; font-size:0.7rem; color:#ffb366; background:rgba(255,179,102,0.08); border:1px solid rgba(255,179,102,0.35); border-radius:10px; padding:8px 10px; margin-bottom:8px;">
+            <div id="admin-quien-conectado-texto"></div>
+            <button id="btn-liberar-sesion" style="margin-top:6px; background:none; border:1px solid #ffb366; color:#ffb366; border-radius:8px; padding:5px 10px; font-size:0.68rem; cursor:pointer;">🆘 Liberar sesión atorada</button>
+          </div>
           <button id="btn-abrir-login-admin" style="background:none; border:1px solid #333; color:#8aa; border-radius:10px; padding:6px 12px; font-size:0.7rem; cursor:pointer;">🔐 Entrar como administrador</button>
           <div id="admin-login-form" style="display:none; margin-top:8px; gap:6px; flex-direction:column;">
             <input type="password" id="admin-pass-input" placeholder="Contraseña de administrador" style="padding:8px 10px; border-radius:10px; border:1px solid #245; background:#071019; color:#fff; font-size:0.8rem; outline:none;">
@@ -911,6 +914,12 @@
     btnConfirmarAdmin.addEventListener('click', intentarLoginAdmin);
     adminPassInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') intentarLoginAdmin(); });
 
+    const btnLiberarSesion = document.getElementById('btn-liberar-sesion');
+    btnLiberarSesion.addEventListener('click', async () => {
+      if (!confirm('¿Seguro? Solo hazlo si de verdad nadie está transmitiendo ahorita y la sesión se quedó atorada por error.')) return;
+      await adminSessionRef.remove();
+    });
+
     function activarModoAdminLocal(nombre) {
       esAdminActivo = true;
       adminGuestView.style.display = 'none';
@@ -924,6 +933,11 @@
       prepararAudioAdmin();
       iniciarJingleAdmin();
       if (ytListo) sincronizarConEstadoActual();
+
+      // Si este aparato pierde la conexión de verdad (se cierra, se apaga,
+      // se va el internet y no vuelve), Firebase libera la sesión solo —
+      // así ya no se queda "atorada" por olvido.
+      adminSessionRef.onDisconnect().remove();
     }
 
     function desactivarModoAdminLocal() {
@@ -937,6 +951,8 @@
     }
 
     btnCerrarAdmin.addEventListener('click', async () => {
+      // Cancelamos la limpieza automática de desconexión, ya la estamos haciendo a mano.
+      adminSessionRef.onDisconnect().cancel();
       // Solo limpiamos la sesión compartida si sigue siendo la nuestra.
       const snap = await adminSessionRef.once('value');
       const actual = snap.val();
@@ -949,12 +965,13 @@
     // Ya NO expulsamos a nadie automáticamente (para evitar falsas alarmas por
     // cortes de conexión). Solo mostramos, a los invitados, quién está
     // conectado ahora mismo como admin — para que se coordinen entre ustedes.
+    const adminQuienConectadoTexto = document.getElementById('admin-quien-conectado-texto');
     adminSessionRef.on('value', snap => {
       const actual = snap.val();
       if (!esAdminActivo) {
-        if (actual && actual.nombre) {
+        if (actual) {
           adminQuienConectado.style.display = 'block';
-          adminQuienConectado.textContent = `🔴 ${actual.nombre} está conectado como admin ahora mismo. Pídele que cierre su sesión para poder entrar tú.`;
+          adminQuienConectadoTexto.textContent = `🔴 ${actual.nombre || 'Alguien'} está conectado como admin ahora mismo. Pídele que cierre su sesión para poder entrar tú.`;
         } else {
           adminQuienConectado.style.display = 'none';
         }

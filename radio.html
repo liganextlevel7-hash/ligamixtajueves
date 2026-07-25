@@ -15,6 +15,8 @@
     justify-content: center;
     color: #fff;
     text-align: center;
+    padding: 30px 12px;
+    box-sizing: border-box;
   }
 
   a.volver {
@@ -34,12 +36,9 @@
   a.volver:hover { transform: scale(1.05); }
 
   /* ===== BLOQUE ÚNICO: logo + reproductor + badge ===== */
-  /* Para agrandar o achicar TODO junto, cambia solo --scale en el div de abajo. */
   .radio-widget {
-    width: 400px;
+    width: 420px;
     max-width: 95vw;
-    transform: scale(var(--scale, 1));
-    transform-origin: center center;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -47,23 +46,24 @@
 
   .radio-widget .logo {
     width: 100%;
+    max-width: 400px;
     filter: drop-shadow(0 0 15px rgba(0,0,0,0.7));
     position: relative;
     z-index: 2;
   }
 
-  .radio-widget .player-card {
+  .player-card {
     background: rgba(10, 10, 10, 0.92);
     border: 2px solid #00b4ff;
     border-radius: 24px;
-    padding: 6px;
+    padding: 20px;
     box-shadow: 0 0 20px rgba(0, 180, 255, 0.5);
     margin-top: -60px;
     position: relative;
     z-index: 1;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
   }
 
   .live-badge {
@@ -77,6 +77,7 @@
     letter-spacing: 1px;
     box-shadow: 0 0 12px rgba(176,0,32,0.6);
     animation: pulse 1.5s infinite;
+    display: inline-block;
   }
   @keyframes pulse {
     0% { box-shadow: 0 0 0 0 rgba(176,0,32,0.6); }
@@ -84,9 +85,151 @@
     100% { box-shadow: 0 0 0 0 rgba(176,0,32,0); }
   }
 
-  /* Capa invisible: el PRIMER toque en cualquier parte de la pantalla (incluso
-     encima del reproductor de Zeno) activa el jingle, y luego desaparece sola
-     para dejar usar el reproductor con normalidad. */
+  /* Reproductor de YouTube oculto: solo se usa el audio */
+  #yt-player-container {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ===== Ahora suena ===== */
+  .now-playing {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+    margin-bottom: 16px;
+  }
+  .now-playing img {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #111;
+  }
+  .now-playing .info { min-width: 0; }
+  .now-playing .titulo {
+    font-size: 0.9rem;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .now-playing .agregado-por {
+    font-size: 0.72rem;
+    color: #9fd8ff;
+    margin-top: 2px;
+  }
+
+  /* ===== Buscador ===== */
+  .buscador {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .buscador input {
+    flex: 1;
+    padding: 9px 12px;
+    border-radius: 12px;
+    border: 1px solid #245;
+    background: #071019;
+    color: #fff;
+    font-size: 0.85rem;
+    outline: none;
+    min-width: 0;
+  }
+  .buscador input:focus { border-color: #00b4ff; }
+  .buscador button {
+    background: linear-gradient(145deg, #00b4ff, #0080c0);
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 12px;
+    padding: 0 14px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .buscador button:disabled { opacity: 0.5; cursor: default; }
+
+  .resultados, .cola-lista {
+    text-align: left;
+    max-height: 220px;
+    overflow-y: auto;
+    margin-bottom: 4px;
+  }
+
+  .item-fila {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 4px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .item-fila img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #111;
+  }
+  .item-fila .info { flex: 1; min-width: 0; }
+  .item-fila .titulo {
+    font-size: 0.78rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .item-fila .sub {
+    font-size: 0.68rem;
+    color: #8aa;
+  }
+  .item-fila button {
+    background: #00b4ff;
+    border: none;
+    color: #111;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .item-fila button:disabled {
+    background: #444;
+    color: #999;
+    cursor: default;
+  }
+
+  .seccion-titulo {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6cf;
+    margin: 14px 0 6px;
+    text-align: left;
+  }
+
+  .estado-msg {
+    font-size: 0.72rem;
+    color: #ff8a65;
+    text-align: left;
+    margin-top: 6px;
+    min-height: 14px;
+  }
+
+  .cupo-msg {
+    font-size: 0.68rem;
+    color: #8aa;
+    text-align: left;
+    margin-top: 8px;
+  }
+
+  /* Capa invisible para desbloquear audio con el primer toque */
   #unlock-overlay {
     position: fixed;
     inset: 0;
@@ -94,79 +237,363 @@
     background: transparent;
     cursor: pointer;
   }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: #245; border-radius: 4px; }
 </style>
 </head>
 <body>
 
-  <!-- Capa invisible que captura el primer toque en cualquier parte (ver script abajo) -->
+  <!-- Capa invisible que captura el primer toque (activa el jingle y el audio de YouTube) -->
   <div id="unlock-overlay"></div>
 
   <a href="index.html" class="volver">← Volver al inicio</a>
 
-  <div class="radio-widget" style="--scale:1;">
+  <div class="radio-widget">
     <img src="radio.png" alt="Next Level 7 Radio" class="logo">
 
     <div class="player-card">
-      <iframe
-        src="https://listen.zeno.fm/player/next-level-7"
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        frameborder="0"
-        scrolling="no"
-        height="250"
-        width="300"
-        loading="lazy"
-        style="border-radius:20px; display:block; max-width:100%;">
-      </iframe>
-    </div>
 
-    <div class="live-badge">● EN VIVO</div>
+      <div id="yt-player-container"><div id="yt-player"></div></div>
+
+      <div class="now-playing" id="now-playing">
+        <img id="np-thumb" src="" alt="">
+        <div class="info">
+          <div class="titulo" id="np-titulo">Cargando...</div>
+          <div class="agregado-por" id="np-agregado">—</div>
+        </div>
+      </div>
+
+      <div class="live-badge">● EN VIVO</div>
+
+      <div class="seccion-titulo">Buscar música</div>
+      <div class="buscador">
+        <input type="text" id="input-buscar" placeholder="Nombre de la canción o artista..." maxlength="80">
+        <button id="btn-buscar">Buscar</button>
+      </div>
+      <div class="resultados" id="resultados"></div>
+      <div class="estado-msg" id="estado-msg"></div>
+
+      <div class="seccion-titulo">Cola (<span id="cola-count">0</span>)</div>
+      <div class="cola-lista" id="cola-lista"></div>
+      <div class="cupo-msg" id="cupo-msg"></div>
+
+    </div>
   </div>
 
-  <!-- Cortina/jingle "Next Level 7 Radio": suena junto con la radio cada 10 min.
-       Se activa solo, sin que tengas que tocar nada especial: en cuanto des cualquier
-       clic normal en esta página (por ejemplo, dentro del reproductor de arriba), queda listo. -->
+  <!-- Jingle "Next Level 7 Radio": intacto, igual que antes -->
   <audio id="jingle-nl7" src="jingle-nl7.mp3" preload="auto"></audio>
 
+  <!-- ===================== FIREBASE ===================== -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <script>
-    const JINGLE_CADA_MS = 10 * 60 * 1000; // cada 10 minutos
+    const firebaseConfig = {
+      apiKey: "AIzaSyAQqwu1QmrWJQev5lPxKw0nC8Q5gaJDKcE",
+      authDomain: "torneomixtojueves.firebaseapp.com",
+      databaseURL: "https://torneomixtojueves-default-rtdb.firebaseio.com",
+      projectId: "torneomixtojueves",
+      storageBucket: "torneomixtojueves.firebasestorage.app",
+      messagingSenderId: "1043570234430",
+      appId: "1:1043570234430:web:f18b44045feeda7eb7ed6f"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const jukeboxRef = db.ref('jukebox');
+    const nowPlayingRef = db.ref('jukebox/nowPlaying');
+    const queueRef = db.ref('jukebox/queue');
+
+    // ===================== CONFIG =====================
+    // 👉 PEGA AQUÍ TU API KEY DE YOUTUBE DATA API v3
+    const YOUTUBE_API_KEY = "AIzaSyAQqwu1QmrWJQev5lPxKw0nC8Q5gaJDKcE";
+    const MAX_CANCIONES_POR_USUARIO = 2;
+    const COOLDOWN_MS = 15 * 60 * 1000; // 15 minutos
+
+    // ===================== IDENTIDAD DEL USUARIO (local, sin login) =====================
+    function getOrCreateUserId() {
+      let id = localStorage.getItem('nl7_user_id');
+      if (!id) {
+        id = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem('nl7_user_id', id);
+      }
+      return id;
+    }
+    function getOrAskNickname() {
+      let nombre = localStorage.getItem('nl7_nickname');
+      if (!nombre) {
+        nombre = prompt('¿Cómo te llamas? (se muestra junto a tus canciones)', '') || 'Anónimo';
+        nombre = nombre.trim().slice(0, 24) || 'Anónimo';
+        localStorage.setItem('nl7_nickname', nombre);
+      }
+      return nombre;
+    }
+    const userId = getOrCreateUserId();
+    let nickname = null; // se pide al primer intento de agregar canción, no al cargar la página
+
+    // ===================== BÚSQUEDA EN YOUTUBE =====================
+    const inputBuscar = document.getElementById('input-buscar');
+    const btnBuscar = document.getElementById('btn-buscar');
+    const resultadosDiv = document.getElementById('resultados');
+    const estadoMsg = document.getElementById('estado-msg');
+
+    async function buscarCanciones() {
+      const q = inputBuscar.value.trim();
+      if (!q) return;
+      if (YOUTUBE_API_KEY.startsWith('PEGA_AQUI')) {
+        estadoMsg.textContent = 'Falta configurar la API Key de YouTube (ver instrucciones).';
+        return;
+      }
+      btnBuscar.disabled = true;
+      estadoMsg.textContent = 'Buscando...';
+      resultadosDiv.innerHTML = '';
+      try {
+        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoCategoryId=10&maxResults=8&q=${encodeURIComponent(q)}&key=${YOUTUBE_API_KEY}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!res.ok) {
+          estadoMsg.textContent = 'Error al buscar: ' + (data.error?.message || res.status);
+          btnBuscar.disabled = false;
+          return;
+        }
+        estadoMsg.textContent = '';
+        (data.items || []).forEach(item => {
+          const fila = document.createElement('div');
+          fila.className = 'item-fila';
+          fila.innerHTML = `
+            <img src="${item.snippet.thumbnails.default.url}">
+            <div class="info">
+              <div class="titulo">${escapeHtml(item.snippet.title)}</div>
+              <div class="sub">${escapeHtml(item.snippet.channelTitle)}</div>
+            </div>
+            <button>Agregar</button>
+          `;
+          fila.querySelector('button').addEventListener('click', (e) => {
+            agregarACola({
+              videoId: item.id.videoId,
+              title: item.snippet.title,
+              thumbnail: item.snippet.thumbnails.default.url
+            }, e.target);
+          });
+          resultadosDiv.appendChild(fila);
+        });
+      } catch (err) {
+        estadoMsg.textContent = 'Error de conexión al buscar.';
+      }
+      btnBuscar.disabled = false;
+    }
+    btnBuscar.addEventListener('click', buscarCanciones);
+    inputBuscar.addEventListener('keydown', (e) => { if (e.key === 'Enter') buscarCanciones(); });
+
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    // ===================== LÍMITE / COOLDOWN POR USUARIO =====================
+    async function puedeAgregarCancion() {
+      const snap = await db.ref('jukebox/userAdds/' + userId).once('value');
+      const registros = snap.val() || {};
+      const ahora = Date.now();
+      const recientes = Object.values(registros).filter(ts => (ahora - ts) < COOLDOWN_MS);
+      return { permitido: recientes.length < MAX_CANCIONES_POR_USUARIO, usados: recientes.length };
+    }
+
+    async function registrarUso() {
+      await db.ref('jukebox/userAdds/' + userId).push(Date.now());
+    }
+
+    // ===================== AGREGAR A LA COLA =====================
+    async function agregarACola(song, boton) {
+      const check = await puedeAgregarCancion();
+      if (!check.permitido) {
+        estadoMsg.textContent = `Ya agregaste ${MAX_CANCIONES_POR_USUARIO} canciones. Espera unos minutos para volver a agregar.`;
+        return;
+      }
+      if (!nickname) nickname = getOrAskNickname();
+
+      if (boton) boton.disabled = true;
+      await queueRef.push({
+        videoId: song.videoId,
+        title: song.title,
+        thumbnail: song.thumbnail,
+        addedBy: nickname,
+        userId: userId,
+        addedAt: Date.now()
+      });
+      await registrarUso();
+
+      // si no hay nada sonando, arrancar de inmediato
+      jukeboxRef.transaction(current => {
+        if (current && !current.nowPlaying) {
+          // se resuelve solo, avanzarQueue lo hace de forma consistente
+        }
+        return current;
+      }).then(() => {
+        nowPlayingRef.once('value', snap => {
+          if (!snap.val()) avanzarCola(null);
+        });
+      });
+
+      estadoMsg.textContent = '¡Canción agregada a la cola!';
+      setTimeout(() => { estadoMsg.textContent = ''; }, 2500);
+    }
+
+    // ===================== AVANZAR LA COLA (atómico) =====================
+    function avanzarCola(videoIdQueTermino) {
+      jukeboxRef.transaction(current => {
+        if (!current) current = {};
+        // Si otra persona ya avanzó (nowPlaying ya cambió), no hacer nada.
+        if (videoIdQueTermino && (!current.nowPlaying || current.nowPlaying.videoId !== videoIdQueTermino)) {
+          return current;
+        }
+        const queue = current.queue || {};
+        const entradas = Object.entries(queue).sort((a, b) => (a[1].addedAt || 0) - (b[1].addedAt || 0));
+        if (entradas.length === 0) {
+          current.nowPlaying = null;
+          return current;
+        }
+        const [key, song] = entradas[0];
+        current.nowPlaying = {
+          videoId: song.videoId,
+          title: song.title,
+          thumbnail: song.thumbnail,
+          addedBy: song.addedBy,
+          startedAt: Date.now()
+        };
+        delete current.queue[key];
+        return current;
+      });
+    }
+
+    // ===================== RENDER: cola visible =====================
+    const colaListaDiv = document.getElementById('cola-lista');
+    const colaCountSpan = document.getElementById('cola-count');
+    queueRef.on('value', snap => {
+      const queue = snap.val() || {};
+      const entradas = Object.entries(queue).sort((a, b) => (a[1].addedAt || 0) - (b[1].addedAt || 0));
+      colaCountSpan.textContent = entradas.length;
+      colaListaDiv.innerHTML = '';
+      entradas.forEach(([key, song]) => {
+        const fila = document.createElement('div');
+        fila.className = 'item-fila';
+        fila.innerHTML = `
+          <img src="${song.thumbnail}">
+          <div class="info">
+            <div class="titulo">${escapeHtml(song.title)}</div>
+            <div class="sub">Agregó: ${escapeHtml(song.addedBy || 'Anónimo')}</div>
+          </div>
+        `;
+        colaListaDiv.appendChild(fila);
+      });
+    });
+
+    // ===================== RENDER: ahora suena =====================
+    const npThumb = document.getElementById('np-thumb');
+    const npTitulo = document.getElementById('np-titulo');
+    const npAgregado = document.getElementById('np-agregado');
+
+    // ===================== REPRODUCTOR DE YOUTUBE =====================
+    let ytPlayer = null;
+    let ytListo = false;
+    let ultimoVideoIdCargado = null;
+
+    const tagScript = document.createElement('script');
+    tagScript.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tagScript);
+
+    window.onYouTubeIframeAPIReady = function () {
+      ytPlayer = new YT.Player('yt-player', {
+        height: '1',
+        width: '1',
+        playerVars: { autoplay: 1, controls: 0, disablekb: 1, playsinline: 1 },
+        events: {
+          onReady: () => { ytListo = true; sincronizarConEstadoActual(); },
+          onStateChange: onPlayerStateChange
+        }
+      });
+    };
+
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.ENDED && ultimoVideoIdCargado) {
+        avanzarCola(ultimoVideoIdCargado);
+      }
+    }
+
+    let estadoActualCache = null;
+    nowPlayingRef.on('value', snap => {
+      estadoActualCache = snap.val();
+      pintarNowPlaying(estadoActualCache);
+      sincronizarConEstadoActual();
+    });
+
+    function pintarNowPlaying(np) {
+      if (!np) {
+        npTitulo.textContent = 'Nada en cola todavía — ¡agrega la primera canción!';
+        npAgregado.textContent = '';
+        npThumb.src = '';
+        return;
+      }
+      npTitulo.textContent = np.title;
+      npAgregado.textContent = 'Agregó: ' + (np.addedBy || 'Anónimo');
+      npThumb.src = np.thumbnail || '';
+    }
+
+    function sincronizarConEstadoActual() {
+      if (!ytListo || !estadoActualCache) return;
+      const np = estadoActualCache;
+      const elapsedSec = Math.max(0, (Date.now() - (np.startedAt || Date.now())) / 1000);
+      if (ultimoVideoIdCargado !== np.videoId) {
+        ultimoVideoIdCargado = np.videoId;
+        ytPlayer.loadVideoById({ videoId: np.videoId, startSeconds: elapsedSec });
+      } else {
+        // Reajuste suave si el navegador se desincroniza (ej. tras estar en segundo plano)
+        ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() !== undefined &&
+          Promise.resolve(ytPlayer.getCurrentTime()).then(actual => {
+            if (Math.abs(actual - elapsedSec) > 3) ytPlayer.seekTo(elapsedSec, true);
+          });
+      }
+    }
+
+    // ===================== DESBLOQUEO DE AUDIO (jingle + YouTube) =====================
     const jingleAudio = document.getElementById('jingle-nl7');
     const unlockOverlay = document.getElementById('unlock-overlay');
     let jingleDesbloqueado = false;
 
-    // Amplificamos el volumen del jingle más allá del 100% normal (Web Audio API),
-    // porque no podemos bajarle el volumen a la radio de Zeno (vive en otro sitio,
-    // fuera de nuestro control) — así que subimos el jingle para que sí se note.
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const jingleSource = audioCtx.createMediaElementSource(jingleAudio);
-    const jingleCompressor = audioCtx.createDynamicsCompressor(); // evita que suene distorsionado al subir el volumen
+    const jingleCompressor = audioCtx.createDynamicsCompressor();
     jingleCompressor.threshold.value = -24;
     jingleCompressor.knee.value = 30;
     jingleCompressor.ratio.value = 12;
     jingleCompressor.attack.value = 0.003;
     jingleCompressor.release.value = 0.25;
     const jingleGain = audioCtx.createGain();
-    jingleGain.gain.value = 5; // 👉 sube este número (ej. 6, 7) si aún se escucha bajito; bájalo si suena distorsionado
+    jingleGain.gain.value = 5;
     jingleSource.connect(jingleCompressor).connect(jingleGain).connect(audioCtx.destination);
 
-    function desbloquearJingle(){
-      if(jingleDesbloqueado) return;
-      if(audioCtx.state === 'suspended') audioCtx.resume();
-      jingleAudio.play().then(()=>{
-        jingleDesbloqueado = true;
-        jingleAudio.pause();
-        jingleAudio.currentTime = 0;
-      }).catch(()=>{});
-      // Quitamos la capa para que el mismo toque (o el siguiente) ya le llegue
-      // normal al reproductor de Zeno que está debajo.
+    function desbloquearAudio() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (!jingleDesbloqueado) {
+        jingleAudio.play().then(() => {
+          jingleDesbloqueado = true;
+          jingleAudio.pause();
+          jingleAudio.currentTime = 0;
+        }).catch(() => {});
+      }
+      if (ytPlayer && ytPlayer.playVideo) {
+        try { ytPlayer.playVideo(); } catch (e) {}
+      }
       unlockOverlay.style.display = 'none';
     }
-    unlockOverlay.addEventListener('click', desbloquearJingle);
-    unlockOverlay.addEventListener('touchstart', desbloquearJingle);
+    unlockOverlay.addEventListener('click', desbloquearAudio);
+    unlockOverlay.addEventListener('touchstart', desbloquearAudio);
 
-    setInterval(()=>{
-      if(!jingleDesbloqueado) return;
+    const JINGLE_CADA_MS = 10 * 60 * 1000;
+    setInterval(() => {
+      if (!jingleDesbloqueado) return;
       jingleAudio.currentTime = 0;
-      jingleAudio.play().catch(()=>{});
+      jingleAudio.play().catch(() => {});
     }, JINGLE_CADA_MS);
   </script>
 

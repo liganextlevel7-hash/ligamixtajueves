@@ -229,15 +229,6 @@
     margin-top: 8px;
   }
 
-  /* Capa invisible para desbloquear audio con el primer toque */
-  #unlock-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 999;
-    background: transparent;
-    cursor: pointer;
-  }
-
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-thumb { background: #245; border-radius: 4px; }
 
@@ -275,9 +266,6 @@
 </head>
 <body>
 
-  <!-- Capa invisible que captura el primer toque (activa el jingle y el audio de YouTube) -->
-  <div id="unlock-overlay"></div>
-
   <a href="index.html" class="volver">← Volver al inicio</a>
 
   <div class="radio-widget">
@@ -285,12 +273,36 @@
 
     <div class="player-card">
 
-      <div id="yt-player-container"><div id="yt-player"></div></div>
+      <div id="yt-player-container"><div id="yt-player"></div><div id="yt-player-personal"></div></div>
 
       <div class="modo-tabs">
-        <button id="tab-oficial" class="modo-tab activo">🔴 Transmitiendo</button>
-        <button id="tab-personal" class="modo-tab">🎧 Escuchar</button>
+        <button id="tab-oficial" class="modo-tab activo" onclick="window.cambiarModoNL7('oficial')">📻 Radio Oficial</button>
+        <button id="tab-personal" class="modo-tab" onclick="window.cambiarModoNL7('personal')">🎧 Mi Espacio</button>
       </div>
+      <script>
+        // Cambio de pestaña 100% independiente del resto del código: funciona
+        // aunque Firebase, YouTube, o cualquier otra cosa de la página falle.
+        window.cambiarModoNL7 = function (modo) {
+          var tOf = document.getElementById('tab-oficial');
+          var tPe = document.getElementById('tab-personal');
+          var pOf = document.getElementById('panel-oficial');
+          var pPe = document.getElementById('panel-personal');
+          if (modo === 'personal') {
+            tPe.classList.add('activo');
+            tOf.classList.remove('activo');
+            pPe.style.display = 'block';
+            pOf.style.display = 'none';
+          } else {
+            tOf.classList.add('activo');
+            tPe.classList.remove('activo');
+            pOf.style.display = 'block';
+            pPe.style.display = 'none';
+          }
+          if (typeof window.alAmbiarModoNL7Extra === 'function') {
+            try { window.alAmbiarModoNL7Extra(modo); } catch (e) {}
+          }
+        };
+      </script>
 
       <div id="panel-oficial">
       <div class="now-playing" id="now-playing">
@@ -343,24 +355,26 @@
       </div>
 
       <div id="panel-personal">
-        <p class="personal-nota">Aquí siempre está sonando la radio (playlist normal, o lo que se esté transmitiendo en vivo desde la cancha).</p>
+        <p class="personal-nota">Aquí escuchas tú solo/a, en tu propio espacio — no se mezcla con la Radio Oficial y nadie más lo escucha.</p>
 
-        <div style="border:2px solid #00b4ff; border-radius:20px; overflow:hidden; box-shadow:0 0 20px rgba(0,180,255,0.4);">
-          <iframe
-            src="https://zeno.fm/player/next-level-7"
-            width="100%"
-            height="250"
-            frameborder="0"
-            scrolling="no"
-            style="display:block; border:none;">
-          </iframe>
+        <div class="now-playing" id="np-personal-wrap">
+          <img id="np-personal-thumb" src="" alt="">
+          <div class="info">
+            <div class="titulo" id="np-personal-titulo">Nada sonando — busca algo abajo</div>
+          </div>
+          <button id="btn-saltar-personal" title="Saltar canción" style="background:#222; border:1px solid #ff6b1a; color:#ff6b1a; border-radius:10px; padding:6px 10px; font-size:0.75rem; cursor:pointer; flex-shrink:0;">⏭</button>
         </div>
 
-        <div style="margin-top:16px; font-size:0.8rem; color:#9fd8ff; background:rgba(0,180,255,0.08); border:1px solid rgba(0,180,255,0.3); border-radius:12px; padding:12px 14px;">
-          🎵 ¿Quieres pedir o agregar una canción a la transmisión en vivo de la cancha?
-          <br>
-          <a href="#" id="link-ir-a-transmitiendo" style="color:#ff9d4d; font-weight:bold; text-decoration:underline;">Da clic aquí →</a>
+        <div class="seccion-titulo">Buscar música (solo para ti)</div>
+        <div class="buscador">
+          <input type="text" id="input-buscar-personal" placeholder="Nombre de la canción o artista..." maxlength="80">
+          <button id="btn-buscar-personal">Buscar</button>
         </div>
+        <div class="resultados" id="resultados-personal"></div>
+        <div class="estado-msg" id="estado-msg-personal"></div>
+
+        <div class="seccion-titulo">Tu cola (<span id="cola-personal-count">0</span>)</div>
+        <div class="cola-lista" id="cola-personal-lista"></div>
       </div>
 
     </div>
@@ -391,14 +405,68 @@
     // ===================== CONFIG =====================
     // 👉 PEGA AQUÍ TU API KEY DE YOUTUBE DATA API v3
     const YOUTUBE_API_KEY = "AIzaSyAQqwu1QmrWJQev5lPxKw0nC8Q5gaJDKcE";
-    const MAX_CANCIONES_POR_USUARIO = 2;
+    const MAX_CANCIONES_POR_USUARIO = 3;
     const COOLDOWN_MS = 15 * 60 * 1000; // 15 minutos
+
+    // ===================== PLAYLIST DE RESPALDO =====================
+    // Suena en bucle SOLO en la Radio Oficial cuando la cola de la gente está
+    // vacía. En cuanto alguien agrega una canción, esa se antepone; al
+    // terminarse lo que la gente agregó, se regresa sola aquí.
+    const PLAYLIST_RESPALDO = [
+      { videoId: 'SlgtjRq5AXs', title: 'Los Ángeles Azules, Belinda, Lalo Ebratt - Amor a Primera Vista' },
+      { videoId: 'KCN568dL3K0', title: 'Éxito de los 90' },
+      { videoId: 'OFDazPw8CWM', title: 'Timbiriche - Tú y Yo Somos Uno Mismo' },
+      { videoId: 'vmBHE3NXclA', title: 'Hombres G - Devuélveme a mi Chica' },
+      { videoId: 'OwGG5fX7bxY', title: 'Mecano - Hijo de la Luna' },
+      { videoId: 'smfo5w7sKMY', title: 'Miguel Bosé - Amante Bandido' },
+      { videoId: '2poXmu9nQ70', title: 'Alaska y Dinarama - A Quién le Importa' },
+      { videoId: 'yiB8rLs6vHk', title: 'Ana Belén - Qué Será' },
+      { videoId: 'p9n7erXdRCs', title: 'Flans - No Controles' },
+      { videoId: 'EoPJdXAzDs8', title: 'Luis Miguel - Culpable o No' },
+      { videoId: 'EU3LuPOYFu4', title: 'Franco de Vita - Te Amo' },
+      { videoId: '2ZACWIPuTDE', title: 'Roberto Carlos - Amigo' },
+      { videoId: 'mFc6VAVMgKo', title: 'Maná - Rayando el Sol' },
+      { videoId: 'SEOsusFXyuM', title: 'Duncan Dhu - En Algún Lugar' },
+      { videoId: '3DV57Y4tEAM', title: 'Enrique Iglesias - Experiencia Religiosa' },
+      { videoId: 'ZMUqIoDtSwc', title: 'Alejandro Sanz - Corazón Partío' },
+      { videoId: 'nwjWU35BkBM', title: 'Los Secretos - Sobre un Vidrio Mojado' },
+      { videoId: '5O4lse0dWPU', title: 'Mocedades - Amor de Hombre' },
+      { videoId: 'pjPA7CXutDw', title: 'Los Fabulosos Cadillacs - Matador' },
+      { videoId: 'kIr8hsVTCzg', title: 'Café Tacvba - La Ingrata' },
+      { videoId: 'MBe_iDSD1q8', title: 'Ricky Martin - María' },
+      { videoId: '4MULjbUhIz4', title: 'La Mosca - Para No Verte Más' },
+      { videoId: 'P8CoNgTfgqo', title: 'Molotov - Gimme tha Power' },
+      { videoId: 'oTdK6zG0M3U', title: 'Jaguares - Detrás de los Cerros' }
+    ];
 
     // ===================== ADMIN: solo un aparato reproduce el audio real =====================
     const ADMIN_PASSWORD = 'nl7admin';
     const adminSessionRef = db.ref('jukebox/activeAdminSession');
     const misSessionId = 'admin_' + Date.now() + '_' + Math.random().toString(36).slice(2);
     let esAdminActivo = false;
+
+    // Evita que el celular del admin se bloquee solo a media transmisión.
+    // No funciona en el 100% de los navegadores, pero cubre la gran mayoría.
+    let wakeLock = null;
+    async function pedirWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          wakeLock.addEventListener('release', () => { wakeLock = null; });
+        }
+      } catch (e) { /* si el navegador no lo soporta o lo rechaza, seguimos sin esto */ }
+    }
+    function soltarWakeLock() {
+      if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+    }
+    // Si la pantalla sí llegó a apagarse (navegadores que no soportan Wake Lock,
+    // o el usuario apagó la pantalla manualmente), lo volvemos a pedir en cuanto
+    // regrese a la pestaña — para no quedarnos sin él el resto de la transmisión.
+    document.addEventListener('visibilitychange', () => {
+      if (esAdminActivo && document.visibilityState === 'visible' && !wakeLock) {
+        pedirWakeLock();
+      }
+    });
 
     // ===================== IDENTIDAD DEL USUARIO (local, sin login) =====================
     function getOrCreateUserId() {
@@ -496,12 +564,14 @@
 
     // ===================== AGREGAR A LA COLA =====================
     async function agregarACola(song, boton) {
-      const check = await puedeAgregarCancion();
-      if (!check.permitido) {
-        estadoMsg.textContent = `Ya agregaste ${MAX_CANCIONES_POR_USUARIO} canciones. Espera unos minutos para volver a agregar.`;
-        return;
+      if (!esAdminActivo) {
+        const check = await puedeAgregarCancion();
+        if (!check.permitido) {
+          estadoMsg.textContent = `Ya agregaste ${MAX_CANCIONES_POR_USUARIO} canciones. Espera unos minutos para volver a agregar.`;
+          return;
+        }
       }
-      if (!nickname) nickname = getOrAskNickname();
+      if (!nickname) nickname = esAdminActivo ? (getOrAskAdminNombre() + ' (Admin)') : getOrAskNickname();
 
       if (boton) boton.disabled = true;
       await queueRef.push({
@@ -512,7 +582,7 @@
         userId: userId,
         addedAt: Date.now()
       });
-      await registrarUso();
+      if (!esAdminActivo) await registrarUso();
 
       // si no hay nada sonando, arrancar de inmediato (avanzarCola ya protege contra doble arranque)
       nowPlayingRef.once('value', snap => {
@@ -541,7 +611,19 @@
         const queue = current.queue || {};
         const entradas = Object.entries(queue).sort((a, b) => (a[1].addedAt || 0) - (b[1].addedAt || 0));
         if (entradas.length === 0) {
-          current.nowPlaying = null;
+          // Cola de la gente vacía: seguimos con la playlist de respaldo, en bucle.
+          const idxAnterior = typeof current.respaldoIndex === 'number' ? current.respaldoIndex : -1;
+          const idx = (idxAnterior + 1) % PLAYLIST_RESPALDO.length;
+          const song = PLAYLIST_RESPALDO[idx];
+          current.respaldoIndex = idx;
+          current.nowPlaying = {
+            videoId: song.videoId,
+            title: song.title,
+            thumbnail: 'https://i.ytimg.com/vi/' + song.videoId + '/hqdefault.jpg',
+            addedBy: '📻 Radio Next Level 7',
+            startedAt: Date.now(),
+            esRespaldo: true
+          };
           return current;
         }
         const [key, song] = entradas[0];
@@ -590,6 +672,12 @@
     let ultimoVideoIdCargado = null;
     let modoActual = 'oficial'; // 'oficial' | 'personal'
 
+    // ---- Reproductor y cola PERSONALES (locales, sin Firebase) ----
+    let ytPlayerPersonal = null;
+    let ytListoPersonal = false;
+    let colaPersonal = [];
+    let personalSonando = null; // {videoId, title, thumbnail}
+
     const tagScript = document.createElement('script');
     tagScript.src = 'https://www.youtube.com/iframe_api';
     document.head.appendChild(tagScript);
@@ -601,13 +689,33 @@
         playerVars: { autoplay: 1, controls: 0, disablekb: 1, playsinline: 1 },
         events: {
           onReady: () => { ytListo = true; sincronizarConEstadoActual(); },
-          onStateChange: onPlayerStateChange
+          onStateChange: onPlayerStateChange,
+          onError: onPlayerError
+        }
+      });
+      ytPlayerPersonal = new YT.Player('yt-player-personal', {
+        height: '1',
+        width: '1',
+        playerVars: { autoplay: 0, controls: 0, disablekb: 1, playsinline: 1 },
+        events: {
+          onReady: () => { ytListoPersonal = true; },
+          onStateChange: onPlayerPersonalStateChange
         }
       });
     };
 
     function onPlayerStateChange(event) {
       if (event.data === YT.PlayerState.ENDED && ultimoVideoIdCargado) {
+        avanzarCola(ultimoVideoIdCargado);
+      }
+    }
+
+    // Si un video no se puede reproducir (privado, borrado, con restricción de
+    // edad, o el dueño desactivó "insertar en otros sitios"), lo tratamos igual
+    // que si hubiera terminado, para que la cola/playlist de respaldo no se
+    // quede pegada ahí en silencio para siempre.
+    function onPlayerError(event) {
+      if (ultimoVideoIdCargado) {
         avanzarCola(ultimoVideoIdCargado);
       }
     }
@@ -645,18 +753,21 @@
       const np = estadoActualCache;
       if (ultimoVideoIdCargado !== np.videoId) {
         ultimoVideoIdCargado = np.videoId;
-        // Siempre desde el inicio: como solo hay UN admin transmitiendo a la
-        // vez, no hay otro aparato con el que "sincronizarse", así que ya no
-        // hace falta calcular ni saltar a ningún tiempo. Esto también evita
-        // el salto feo que causaban los comerciales de YouTube antes de la canción.
+        // Como ahora solo este aparato reproduce audio real, cada canción arranca
+        // siempre del segundo 0 — ya no hay que "alcanzar" a nadie más. Antes, si
+        // YouTube metía un anuncio antes del video, el reloj seguía corriendo y la
+        // canción terminaba saltándose los primeros segundos al terminar el anuncio.
         ytPlayer.loadVideoById({ videoId: np.videoId, startSeconds: 0 });
       }
     }
 
+    // Ya no hace falta resincronizar periódicamente: solo el aparato del admin
+    // reproduce audio real, y ese ya se actualiza directo cuando cambia la canción
+    // (ver nowPlayingRef.on('value', ...) más arriba).
+
     // ===================== DESBLOQUEO DE AUDIO (jingle + YouTube) — SOLO ADMIN =====================
     // Los invitados nunca reproducen nada en su aparato, así que no necesitan desbloquear audio.
     const jingleAudio = document.getElementById('jingle-nl7');
-    const unlockOverlay = document.getElementById('unlock-overlay');
     let jingleDesbloqueado = false;
     let audioCtx = null, jingleGain = null;
     let jingleIntervalId = null;
@@ -676,24 +787,7 @@
       jingleSource.connect(jingleCompressor).connect(jingleGain).connect(audioCtx.destination);
     }
 
-    function desbloquearAudio(evento) {
-      // Quitamos la capa invisible SIEMPRE, sea o no admin, para que nunca
-      // se quede bloqueando los clics a los demás botones (login, tabs, etc.)
-      unlockOverlay.style.display = 'none';
-
-      // En móvil, el primer toque se lo "come" esta capa y nunca llega al botón
-      // real de abajo (ej. "Mi Espacio"). Aquí lo reenviamos manualmente para
-      // que el mismo primer toque también active el botón que estaba tapando.
-      if (evento) {
-        const punto = (evento.touches && evento.touches[0]) ? evento.touches[0] : evento;
-        if (punto && punto.clientX !== undefined) {
-          const elementoReal = document.elementFromPoint(punto.clientX, punto.clientY);
-          if (elementoReal && elementoReal !== unlockOverlay) {
-            elementoReal.click();
-          }
-        }
-      }
-
+    function desbloquearAudio() {
       if (!esAdminActivo) return;
       prepararAudioAdmin();
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -708,10 +802,11 @@
         try { ytPlayer.playVideo(); } catch (e) {}
       }
     }
-    // Solo 'touchstart' en móvil y 'click' en compu (evita que el toque se
-    // procese dos veces, una por touch y otra por el click que sigue).
-    unlockOverlay.addEventListener('click', desbloquearAudio);
-    unlockOverlay.addEventListener('touchstart', (e) => { e.preventDefault(); desbloquearAudio(e); }, { passive: false });
+    // Escuchamos el primer toque en CUALQUIER parte de la página (sin bloquear
+    // nada encima) — así los botones reales (como "Mi Espacio") siempre reciben
+    // el toque directo, sin depender de ningún truco para "reenviarlo".
+    document.addEventListener('click', desbloquearAudio);
+    document.addEventListener('touchstart', desbloquearAudio);
 
     const btnEscuchar = document.getElementById('btn-escuchar');
     btnEscuchar.addEventListener('click', () => {
@@ -734,6 +829,106 @@
       if (jingleIntervalId) { clearInterval(jingleIntervalId); jingleIntervalId = null; }
     }
 
+    // ===================== MODO PERSONAL ("Mi Espacio") =====================
+    // Búsqueda y cola 100% locales a este navegador: no se guardan en Firebase,
+    // no las escucha nadie más, y no dependen ni afectan a la Radio Oficial.
+
+    const inputBuscarP = document.getElementById('input-buscar-personal');
+    const btnBuscarP = document.getElementById('btn-buscar-personal');
+    const resultadosPDiv = document.getElementById('resultados-personal');
+    const estadoMsgP = document.getElementById('estado-msg-personal');
+    const npPersonalTitulo = document.getElementById('np-personal-titulo');
+    const npPersonalThumb = document.getElementById('np-personal-thumb');
+    const colaPersonalDiv = document.getElementById('cola-personal-lista');
+    const colaPersonalCount = document.getElementById('cola-personal-count');
+
+    async function buscarCancionesPersonal() {
+      const q = inputBuscarP.value.trim();
+      if (!q) return;
+      btnBuscarP.disabled = true;
+      estadoMsgP.textContent = 'Buscando...';
+      resultadosPDiv.innerHTML = '';
+      try {
+        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoCategoryId=10&maxResults=8&q=${encodeURIComponent(q)}&key=${YOUTUBE_API_KEY}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!res.ok) {
+          estadoMsgP.textContent = 'Error al buscar: ' + (data.error?.message || res.status);
+          btnBuscarP.disabled = false;
+          return;
+        }
+        estadoMsgP.textContent = '';
+        (data.items || []).forEach(item => {
+          const fila = document.createElement('div');
+          fila.className = 'item-fila';
+          fila.innerHTML = `
+            <img src="${item.snippet.thumbnails.default.url}">
+            <div class="info">
+              <div class="titulo">${escapeHtml(item.snippet.title)}</div>
+              <div class="sub">${escapeHtml(item.snippet.channelTitle)}</div>
+            </div>
+            <button>Agregar</button>
+          `;
+          fila.querySelector('button').addEventListener('click', () => {
+            agregarAColaPersonal({
+              videoId: item.id.videoId,
+              title: item.snippet.title,
+              thumbnail: item.snippet.thumbnails.default.url
+            });
+          });
+          resultadosPDiv.appendChild(fila);
+        });
+      } catch (err) {
+        estadoMsgP.textContent = 'Error de conexión al buscar.';
+      }
+      btnBuscarP.disabled = false;
+    }
+    btnBuscarP.addEventListener('click', buscarCancionesPersonal);
+    inputBuscarP.addEventListener('keydown', (e) => { if (e.key === 'Enter') buscarCancionesPersonal(); });
+
+    function pintarColaPersonal() {
+      colaPersonalCount.textContent = colaPersonal.length;
+      colaPersonalDiv.innerHTML = '';
+      colaPersonal.forEach(song => {
+        const fila = document.createElement('div');
+        fila.className = 'item-fila';
+        fila.innerHTML = `
+          <img src="${song.thumbnail}">
+          <div class="info"><div class="titulo">${escapeHtml(song.title)}</div></div>
+        `;
+        colaPersonalDiv.appendChild(fila);
+      });
+    }
+
+    function agregarAColaPersonal(song) {
+      colaPersonal.push(song);
+      pintarColaPersonal();
+      if (!personalSonando) avanzarColaPersonal();
+    }
+
+    function avanzarColaPersonal() {
+      if (colaPersonal.length === 0) {
+        personalSonando = null;
+        npPersonalTitulo.textContent = 'Nada sonando — busca algo abajo';
+        npPersonalThumb.src = '';
+        return;
+      }
+      personalSonando = colaPersonal.shift();
+      pintarColaPersonal();
+      npPersonalTitulo.textContent = personalSonando.title;
+      npPersonalThumb.src = personalSonando.thumbnail;
+      if (ytListoPersonal) {
+        ytPlayerPersonal.loadVideoById({ videoId: personalSonando.videoId, startSeconds: 0 });
+      }
+    }
+
+    function onPlayerPersonalStateChange(event) {
+      if (event.data === YT.PlayerState.ENDED) avanzarColaPersonal();
+    }
+
+    document.getElementById('btn-saltar-personal').addEventListener('click', () => {
+      if (personalSonando) avanzarColaPersonal();
+    });
 
     // ===================== LOGIN / LOGOUT DE ADMIN =====================
     const adminGuestView = document.getElementById('admin-guest-view');
@@ -806,7 +1001,12 @@
       btnSaltar.style.display = 'inline-block';
       prepararAudioAdmin();
       iniciarJingleAdmin();
-      if (ytListo) sincronizarConEstadoActual();
+      pedirWakeLock();
+      // Si no hay nada sonando todavía (ni cola de la gente ni respaldo activo), arrancamos.
+      nowPlayingRef.once('value', snap => {
+        if (!snap.val()) avanzarCola(null);
+        else if (ytListo) sincronizarConEstadoActual();
+      });
 
       // Si este aparato pierde la conexión de verdad (se cierra, se apaga,
       // se va el internet y no vuelve), Firebase libera la sesión solo —
@@ -821,6 +1021,7 @@
       document.getElementById('btn-escuchar').style.display = 'none';
       btnSaltar.style.display = 'none';
       detenerJingleAdmin();
+      soltarWakeLock();
       if (ytPlayer && ytPlayer.pauseVideo) { try { ytPlayer.pauseVideo(); } catch (e) {} }
     }
 
@@ -852,38 +1053,20 @@
       }
     });
 
-    // ===================== CAMBIO DE PESTAÑAS =====================
-    const tabOficial = document.getElementById('tab-oficial');
-    const tabPersonal = document.getElementById('tab-personal');
-    const panelOficial = document.getElementById('panel-oficial');
-    const panelPersonal = document.getElementById('panel-personal');
-
-    function irATransmitiendo() {
-      if (modoActual === 'oficial') return;
-      modoActual = 'oficial';
-      tabOficial.classList.add('activo');
-      tabPersonal.classList.remove('activo');
-      panelOficial.style.display = 'block';
-      panelPersonal.style.display = 'none';
-    }
-
-    tabOficial.addEventListener('click', irATransmitiendo);
-
-    tabPersonal.addEventListener('click', () => {
-      if (modoActual === 'personal') return;
-      modoActual = 'personal';
-      tabPersonal.classList.add('activo');
-      tabOficial.classList.remove('activo');
-      panelPersonal.style.display = 'block';
-      panelOficial.style.display = 'none';
-      // Nota: el audio de la cola (ytPlayer) sigue sonando normal si eres admin,
-      // sin importar qué pestaña estés viendo — es el audio real de la cancha.
-    });
-
-    document.getElementById('link-ir-a-transmitiendo').addEventListener('click', (e) => {
-      e.preventDefault();
-      irATransmitiendo();
-    });
+    // ===================== CAMBIO DE PESTAÑAS (extra: pausar/reanudar audio) =====================
+    // El cambio de panel en sí ya lo hace window.cambiarModoNL7 (definido junto a los
+    // botones, independiente de todo esto). Aquí solo enganchamos el detalle de
+    // pausar un reproductor y reanudar el otro, si esta parte del código cargó bien.
+    window.alAmbiarModoNL7Extra = function (modo) {
+      modoActual = modo;
+      if (modo === 'oficial') {
+        if (ytListoPersonal) try { ytPlayerPersonal.pauseVideo(); } catch (e) {}
+        if (esAdminActivo && ytListo) { sincronizarConEstadoActual(); try { ytPlayer.playVideo(); } catch (e) {} }
+      } else {
+        if (ytListo) try { ytPlayer.pauseVideo(); } catch (e) {}
+        if (ytListoPersonal && personalSonando) try { ytPlayerPersonal.playVideo(); } catch (e) {}
+      }
+    };
   </script>
 
 </body>

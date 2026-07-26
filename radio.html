@@ -277,7 +277,7 @@
 
       <div class="modo-tabs">
         <button id="tab-oficial" class="modo-tab activo" onclick="window.cambiarModoNL7('oficial')">📻 Radio Oficial</button>
-        <button id="tab-personal" class="modo-tab" onclick="window.cambiarModoNL7('personal')">🎧 Mi Espacio</button>
+        <button id="tab-personal" class="modo-tab" onclick="window.cambiarModoNL7('personal')">🎧 PRUEBA123</button>
       </div>
       <script>
         // Cambio de pestaña 100% independiente del resto del código: funciona
@@ -362,7 +362,6 @@
           <div class="info">
             <div class="titulo" id="np-personal-titulo">Nada sonando — busca algo abajo</div>
           </div>
-          <button id="btn-play-personal" onclick="iniciarPlayPersonal()" title="Reproducir" style="display:none;align-items:center;justify-content:center;background:linear-gradient(145deg,#00b4ff,#ff6b1a);border:none;color:#111;font-weight:bold;border-radius:10px;padding:6px 14px;font-size:0.85rem;cursor:pointer;flex-shrink:0;">▶ Play</button>
           <button id="btn-saltar-personal" title="Saltar canción" style="background:#222; border:1px solid #ff6b1a; color:#ff6b1a; border-radius:10px; padding:6px 10px; font-size:0.75rem; cursor:pointer; flex-shrink:0;">⏭</button>
         </div>
 
@@ -699,18 +698,7 @@
         width: '1',
         playerVars: { autoplay: 0, controls: 0, disablekb: 1, playsinline: 1 },
         events: {
-          onReady: () => {
-            ytListoPersonal = true;
-            // Si hay una canción esperando, intentar reproducirla
-            if (personalSonando) {
-              try {
-                ytPlayerPersonal.loadVideoById({ videoId: personalSonando.videoId, startSeconds: 0 });
-                // No autoplay aquí para respetar política del navegador
-                // El usuario verá el botón de play
-                mostrarBtnPlayPersonal();
-              } catch(e) {}
-            }
-          },
+          onReady: () => { ytListoPersonal = true; },
           onStateChange: onPlayerPersonalStateChange
         }
       });
@@ -923,9 +911,6 @@
         personalSonando = null;
         npPersonalTitulo.textContent = 'Nada sonando — busca algo abajo';
         npPersonalThumb.src = '';
-        // Mostrar botón play oculto
-        var btnP = document.getElementById('btn-play-personal');
-        if (btnP) btnP.style.display = 'none';
         return;
       }
       personalSonando = colaPersonal.shift();
@@ -933,36 +918,7 @@
       npPersonalTitulo.textContent = personalSonando.title;
       npPersonalThumb.src = personalSonando.thumbnail;
       if (ytListoPersonal) {
-        try {
-          ytPlayerPersonal.loadVideoById({ videoId: personalSonando.videoId, startSeconds: 0 });
-          ytPlayerPersonal.playVideo();
-          // Ocultar botón play si estaba visible
-          var btnP = document.getElementById('btn-play-personal');
-          if (btnP) btnP.style.display = 'none';
-        } catch(e) {
-          // Si falla, mostrar botón de play manual
-          mostrarBtnPlayPersonal();
-        }
-      } else {
-        // Player aún no listo: guardar pendiente y mostrar play manual
-        mostrarBtnPlayPersonal();
-      }
-    }
-
-    function mostrarBtnPlayPersonal() {
-      var btnP = document.getElementById('btn-play-personal');
-      if (btnP) btnP.style.display = 'inline-flex';
-    }
-
-    function iniciarPlayPersonal() {
-      var btnP = document.getElementById('btn-play-personal');
-      if (btnP) btnP.style.display = 'none';
-      if (!personalSonando) { avanzarColaPersonal(); return; }
-      if (ytListoPersonal) {
-        try {
-          ytPlayerPersonal.loadVideoById({ videoId: personalSonando.videoId, startSeconds: 0 });
-          ytPlayerPersonal.playVideo();
-        } catch(e) {}
+        ytPlayerPersonal.loadVideoById({ videoId: personalSonando.videoId, startSeconds: 0 });
       }
     }
 

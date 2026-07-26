@@ -863,7 +863,7 @@
       modoActual = 'oficial';
       tabOficial.classList.add('activo');
       tabPersonal.classList.remove('activo');
-      panelOficial.style.display = '';
+      panelOficial.style.display = 'block';
       panelPersonal.style.display = 'none';
     }
 
@@ -874,7 +874,7 @@
       modoActual = 'personal';
       tabPersonal.classList.add('activo');
       tabOficial.classList.remove('activo');
-      panelPersonal.style.display = '';
+      panelPersonal.style.display = 'block';
       panelOficial.style.display = 'none';
       // Nota: el audio de la cola (ytPlayer) sigue sonando normal si eres admin,
       // sin importar qué pestaña estés viendo — es el audio real de la cancha.

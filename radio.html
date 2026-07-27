@@ -121,6 +121,12 @@
         <span class="emoji">🎶</span>
         <div class="titulo">Radio en la Cancha (Colaborativa)</div>
         <div class="desc">Agrega canciones a la cola de todos. Lo que se escucha en la radio oficial lo elige la gente.</div>
+        <div id="switch-transmision" style="display:flex; align-items:center; gap:8px; margin-top:10px;">
+          <div id="transmision-switch" style="width:40px; height:22px; border-radius:20px; background:#7a3d1e; position:relative; transition:background 0.25s; flex-shrink:0;">
+            <div id="transmision-switch-knob" style="width:18px; height:18px; border-radius:50%; background:#1a1a1a; position:absolute; top:2px; left:2px; transition:left 0.25s; box-shadow:0 1px 3px rgba(0,0,0,0.5);"></div>
+          </div>
+          <span id="transmision-switch-label" style="font-size:0.7rem; color:#ff9d5c; font-weight:bold;">Sin transmisión ahora</span>
+        </div>
       </a>
 
       <a href="mi-espacio.html" class="opcion espacio">
@@ -136,6 +142,41 @@
       </a>
     </div>
   </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAQqwu1QmrWJQev5lPxKw0nC8Q5gaJDKcE",
+      authDomain: "torneomixtojueves.firebaseapp.com",
+      databaseURL: "https://torneomixtojueves-default-rtdb.firebaseio.com",
+      projectId: "torneomixtojueves",
+      storageBucket: "torneomixtojueves.firebasestorage.app",
+      messagingSenderId: "1043570234430",
+      appId: "1:1043570234430:web:f18b44045feeda7eb7ed6f"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const transmisionSwitch = document.getElementById('transmision-switch');
+    const transmisionSwitchKnob = document.getElementById('transmision-switch-knob');
+    const transmisionSwitchLabel = document.getElementById('transmision-switch-label');
+
+    db.ref('jukebox/activeAdminSession').on('value', snap => {
+      const actual = snap.val();
+      if (actual) {
+        transmisionSwitch.style.background = '#00b4ff';
+        transmisionSwitchKnob.style.left = '20px';
+        transmisionSwitchLabel.style.color = '#00b4ff';
+        transmisionSwitchLabel.textContent = 'Transmitiendo ahora';
+      } else {
+        transmisionSwitch.style.background = '#7a3d1e';
+        transmisionSwitchKnob.style.left = '2px';
+        transmisionSwitchLabel.style.color = '#ff9d5c';
+        transmisionSwitchLabel.textContent = 'Sin transmisión ahora';
+      }
+    });
+  </script>
 
 </body>
 </html>

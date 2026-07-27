@@ -251,11 +251,22 @@
           <div class="titulo" id="np-titulo">Cargando...</div>
           <div class="agregado-por" id="np-agregado">—</div>
         </div>
-        <button id="btn-saltar" title="Saltar canción" style="background:#222; border:1px solid #00b4ff; color:#00b4ff; border-radius:10px; padding:6px 10px; font-size:0.75rem; cursor:pointer; flex-shrink:0; display:none;">⏭</button>
+        <div id="controles-orange" style="display:none; gap:8px; margin-top:8px; justify-content:center;">
+          <button id="btn-playpause" title="Reproducir/Pausar" style="width:38px; height:38px; border-radius:50%; border:1px solid #66c2ff; background:radial-gradient(circle at 35% 30%, #66c2ff, #00b4ff); color:#fff; font-size:1rem; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.4);">⏸</button>
+          <button id="btn-stop" title="Detener" style="width:38px; height:38px; border-radius:50%; border:1px solid #66c2ff; background:radial-gradient(circle at 35% 30%, #66c2ff, #00b4ff); color:#fff; font-size:1rem; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.4);">⏹</button>
+          <button id="btn-saltar-orange" title="Saltar canción" style="width:38px; height:38px; border-radius:50%; border:1px solid #66c2ff; background:radial-gradient(circle at 35% 30%, #66c2ff, #00b4ff); color:#fff; font-size:1rem; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.4);">⏭</button>
+          <button id="btn-mute" title="Silenciar/Activar sonido" style="width:38px; height:38px; border-radius:50%; border:1px solid #66c2ff; background:radial-gradient(circle at 35% 30%, #66c2ff, #00b4ff); color:#fff; font-size:1rem; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.4);">🔊</button>
+        </div>
       </div>
 
       <!-- ===== ADMIN: solo este aparato reproduce el audio real ===== -->
       <div id="admin-box" style="text-align:left; margin-bottom:14px;">
+        <div id="admin-switch-wrap" style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <div id="admin-switch" style="width:46px; height:24px; border-radius:20px; background:#7a1e1e; position:relative; transition:background 0.25s; flex-shrink:0;">
+            <div id="admin-switch-knob" style="width:20px; height:20px; border-radius:50%; background:#1a1a1a; position:absolute; top:2px; left:2px; transition:left 0.25s; box-shadow:0 1px 3px rgba(0,0,0,0.5);"></div>
+          </div>
+          <span id="admin-switch-label" style="font-size:0.7rem; color:#ff6b6b; font-weight:bold;">Sin admin conectado</span>
+        </div>
         <div id="admin-guest-view">
           <div style="font-size:0.68rem; color:#8aa; margin-bottom:6px;">🔇 Modo invitado: puedes agregar canciones, pero el audio solo suena en el aparato del administrador.</div>
           <div id="admin-quien-conectado" style="display:none; font-size:0.7rem; color:#ffb366; background:rgba(255,179,102,0.08); border:1px solid rgba(255,179,102,0.35); border-radius:10px; padding:8px 10px; margin-bottom:8px;">
@@ -272,6 +283,7 @@
         <div id="admin-active-view" style="display:none; background:rgba(0,180,255,0.1); border:1px solid #00b4ff; border-radius:10px; padding:8px 10px;">
           <div style="font-size:0.75rem; font-weight:bold; color:#00b4ff;">🎙️ Modo Admin activo — <span id="admin-mi-nombre"></span></div>
           <div style="font-size:0.68rem; color:#9fd8ff; margin:2px 0 6px;">El audio suena en este aparato. Conéctalo a las bocinas. Cuando termines, cierra tu sesión para que otro pueda entrar.</div>
+          <button id="btn-vivo-youtube" style="background:none; border:1px solid #ff6b1a; color:#ff6b1a; border-radius:8px; padding:5px 10px; font-size:0.7rem; cursor:pointer; margin-right:6px;">📡 Agregar transmisión en vivo</button>
           <button id="btn-cerrar-admin" style="background:none; border:1px solid #00b4ff; color:#00b4ff; border-radius:8px; padding:5px 10px; font-size:0.7rem; cursor:pointer;">Cerrar sesión de admin</button>
         </div>
       </div>
@@ -470,6 +482,29 @@
     }
     const userId = getOrCreateUserId();
     let nickname = null; // se pide al primer intento de agregar canción, no al cargar la página
+
+    // ===================== TRANSMISIÓN EN VIVO (solo admin) =====================
+    // A diferencia de una canción normal, un video EN VIVO no dispara "ENDED" —
+    // se queda sonando hasta que el admin le dé manualmente a "Saltar" (⏭).
+    function extraerVideoIdDeUrl(url) {
+      const m = url.match(/(?:youtube\.com\/watch\?v=|youtube\.com\/live\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+
+    document.getElementById('btn-vivo-youtube').addEventListener('click', () => {
+      const url = prompt('Pega el link de la transmisión en vivo de YouTube:');
+      if (!url) return;
+      const videoId = extraerVideoIdDeUrl(url.trim());
+      if (!videoId) {
+        alert('No reconocí ese link. Debe ser algo como https://www.youtube.com/watch?v=XXXXXXXXXXX o https://youtu.be/XXXXXXXXXXX');
+        return;
+      }
+      agregarACola({
+        videoId: videoId,
+        title: '🔴 Transmisión en vivo',
+        thumbnail: 'https://i.ytimg.com/vi/' + videoId + '/hqdefault.jpg'
+      }, null);
+    });
 
     // ===================== BÚSQUEDA EN YOUTUBE =====================
     const inputBuscar = document.getElementById('input-buscar');
@@ -686,11 +721,51 @@
       }
     }
 
-    const btnSaltar = document.getElementById('btn-saltar');
-    btnSaltar.addEventListener('click', () => {
+    const controlesOrange = document.getElementById('controles-orange');
+    const btnPlayPause = document.getElementById('btn-playpause');
+    const btnStop = document.getElementById('btn-stop');
+    const btnSaltarOrange = document.getElementById('btn-saltar-orange');
+    const btnMute = document.getElementById('btn-mute');
+    let pausadoManualmente = false;
+
+    btnSaltarOrange.addEventListener('click', () => {
       if (!esAdminActivo) return;
       if (estadoActualCache && estadoActualCache.videoId) {
         avanzarCola(estadoActualCache.videoId);
+      }
+    });
+
+    btnPlayPause.addEventListener('click', () => {
+      if (!esAdminActivo || !ytPlayer) return;
+      if (pausadoManualmente) {
+        ytPlayer.playVideo();
+        pausadoManualmente = false;
+        btnPlayPause.textContent = '⏸';
+      } else {
+        ytPlayer.pauseVideo();
+        pausadoManualmente = true;
+        btnPlayPause.textContent = '▶';
+      }
+    });
+
+    btnStop.addEventListener('click', () => {
+      if (!esAdminActivo || !ytPlayer) return;
+      ytPlayer.pauseVideo();
+      pausadoManualmente = true;
+      btnPlayPause.textContent = '▶';
+    });
+
+    let silenciado = false;
+    btnMute.addEventListener('click', () => {
+      if (!esAdminActivo || !ytPlayer) return;
+      if (silenciado) {
+        ytPlayer.unMute();
+        silenciado = false;
+        btnMute.textContent = '🔊';
+      } else {
+        ytPlayer.mute();
+        silenciado = true;
+        btnMute.textContent = '🔇';
       }
     });
 
@@ -863,7 +938,7 @@
       document.getElementById('btn-escuchar').textContent = '▶ Escuchar';
       document.getElementById('btn-escuchar').disabled = false;
       document.getElementById('btn-escuchar').style.opacity = '1';
-      btnSaltar.style.display = 'inline-block';
+      controlesOrange.style.display = 'flex';
       prepararAudioAdmin();
       iniciarJingleAdmin();
       pedirWakeLock();
@@ -884,7 +959,7 @@
       adminActiveView.style.display = 'none';
       adminGuestView.style.display = 'block';
       document.getElementById('btn-escuchar').style.display = 'none';
-      btnSaltar.style.display = 'none';
+      controlesOrange.style.display = 'none';
       detenerJingleAdmin();
       soltarWakeLock();
       if (ytPlayer && ytPlayer.pauseVideo) { try { ytPlayer.pauseVideo(); } catch (e) {} }
@@ -906,8 +981,24 @@
     // cortes de conexión). Solo mostramos, a los invitados, quién está
     // conectado ahora mismo como admin — para que se coordinen entre ustedes.
     const adminQuienConectadoTexto = document.getElementById('admin-quien-conectado-texto');
+    const adminSwitch = document.getElementById('admin-switch');
+    const adminSwitchKnob = document.getElementById('admin-switch-knob');
+    const adminSwitchLabel = document.getElementById('admin-switch-label');
     adminSessionRef.on('value', snap => {
       const actual = snap.val();
+
+      if (actual) {
+        adminSwitch.style.background = '#00b4ff';
+        adminSwitchKnob.style.left = '24px';
+        adminSwitchLabel.style.color = '#00b4ff';
+        adminSwitchLabel.textContent = `Admin conectado: ${actual.nombre || 'alguien'}`;
+      } else {
+        adminSwitch.style.background = '#7a1e1e';
+        adminSwitchKnob.style.left = '2px';
+        adminSwitchLabel.style.color = '#ff6b6b';
+        adminSwitchLabel.textContent = 'Sin admin conectado';
+      }
+
       if (!esAdminActivo) {
         if (actual) {
           adminQuienConectado.style.display = 'block';

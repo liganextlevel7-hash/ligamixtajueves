@@ -251,12 +251,7 @@
           <div class="titulo" id="np-titulo">Cargando...</div>
           <div class="agregado-por" id="np-agregado">—</div>
         </div>
-        <div id="controles-orange" style="display:none; gap:8px; margin-top:8px; justify-content:center;">
-          <button id="btn-playpause" title="Reproducir/Pausar" style="width:38px; height:38px; border-radius:50%; border:1px solid #66c2ff; background:radial-gradient(circle at 35% 30%, #66c2ff, #00b4ff); color:#fff; font-size:1rem; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.4);">⏸</button>
-          <button id="btn-stop" title="Detener" style="width:38px; height:38px; border-radius:50%; border:1px solid #66c2ff; background:radial-gradient(circle at 35% 30%, #66c2ff, #00b4ff); color:#fff; font-size:1rem; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.4);">⏹</button>
-          <button id="btn-saltar-orange" title="Saltar canción" style="width:38px; height:38px; border-radius:50%; border:1px solid #66c2ff; background:radial-gradient(circle at 35% 30%, #66c2ff, #00b4ff); color:#fff; font-size:1rem; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.4);">⏭</button>
-          <button id="btn-mute" title="Silenciar/Activar sonido" style="width:38px; height:38px; border-radius:50%; border:1px solid #66c2ff; background:radial-gradient(circle at 35% 30%, #66c2ff, #00b4ff); color:#fff; font-size:1rem; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.4);">🔊</button>
-        </div>
+        <button id="btn-saltar" title="Saltar canción" style="background:#222; border:1px solid #00b4ff; color:#00b4ff; border-radius:10px; padding:6px 10px; font-size:0.75rem; cursor:pointer; flex-shrink:0; display:none;">⏭</button>
       </div>
 
       <!-- ===== ADMIN: solo este aparato reproduce el audio real ===== -->
@@ -709,17 +704,6 @@
       if (event.data === YT.PlayerState.ENDED && ultimoVideoIdCargado) {
         avanzarCola(ultimoVideoIdCargado);
       }
-      // El ícono de play/pausa siempre refleja el estado REAL del reproductor,
-      // sin importar qué lo haya cambiado (clic manual, o una canción nueva que
-      // entró sola por Firebase) — así nunca se queda "atorado" mostrando lo
-      // contrario de lo que en verdad está pasando.
-      if (event.data === YT.PlayerState.PLAYING) {
-        pausadoManualmente = false;
-        btnPlayPause.textContent = '⏸';
-      } else if (event.data === YT.PlayerState.PAUSED) {
-        pausadoManualmente = true;
-        btnPlayPause.textContent = '▶';
-      }
     }
 
     // Si un video no se puede reproducir (privado, borrado, con restricción de
@@ -732,51 +716,11 @@
       }
     }
 
-    const controlesOrange = document.getElementById('controles-orange');
-    const btnPlayPause = document.getElementById('btn-playpause');
-    const btnStop = document.getElementById('btn-stop');
-    const btnSaltarOrange = document.getElementById('btn-saltar-orange');
-    const btnMute = document.getElementById('btn-mute');
-    let pausadoManualmente = false;
-
-    btnSaltarOrange.addEventListener('click', () => {
+    const btnSaltar = document.getElementById('btn-saltar');
+    btnSaltar.addEventListener('click', () => {
       if (!esAdminActivo) return;
       if (estadoActualCache && estadoActualCache.videoId) {
         avanzarCola(estadoActualCache.videoId);
-      }
-    });
-
-    btnPlayPause.addEventListener('click', () => {
-      if (!esAdminActivo || !ytPlayer) return;
-      if (pausadoManualmente) {
-        ytPlayer.playVideo();
-        pausadoManualmente = false;
-        btnPlayPause.textContent = '⏸';
-      } else {
-        ytPlayer.pauseVideo();
-        pausadoManualmente = true;
-        btnPlayPause.textContent = '▶';
-      }
-    });
-
-    btnStop.addEventListener('click', () => {
-      if (!esAdminActivo || !ytPlayer) return;
-      ytPlayer.pauseVideo();
-      pausadoManualmente = true;
-      btnPlayPause.textContent = '▶';
-    });
-
-    let silenciado = false;
-    btnMute.addEventListener('click', () => {
-      if (!esAdminActivo || !ytPlayer) return;
-      if (silenciado) {
-        ytPlayer.unMute();
-        silenciado = false;
-        btnMute.textContent = '🔊';
-      } else {
-        ytPlayer.mute();
-        silenciado = true;
-        btnMute.textContent = '🔇';
       }
     });
 

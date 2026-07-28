@@ -709,6 +709,17 @@
       if (event.data === YT.PlayerState.ENDED && ultimoVideoIdCargado) {
         avanzarCola(ultimoVideoIdCargado);
       }
+      // El ícono de play/pausa siempre refleja el estado REAL del reproductor,
+      // sin importar qué lo haya cambiado (clic manual, o una canción nueva que
+      // entró sola por Firebase) — así nunca se queda "atorado" mostrando lo
+      // contrario de lo que en verdad está pasando.
+      if (event.data === YT.PlayerState.PLAYING) {
+        pausadoManualmente = false;
+        btnPlayPause.textContent = '⏸';
+      } else if (event.data === YT.PlayerState.PAUSED) {
+        pausadoManualmente = true;
+        btnPlayPause.textContent = '▶';
+      }
     }
 
     // Si un video no se puede reproducir (privado, borrado, con restricción de

@@ -893,6 +893,7 @@
       document.getElementById('btn-escuchar').textContent = '▶ Escuchar';
       document.getElementById('btn-escuchar').disabled = false;
       document.getElementById('btn-escuchar').style.opacity = '1';
+      btnSaltar.style.display = 'inline-block';
       prepararAudioAdmin();
       iniciarJingleAdmin();
       pedirWakeLock();
@@ -913,6 +914,7 @@
       adminActiveView.style.display = 'none';
       adminGuestView.style.display = 'block';
       document.getElementById('btn-escuchar').style.display = 'none';
+      btnSaltar.style.display = 'none';
       detenerJingleAdmin();
       soltarWakeLock();
       if (ytPlayer && ytPlayer.pauseVideo) { try { ytPlayer.pauseVideo(); } catch (e) {} }

@@ -7,10 +7,10 @@ const logos = {
 "UEquipo 3":"https://i.imgur.com/r8m6hd6.png",
 "Equipo 4":"https://i.imgur.com/hwOdu31.png",
 "Equipo 5":"https://i.imgur.com/QSRGYwP.png",
-"Equipo 6":"https://i.imgur.com/undefined.png",
-"Equipo 7":"https://i.imgur.com/ZVfuHio.png",
+"Equipo 6":"https://i.imgur.com/qbOamH5.png",
+"Equipo 7":"https://i.imgur.com/YeYA2Jd.png",
 "Equipo 8":"https://i.imgur.com/m0IcPLL.png",
-"Equipo 9":"https://i.imgur.com/P0AWXuE.png",
+"Equipo 9":"https://i.imgur.com/aMc7YJ3.png",
 "Euipo 10":"https://i.imgur.com/MpgSp2v.png"
 };
 

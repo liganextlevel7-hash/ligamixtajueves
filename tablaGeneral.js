@@ -1,17 +1,24 @@
-const URL_ESTADISTICAS =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=979195152&single=true&output=csv";
+const PUB_HASH = "2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy";
 
-const logos = {
-  "Soldados Del Amor":"https://i.imgur.com/gBvmM4v.png",
-  "Cuervos F.C":"https://i.imgur.com/fGQAhE5.png",
-  "Unión 8":"https://i.imgur.com/Qrx4JSj.png",
-  "La Garra":"https://i.imgur.com/8BWFWBW.png",
-  "Pumas KAP":"https://i.imgur.com/5TAVBS7.png",
-  "Los Chipotles":"https://i.imgur.com/KTMLCv9.png",
-  "Deportivo CT":"https://i.imgur.com/hqOAa7J.png",
-  "Gusanitos":"https://i.imgur.com/5TARJkD.png",
-  "Bacachitos":"https://i.imgur.com/ddKmNL6.png"
-};
+const URL_EQUIPOS =
+  `https://docs.google.com/spreadsheets/d/e/${PUB_HASH}/pub?gid=1894947293&single=true&output=csv`;
+
+const URL_ESTADISTICAS =
+  `https://docs.google.com/spreadsheets/d/e/${PUB_HASH}/pub?gid=979195152&single=true&output=csv`;
+
+let logos = {}; // se llena solo, jalando la hoja "Equipos" — ya no hace falta tocarlo a mano
+
+async function cargarLogosEquipos() {
+  const resp = await fetch(URL_EQUIPOS);
+  const texto = await resp.text();
+  const filas = texto.replace(/\r/g, '').trim().split("\n");
+  for (let i = 1; i < filas.length; i++) {
+    const c = filas[i].split(",");
+    const nombre = (c[1] || "").trim();
+    if (!nombre || nombre === "Descansa") continue;
+    logos[nombre] = (c[4] || c[3] || "").trim(); // columna "URL" (o "Logo" si esa trae el link)
+  }
+}
 
 (function() {
   if (document.getElementById("tabla-gn-style")) return;
@@ -144,6 +151,7 @@ function cerrarPopup() {
 }
 
 async function cargarTablaCompleta() {
+  await cargarLogosEquipos();
   const respuesta = await fetch(URL_ESTADISTICAS);
   const texto = await respuesta.text();
   const filas = texto.replace(/\r/g,'').trim().split("\n");

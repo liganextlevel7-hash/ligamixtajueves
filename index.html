@@ -142,7 +142,7 @@
 </head>
 <body>
 <header>
-  <img src="logo-liga.png.png" class="logo-liga">
+  <img src="logo-liga.png" class="logo-liga">
   <h1 style="position:relative;display:inline-block;">
     <div class="balon-container" id="balon-wrap">
       <div class="balon-emoji">⚽</div>
@@ -339,9 +339,28 @@ const CAR_PARTIDOS     = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_
 const CAR_JUGADORES    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=1940220650&single=true&output=csv";
 const CAR_EVENTOS      = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=645868286&single=true&output=csv";
 const CAR_PARTIC       = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=626975401&single=true&output=csv";
-const carLogos = {"Soldados Del Amor":"https://i.imgur.com/gBvmM4v.png","Cuervos F.C":"https://i.imgur.com/fGQAhE5.png","Unión 8":"https://i.imgur.com/Qrx4JSj.png","La Garra":"https://i.imgur.com/8BWFWBW.png","Pumas KAP":"https://i.imgur.com/5TAVBS7.png","Los Chipotles":"https://i.imgur.com/KTMLCv9.png","Deportivo CT":"https://i.imgur.com/hqOAa7J.png","Gusanitos":"https://i.imgur.com/5TARJkD.png","Bacachitos":"https://i.imgur.com/ddKmNL6.png"};
-const carEqID  = {1:"Soldados Del Amor",2:"Cuervos F.C",3:"Unión 8",4:"La Garra",5:"Pumas KAP",6:"Los Chipotles",7:"Deportivo CT",8:"Gusanitos",9:"Bacachitos"};
-const carLogosID = {1:"https://i.imgur.com/gBvmM4v.png",2:"https://i.imgur.com/fGQAhE5.png",3:"https://i.imgur.com/Qrx4JSj.png",4:"https://i.imgur.com/8BWFWBW.png",5:"https://i.imgur.com/5TAVBS7.png",6:"https://i.imgur.com/KTMLCv9.png",7:"https://i.imgur.com/hqOAa7J.png",8:"https://i.imgur.com/5TARJkD.png",9:"https://i.imgur.com/ddKmNL6.png"};
+const CAR_EQUIPOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=1894947293&single=true&output=csv";
+let carLogos = {};    // nombre -> logo, se llena solo desde la hoja "Equipos"
+let carEqID  = {};    // ID_Equipo -> nombre
+let carLogosID = {};  // ID_Equipo -> logo
+async function cargarCatalogoCarrusel(){
+  const resp = await fetch(CAR_EQUIPOS);
+  const texto = await resp.text();
+  const filas = texto.trim().split("\n");
+  const logosTmp = {}, idNombreTmp = {}, idLogoTmp = {};
+  for(let i=1;i<filas.length;i++){
+    const c = filas[i].split(",");
+    const id = Number(c[0]);
+    const nombre = (c[1] || "").trim();
+    if(!nombre) continue;
+    const logoUrl = (c[4] || c[3] || "").trim();
+    logosTmp[nombre] = logoUrl;
+    if(id){ idNombreTmp[id] = nombre; idLogoTmp[id] = logoUrl; }
+  }
+  carLogos = logosTmp;
+  carEqID = idNombreTmp;
+  carLogosID = idLogoTmp;
+}
 function carParseCSV(text) {
   const lines = text.replace(/\r/g,'').trim().split('\n');
   const headers = lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
@@ -361,6 +380,7 @@ function svgMini(tipo, num, logoUrl) {
 }
 async function cargarCarrusel() {
   try {
+    await cargarCatalogoCarrusel(); // primero traemos equipos/logos/IDs reales del Sheet
     const [resE,resP,resJ,resEv,resPart] = await Promise.all([fetch(CAR_ESTADISTICAS),fetch(CAR_PARTIDOS),fetch(CAR_JUGADORES),fetch(CAR_EVENTOS),fetch(CAR_PARTIC)]);
     const [tE,tP,tJ,tEv,tPart] = await Promise.all([resE.text(),resP.text(),resJ.text(),resEv.text(),resPart.text()]);
     const filasE=tE.trim().split('\n'); const equipos=[];

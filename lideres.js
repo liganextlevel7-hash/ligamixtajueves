@@ -1,19 +1,29 @@
 // ==================== LÍDERES ====================
 
-const URL_ESTADISTICAS_LID =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=979195152&single=true&output=csv";
+const PUB_HASH_LID = "2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy";
 
-const logosLideres = {
-  "Soldados Del Amor": "https://i.imgur.com/gBvmM4v.png",
-  "Cuervos F.C":       "https://i.imgur.com/fGQAhE5.png",
-  "Unión 8":           "https://i.imgur.com/Qrx4JSj.png",
-  "La Garra":          "https://i.imgur.com/8BWFWBW.png",
-  "Pumas KAP":         "https://i.imgur.com/5TAVBS7.png",
-  "Los Chipotles":     "https://i.imgur.com/KTMLCv9.png",
-  "Deportivo CT":      "https://i.imgur.com/hqOAa7J.png",
-  "Gusanitos":         "https://i.imgur.com/5TARJkD.png",
-  "Bacachitos":        "https://i.imgur.com/ddKmNL6.png"
-};
+const URL_EQUIPOS_LID =
+  `https://docs.google.com/spreadsheets/d/e/${PUB_HASH_LID}/pub?gid=1894947293&single=true&output=csv`;
+
+const URL_ESTADISTICAS_LID =
+  `https://docs.google.com/spreadsheets/d/e/${PUB_HASH_LID}/pub?gid=979195152&single=true&output=csv`;
+
+let logosLideres = {}; // nombre -> logo, se llena solo desde la hoja "Equipos"
+
+async function cargarCatalogoLideres(){
+  const resp = await fetch(URL_EQUIPOS_LID);
+  const texto = await resp.text();
+  const filas = texto.trim().split("\n");
+  const tmp = {};
+  for(let i=1;i<filas.length;i++){
+    const c = filas[i].split(",");
+    const nombre = (c[1] || "").trim();
+    if(!nombre) continue;
+    const logoUrl = (c[4] || c[3] || "").trim();
+    tmp[nombre] = logoUrl;
+  }
+  logosLideres = tmp;
+}
 
 // Inyectar estilos
 (function() {
@@ -253,6 +263,8 @@ async function cargarLideres() {
   contenedor.innerHTML = `<div style="text-align:center;color:#00b4ff;padding:20px;">Cargando líderes...</div>`;
 
   try {
+    await cargarCatalogoLideres(); // trae nombres/logos reales desde la hoja "Equipos"
+
     const res = await fetch(URL_ESTADISTICAS_LID);
     const texto = await res.text();
     const filas = texto.trim().split("\n");

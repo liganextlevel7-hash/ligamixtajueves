@@ -1,25 +1,36 @@
 // ==================== TOP GOLEADORES ====================
 
+const PUB_HASH_GOL = "2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy";
+
+const URL_EQUIPOS_GOL =
+  `https://docs.google.com/spreadsheets/d/e/${PUB_HASH_GOL}/pub?gid=1894947293&single=true&output=csv`;
+
 const URL_JUGADORES =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=1940220650&single=true&output=csv";
+  `https://docs.google.com/spreadsheets/d/e/${PUB_HASH_GOL}/pub?gid=1940220650&single=true&output=csv`;
 
 const URL_EVENTOS =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=645868286&single=true&output=csv";
+  `https://docs.google.com/spreadsheets/d/e/${PUB_HASH_GOL}/pub?gid=645868286&single=true&output=csv`;
 
 const URL_PARTICIPACIONES =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy/pub?gid=626975401&single=true&output=csv";
+  `https://docs.google.com/spreadsheets/d/e/${PUB_HASH_GOL}/pub?gid=626975401&single=true&output=csv`;
 
-const logosEquipos = {
-  1: "https://i.imgur.com/gBvmM4v.png",
-  2: "https://i.imgur.com/fGQAhE5.png",
-  3: "https://i.imgur.com/Qrx4JSj.png",
-  4: "https://i.imgur.com/8BWFWBW.png",
-  5: "https://i.imgur.com/5TAVBS7.png",
-  6: "https://i.imgur.com/KTMLCv9.png",
-  7: "https://i.imgur.com/hqOAa7J.png",
-  8: "https://i.imgur.com/5TARJkD.png",
-  9: "https://i.imgur.com/ddKmNL6.png"
-};
+let logosEquipos = {}; // ID_Equipo -> logo, se llena solo desde la hoja "Equipos"
+
+async function cargarCatalogoGoleadores(){
+  const resp = await fetch(URL_EQUIPOS_GOL);
+  const texto = await resp.text();
+  const filas = texto.trim().split("\n");
+  const tmp = {};
+  for(let i=1;i<filas.length;i++){
+    const c = filas[i].split(",");
+    const id = Number(c[0]);
+    const nombre = (c[1] || "").trim();
+    if(!nombre || !id) continue;
+    const logoUrl = (c[4] || c[3] || "").trim();
+    tmp[id] = logoUrl;
+  }
+  logosEquipos = tmp;
+}
 
 function parseCSV(texto) {
   const filas = texto.trim().split("\n");
@@ -272,12 +283,13 @@ async function cargarTopGoleadores() {
   contenedor.innerHTML = `<div style="text-align:center;color:#00b4ff;padding:20px;">Cargando goleadores...</div>`;
 
   try {
-    const [resJ, resE, resP] = await Promise.all([
+    const [, respJ, respE, respP] = await Promise.all([
+      cargarCatalogoGoleadores(),
       fetch(URL_JUGADORES),
       fetch(URL_EVENTOS),
       fetch(URL_PARTICIPACIONES)
     ]);
-    const [txtJ, txtE, txtP] = await Promise.all([resJ.text(), resE.text(), resP.text()]);
+    const [txtJ, txtE, txtP] = await Promise.all([respJ.text(), respE.text(), respP.text()]);
 
     const jugadores       = parseCSV(txtJ);
     const eventos         = parseCSV(txtE);

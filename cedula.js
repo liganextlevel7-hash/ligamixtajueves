@@ -472,18 +472,18 @@ async function descargarPDF() {
     }
 
     doc.setFillColor(8,12,20); doc.rect(0,0,210,297,'F');
-    doc.setFillColor(15,30,10); doc.rect(0,0,210,32,'F');
-    doc.setTextColor(184,240,48); doc.setFontSize(18); doc.setFont('helvetica','bold');
+    doc.setFillColor(40,18,5); doc.rect(0,0,210,32,'F');
+    doc.setTextColor(255,107,26); doc.setFontSize(18); doc.setFont('helvetica','bold');
     doc.text('CEDULA ARBITRAL',105,13,{align:'center'});
-    doc.setFontSize(10); doc.setTextColor(150,200,80);
+    doc.setFontSize(10); doc.setTextColor(220,140,80);
     doc.text('LIGA NEXT LEVEL 7',105,21,{align:'center'});
-    doc.setFontSize(8); doc.setTextColor(100,150,60);
+    doc.setFontSize(8); doc.setTextColor(150,90,40);
     doc.text('Partido #'+partidoActual.ID_Partido+' | '+(partidoActual.Jornada?'Jornada '+partidoActual.Jornada:'')+' | '+(partidoActual.Fecha||'')+' | '+(partidoActual.Cancha||''),105,28,{align:'center'});
 
-    doc.setFillColor(12,25,8); doc.rect(0,34,210,20,'F');
+    doc.setFillColor(30,14,4); doc.rect(0,34,210,20,'F');
     doc.setTextColor(255,255,255); doc.setFontSize(12); doc.setFont('helvetica','bold');
     doc.text((eqL.Nombre||'Local').toUpperCase(),52,46,{align:'center'});
-    doc.setTextColor(212,240,48); doc.setFontSize(18);
+    doc.setTextColor(255,107,26); doc.setFontSize(18);
     doc.text(gL+'  -  '+gV,105,47,{align:'center'});
     doc.setTextColor(255,255,255); doc.setFontSize(12);
     doc.text((eqV.Nombre||'Visita').toUpperCase(),158,46,{align:'center'});
@@ -494,15 +494,15 @@ async function descargarPDF() {
     const pV  = todasParticipaciones.filter(p=>String(p.Partido).trim()===idP&&String(p.Equipo).trim()===String(partidoActual.Equipo_Visita).trim());
 
     let y=62;
-    doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(100,200,60);
+    doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(200,120,50);
     doc.text('A  NUM  JUGADOR',13,y); doc.text('EVENTOS',75,y);
     doc.text('A  NUM  JUGADOR',113,y); doc.text('EVENTOS',175,y);
-    y+=3; doc.setDrawColor(57,255,20); doc.line(10,y,200,y); y+=4;
+    y+=3; doc.setDrawColor(255,107,26); doc.line(10,y,200,y); y+=4;
 
     const maxR=Math.max(pL.length,pV.length);
     for(let i=0;i<maxR;i++){
       if(y>255){doc.addPage();doc.setFillColor(8,12,20);doc.rect(0,0,210,297,'F');y=15;}
-      if(i%2===0){doc.setFillColor(14,22,8);doc.rect(10,y-3,88,7,'F');doc.rect(110,y-3,88,7,'F');}
+      if(i%2===0){doc.setFillColor(30,14,4);doc.rect(10,y-3,88,7,'F');doc.rect(110,y-3,88,7,'F');}
 
       function rj(part,x){
         if(!part)return;
@@ -510,28 +510,28 @@ async function descargarPDF() {
         const id=String(part.Jugador).trim();
         const ev=eventosRegistrados[id]||{goles:0,amarilla:false,roja:false,asistencia:false};
         doc.setFontSize(7); doc.setFont('helvetica','bold');
-        if(ev.asistencia){doc.setTextColor(57,255,20);doc.text('V',x,y);}
+        if(ev.asistencia){doc.setTextColor(20,184,254);doc.text('V',x,y);}
         else{doc.setTextColor(60,60,60);doc.text('-',x,y);}
-        doc.setTextColor(184,240,48); doc.text(String(jug.Numero||'-'),x+5,y);
+        doc.setTextColor(255,107,26); doc.text(String(jug.Numero||'-'),x+5,y);
         doc.setFont('helvetica','normal'); doc.setTextColor(210,210,210);
         doc.text((jug.Nombre||'').substring(0,20),x+12,y);
         const evStr=(ev.goles>0?ev.goles+'GOL ':'')+(ev.amarilla?'AM ':'')+(ev.roja?'RJ':'');
-        if(evStr.trim()){doc.setFont('helvetica','bold');doc.setTextColor(212,240,48);doc.text(evStr.trim(),x+62,y);}
+        if(evStr.trim()){doc.setFont('helvetica','bold');doc.setTextColor(255,107,26);doc.text(evStr.trim(),x+62,y);}
       }
       rj(pL[i],13); rj(pV[i],113); y+=7;
     }
 
     y+=8;
     if(y>230){doc.addPage();doc.setFillColor(8,12,20);doc.rect(0,0,210,297,'F');y=15;}
-    doc.setDrawColor(57,255,20); doc.line(10,y,200,y); y+=6;
-    doc.setTextColor(184,240,48); doc.setFontSize(9); doc.setFont('helvetica','bold');
+    doc.setDrawColor(255,107,26); doc.line(10,y,200,y); y+=6;
+    doc.setTextColor(255,107,26); doc.setFontSize(9); doc.setFont('helvetica','bold');
     doc.text('FIRMAS',105,y,{align:'center'}); y+=8;
 
     const cArb=document.getElementById('firma-arbitro');
     doc.addImage(cArb.toDataURL('image/png'),'PNG',75,y,60,20); y+=22;
     doc.setTextColor(200,200,200); doc.setFontSize(8); doc.setFont('helvetica','normal');
     doc.text(arbitro,105,y,{align:'center'});
-    doc.setTextColor(100,150,60); doc.setFontSize(7); doc.text('ARBITRO',105,y+4,{align:'center'}); y+=12;
+    doc.setTextColor(150,90,40); doc.setFontSize(7); doc.text('ARBITRO',105,y+4,{align:'center'}); y+=12;
 
     const cCL=document.getElementById('firma-capitan-local');
     const cCV=document.getElementById('firma-capitan-visita');
@@ -539,10 +539,10 @@ async function descargarPDF() {
     doc.addImage(cCV.toDataURL('image/png'),'PNG',135,y,60,20); y+=22;
     doc.setTextColor(200,200,200); doc.setFontSize(8); doc.setFont('helvetica','normal');
     doc.text(capLocal,45,y,{align:'center'}); doc.text(capVisita,165,y,{align:'center'});
-    doc.setTextColor(100,150,60); doc.setFontSize(7);
+    doc.setTextColor(150,90,40); doc.setFontSize(7);
     doc.text('CAPITAN - '+(eqL.Nombre||'').toUpperCase(),45,y+4,{align:'center'});
     doc.text('CAPITAN - '+(eqV.Nombre||'').toUpperCase(),165,y+4,{align:'center'});
-    y+=10; doc.setTextColor(80,120,50); doc.setFontSize(7);
+    y+=10; doc.setTextColor(130,80,40); doc.setFontSize(7);
     doc.text(new Date().toLocaleString('es-MX'),105,y,{align:'center'});
 
     doc.save('cedula_partido_'+partidoActual.ID_Partido+'.pdf');

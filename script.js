@@ -1,33 +1,40 @@
+const PUB_HASH_TABLA = "2PACX-1vQJWh_TR7iUaRe9qfPVxtrGUeAQxXiNXw92l3rk49CNZWix9pW7varCzssaVI21WYP9pZ5UCEpa4iSy";
+
+const URL_EQUIPOS_TABLA =
+  `https://docs.google.com/spreadsheets/d/e/${PUB_HASH_TABLA}/pub?gid=1894947293&single=true&output=csv`;
+
 const URL_ESTADISTICAS =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=979195152&single=true&output=csv";
+  `https://docs.google.com/spreadsheets/d/e/${PUB_HASH_TABLA}/pub?gid=979195152&single=true&output=csv`;
 
 const URL_PARTIDOS =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vRs55yHIAY-lWfU6XccheWIPHUjF4aRue0jy68FbZ9fNtPJfeO1glwsWI46cWv-6cxXy2slGty-DgMd/pub?gid=1362473459&single=true&output=csv";
+  `https://docs.google.com/spreadsheets/d/e/${PUB_HASH_TABLA}/pub?gid=1362473459&single=true&output=csv`;
 
-const logos = {
-  "Soldados Del Amor":"https://i.imgur.com/gBvmM4v.png",
-  "Cuervos F.C":"https://i.imgur.com/fGQAhE5.png",
-  "Unión 8":"https://i.imgur.com/Qrx4JSj.png",
-  "La Garra":"https://i.imgur.com/8BWFWBW.png",
-  "Pumas KAP":"https://i.imgur.com/5TAVBS7.png",
-  "Los Chipotles":"https://i.imgur.com/KTMLCv9.png",
-  "Deportivo CT":"https://i.imgur.com/hqOAa7J.png",
-  "Gusanitos":"https://i.imgur.com/5TARJkD.png",
-  "Bacachitos":"https://i.imgur.com/ddKmNL6.png"
-};
+let logos = {};       // nombre -> logo, se llena solo desde la hoja "Equipos"
+let equiposID = {};   // ID_Equipo -> nombre, se llena solo desde la hoja "Equipos"
 
-const equiposID = {
-  1:"Soldados Del Amor",
-  2:"Cuervos F.C",
-  3:"Unión 8",
-  4:"La Garra",
-  5:"Pumas KAP",
-  6:"Los Chipotles",
-  7:"Deportivo CT",
-  8:"Gusanitos",
-  9:"Bacachitos",
-  10:"Descansa"
-};
+let _catalogoTablaPromise = null;
+function cargarCatalogoTabla(){
+  if(!_catalogoTablaPromise){
+    _catalogoTablaPromise = fetch(URL_EQUIPOS_TABLA)
+      .then(r => r.text())
+      .then(texto => {
+        const filas = texto.trim().split("\n");
+        const logosTmp = {}, idTmp = {};
+        for(let i=1;i<filas.length;i++){
+          const c = filas[i].split(",");
+          const id = Number(c[0]);
+          const nombre = (c[1] || "").trim();
+          if(!nombre) continue;
+          const logoUrl = (c[4] || c[3] || "").trim();
+          logosTmp[nombre] = logoUrl;
+          if(id) idTmp[id] = nombre;
+        }
+        logos = logosTmp;
+        equiposID = idTmp;
+      });
+  }
+  return _catalogoTablaPromise;
+}
 
 // ==================== TABLA GENERAL ====================
 async function cargarTablaGeneral(){
@@ -112,7 +119,6 @@ html += `
 `;
 
 document.getElementById("tabla-general").innerHTML = html;
-    document.getElementById("tabla-general").innerHTML = html;
 
   }catch(error){
     console.error(error);
@@ -230,10 +236,6 @@ if(jugados.length > 0){
   }
 }
 
-// ==================== INICIO ====================
-cargarTablaGeneral();
-cargarPartidos();
-
 // ==================== EQUIPOS ====================
 function cargarEquipos(){
   const contenedor = document.getElementById("lista-equipos");
@@ -250,4 +252,11 @@ function cargarEquipos(){
   contenedor.innerHTML = html;
 }
 
-cargarEquipos();
+// ==================== INICIO ====================
+async function iniciarTabla(){
+  await cargarCatalogoTabla(); // primero traemos equipos/logos/IDs del Sheet
+  cargarTablaGeneral();
+  cargarPartidos();
+  cargarEquipos();
+}
+iniciarTabla();

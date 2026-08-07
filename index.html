@@ -24,11 +24,11 @@
 @keyframes sombraBalon { 0% { transform: scaleX(0.3); opacity: 0.1; } 100% { transform: scaleX(1); opacity: 0.5; } }
 .carrusel-seccion { max-width: 1100px; margin: 20px auto 30px; padding: 0 10px; position: relative; height: 480px; perspective: 1400px; }
 .card-sec { position: absolute; top: 50%; left: 50%; width: 320px; border-radius: 22px; cursor: pointer; transition: all 0.6s cubic-bezier(0.25,0.46,0.45,0.94); transform: translate(-50%,-50%) scale(0.4); opacity: 0; pointer-events: none; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); background:#000; }
-.card-sec.c  { transform:translate(-50%,-50%) scale(1); opacity:1; z-index:5; pointer-events:all; border: 1px solid #00b4ff; box-shadow: 0 0 16px #00b4ff, 0 0 32px rgba(0,180,255,0.4); }
-.card-sec.l1 { transform:translate(calc(-50% - 240px),-50%) scale(0.75) rotateY(35deg); opacity:0.55; z-index:4; pointer-events:all; filter: brightness(0.55); }
-.card-sec.r1 { transform:translate(calc(-50% + 240px),-50%) scale(0.75) rotateY(-35deg); opacity:0.55; z-index:4; pointer-events:all; filter: brightness(0.55); }
-.card-sec.l2 { transform:translate(calc(-50% - 400px),-50%) scale(0.55) rotateY(45deg); opacity:0.25; z-index:3; pointer-events:all; filter: brightness(0.4); }
-.card-sec.r2 { transform:translate(calc(-50% + 400px),-50%) scale(0.55) rotateY(-45deg); opacity:0.25; z-index:3; pointer-events:all; filter: brightness(0.4); }
+.card-sec.c  { transform:translate(-50%,-50%) translateZ(0) scale(1); opacity:1; z-index:5; pointer-events:all; border: 1px solid #00b4ff; box-shadow: 0 0 16px #00b4ff, 0 0 32px rgba(0,180,255,0.4); }
+.card-sec.l1 { transform:translate(calc(-50% - 200px),-50%) translateZ(-160px) rotateY(45deg) scale(0.8); opacity:0.6; z-index:4; pointer-events:all; filter: brightness(0.55); }
+.card-sec.r1 { transform:translate(calc(-50% + 200px),-50%) translateZ(-160px) rotateY(-45deg) scale(0.8); opacity:0.6; z-index:4; pointer-events:all; filter: brightness(0.55); }
+.card-sec.l2 { transform:translate(calc(-50% - 340px),-50%) translateZ(-320px) rotateY(55deg) scale(0.6); opacity:0.3; z-index:3; pointer-events:all; filter: brightness(0.4); }
+.card-sec.r2 { transform:translate(calc(-50% + 340px),-50%) translateZ(-320px) rotateY(-55deg) scale(0.6); opacity:0.3; z-index:3; pointer-events:all; filter: brightness(0.4); }
 .card-body { padding:22px 18px 18px; display:flex; flex-direction:column; gap:10px; min-height:440px; background:#000; }
 .card-titulo { font-size:15px; font-weight:900; letter-spacing:2px; text-transform:uppercase; text-align:center; }
 .card-contenido { flex:1; font-size:12px; font-family:Arial,sans-serif; }

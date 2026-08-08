@@ -22,19 +22,23 @@
 @keyframes balonGira { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
 .balon-sombra { width: 20px; height: 5px; background: rgba(0,180,255,0.4); border-radius: 50%; margin: 0 auto; animation: sombraBalon 0.55s ease infinite alternate; }
 @keyframes sombraBalon { 0% { transform: scaleX(0.3); opacity: 0.1; } 100% { transform: scaleX(1); opacity: 0.5; } }
-.carrusel-seccion { max-width: 1100px; margin: 20px auto 30px; padding: 0 10px; position: relative; height: 400px; perspective: 1100px; }
-#carrusel-wheel { position: absolute; top: 50%; left: 50%; width: 230px; height: 400px; margin: -200px 0 0 -115px; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94); transform: rotateY(0deg); }
-.card-sec { position: absolute; top: 0; left: 0; width: 230px; height: 400px; border-radius: 18px; cursor: pointer; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); background:#000; transform: rotateY(calc(var(--i) * var(--car-step, 36deg))) translateZ(var(--car-radio, 400px)); transition: opacity 0.5s, filter 0.5s, border-color 0.5s, box-shadow 0.5s; opacity: 0.35; filter: brightness(0.4); }
+.carrusel-seccion { max-width: 1100px; margin: 20px auto 30px; padding: 0 10px; position: relative; height: 420px; perspective: 1100px; }
+#carrusel-wheel { position: absolute; top: 50%; left: 50%; width: 230px; height: 418px; margin: -209px 0 0 -115px; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94); transform: rotateY(0deg); }
+.card-sec { position: absolute; top: 0; left: 0; width: 230px; height: 418px; border-radius: 18px; cursor: pointer; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); background:#000; transform: rotateY(calc(var(--i) * var(--car-step, 36deg))) translateZ(var(--car-radio, 400px)); transition: opacity 0.5s, filter 0.5s, border-color 0.5s, box-shadow 0.5s; opacity: 0.35; filter: brightness(0.4); }
 .card-sec.activa { opacity: 1; filter: brightness(1); border: 1px solid #00b4ff; box-shadow: 0 0 12px #00b4ff, 0 0 24px rgba(0,180,255,0.4); z-index: 5; }
 /* La tarjeta original (con todo su contenido) mide 320x580 tal como fue diseñada
    -con suficiente alto para que quepan Tabla General/Goleadores/Próxima/Resultados
    sin cortarse- y aquí nada más la encogemos completa (contenido incluido) para
-   que quepa en la caja chica del carrusel, en vez de re-acomodar cada pieza a mano. */
+   que quepa en la caja chica del carrusel. IMPORTANTE: el alto de #carrusel-wheel/
+   .card-sec de arriba (418px) = 580 * 0.72 (la escala de abajo). Si se cambia la
+   escala, hay que recalcular ese alto = 580 * nueva_escala, si no se vuelve a
+   cortar contenido por abajo.
+*/
 .card-sec > .card-body { width: 320px !important; height: 580px !important; position: absolute !important; top: 0 !important; left: 0 !important; transform: scale(0.72); transform-origin: top left; }
 @media (max-width: 600px) {
-  .carrusel-seccion { height: 280px; }
-  #carrusel-wheel { width: 155px; height: 270px; margin: -135px 0 0 -77px; }
-  .card-sec { width: 155px; height: 270px; }
+  .carrusel-seccion { height: 286px; }
+  #carrusel-wheel { width: 155px; height: 281px; margin: -140px 0 0 -77px; }
+  .card-sec { width: 155px; height: 281px; }
   .card-sec { --car-radio: 200px; }
   .card-sec > .card-body { transform: scale(0.485); }
 }

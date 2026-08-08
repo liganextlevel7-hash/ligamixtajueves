@@ -22,10 +22,17 @@
 @keyframes balonGira { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
 .balon-sombra { width: 20px; height: 5px; background: rgba(0,180,255,0.4); border-radius: 50%; margin: 0 auto; animation: sombraBalon 0.55s ease infinite alternate; }
 @keyframes sombraBalon { 0% { transform: scaleX(0.3); opacity: 0.1; } 100% { transform: scaleX(1); opacity: 0.5; } }
-.carrusel-seccion { max-width: 1100px; margin: 20px auto 30px; padding: 0 10px; position: relative; height: 480px; perspective: 1400px; }
-#carrusel-wheel { position: absolute; top: 50%; left: 50%; width: 320px; height: 480px; margin: -240px 0 0 -160px; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94); transform: rotateY(0deg); }
-.card-sec { position: absolute; top: 0; left: 0; width: 320px; height: 480px; border-radius: 22px; cursor: pointer; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); background:#000; transform: rotateY(calc(var(--i) * var(--car-step, 36deg))) translateZ(var(--car-radio, 540px)); transition: opacity 0.5s, filter 0.5s, border-color 0.5s, box-shadow 0.5s; opacity: 0.35; filter: brightness(0.4); }
+.carrusel-seccion { max-width: 1100px; margin: 20px auto 30px; padding: 0 10px; position: relative; height: 420px; perspective: 1200px; }
+#carrusel-wheel { position: absolute; top: 50%; left: 50%; width: 280px; height: 400px; margin: -200px 0 0 -140px; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94); transform: rotateY(0deg); }
+.card-sec { position: absolute; top: 0; left: 0; width: 280px; height: 400px; border-radius: 20px; cursor: pointer; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); background:#000; transform: rotateY(calc(var(--i) * var(--car-step, 36deg))) translateZ(var(--car-radio, 440px)); transition: opacity 0.5s, filter 0.5s, border-color 0.5s, box-shadow 0.5s; opacity: 0.35; filter: brightness(0.4); }
 .card-sec.activa { opacity: 1; filter: brightness(1); border: 1px solid #00b4ff; box-shadow: 0 0 16px #00b4ff, 0 0 32px rgba(0,180,255,0.4); z-index: 5; }
+@media (max-width: 600px) {
+  .carrusel-seccion { height: 340px; }
+  #carrusel-wheel { width: 210px; height: 310px; margin: -155px 0 0 -105px; }
+  .card-sec { width: 210px; height: 310px; }
+  .card-sec { --car-radio: 220px; }
+  .card-titulo { font-size: 12px !important; }
+}
 .card-body { padding:22px 18px 18px; display:flex; flex-direction:column; gap:10px; min-height:440px; background:#000; }
 .card-titulo { font-size:15px; font-weight:900; letter-spacing:2px; text-transform:uppercase; text-align:center; }
 .card-contenido { flex:1; font-size:12px; font-family:Arial,sans-serif; }

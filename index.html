@@ -22,17 +22,17 @@
 @keyframes balonGira { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
 .balon-sombra { width: 20px; height: 5px; background: rgba(0,180,255,0.4); border-radius: 50%; margin: 0 auto; animation: sombraBalon 0.55s ease infinite alternate; }
 @keyframes sombraBalon { 0% { transform: scaleX(0.3); opacity: 0.1; } 100% { transform: scaleX(1); opacity: 0.5; } }
-.carrusel-seccion { max-width: 1100px; margin: 20px auto 30px; padding: 0 10px; position: relative; height: 320px; perspective: 1000px; }
-#carrusel-wheel { position: absolute; top: 50%; left: 50%; width: 220px; height: 300px; margin: -150px 0 0 -110px; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94); transform: rotateY(0deg); }
-.card-sec { position: absolute; top: 0; left: 0; width: 220px; height: 300px; border-radius: 16px; cursor: pointer; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); background:#000; transform: rotateY(calc(var(--i) * var(--car-step, 36deg))) translateZ(var(--car-radio, 340px)); transition: opacity 0.5s, filter 0.5s, border-color 0.5s, box-shadow 0.5s; opacity: 0.35; filter: brightness(0.4); }
+.carrusel-seccion { max-width: 1100px; margin: 20px auto 30px; padding: 0 10px; position: relative; height: 400px; perspective: 1100px; }
+#carrusel-wheel { position: absolute; top: 50%; left: 50%; width: 250px; height: 380px; margin: -190px 0 0 -125px; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94); transform: rotateY(0deg); }
+.card-sec { position: absolute; top: 0; left: 0; width: 250px; height: 380px; border-radius: 18px; cursor: pointer; overflow-x: hidden; overflow-y: auto; border: 1px solid rgba(255,255,255,0.08); background:#000; transform: rotateY(calc(var(--i) * var(--car-step, 36deg))) translateZ(var(--car-radio, 400px)); transition: opacity 0.5s, filter 0.5s, border-color 0.5s, box-shadow 0.5s; opacity: 0.35; filter: brightness(0.4); }
 .card-sec.activa { opacity: 1; filter: brightness(1); border: 1px solid #00b4ff; box-shadow: 0 0 12px #00b4ff, 0 0 24px rgba(0,180,255,0.4); z-index: 5; }
-.card-sec .card-titulo { font-size: 12.5px !important; }
+.card-sec .card-titulo { font-size: 13px !important; }
 @media (max-width: 600px) {
-  .carrusel-seccion { height: 260px; }
-  #carrusel-wheel { width: 170px; height: 240px; margin: -120px 0 0 -85px; }
-  .card-sec { width: 170px; height: 240px; }
-  .card-sec { --car-radio: 175px; }
-  .card-titulo { font-size: 11px !important; }
+  .carrusel-seccion { height: 320px; }
+  #carrusel-wheel { width: 195px; height: 300px; margin: -150px 0 0 -97px; }
+  .card-sec { width: 195px; height: 300px; }
+  .card-sec { --car-radio: 220px; }
+  .card-titulo { font-size: 11.5px !important; }
 }
 .card-body { padding:22px 18px 18px; display:flex; flex-direction:column; gap:10px; min-height:440px; background:#000; }
 .card-sec .card-body { min-height: 0; height: 100%; padding: 14px 12px 12px; gap: 6px; }
